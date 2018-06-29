@@ -1,0 +1,82 @@
+.paygate table button, .paygate-registrations table button {
+	border: 0;
+	background: transparent;
+	margin: 0;
+	padding: .1em;
+	cursor: pointer;
+}
+
+.paygate table {
+	direction: rtl;
+	width: 80%;
+	border-collapse: collapse;
+}
+
+.paygate table.internal {
+	width: auto;
+}
+
+.paygate table thead tr {
+	border: solid black;
+	border-width: 0 0 1px 0;
+}
+
+.paygate table.internal thead tr {
+	border: 0;
+}
+
+.paygate table tbody tr {
+	border: solid black;
+	border-width: 1px 0;
+}
+
+.paygate table.internal tbody tr {
+	border: 0;
+}
+
+.paygate table th, .paygate table td {
+	text-align: right;
+	border: solid gray;
+	border-width: 0 1px 0 0;
+	padding: .2em;
+	padding-right: .5em;
+	vertical-align: text-top;
+}
+
+.paygate table.internal th, .paygate table.internal td {
+	border: 0;
+	padding: 0 .3em;
+}
+
+.paygate form label span {
+	min-width: 8em;
+	display: inline-block;
+}
+
+.paygate table p, .paygate-registrations table p {
+	margin: 0;
+}
+
+div.paygate-registrations div.payer-details {
+	position: absolute;
+	display: none;
+	border: solid gray 2px;
+	background: lightyellow;
+	min-width: 30em;
+}
+
+div.paygate-registrations button.pager-first::before {
+	content: "<<";
+}
+
+div.paygate-registrations button.pager-prev::before {
+	content: "<";
+}
+
+div.paygate-registrations button.pager-next::before {
+	content: ">";
+}
+
+div.paygate-registrations button.pager-last::before {
+	content: ">>";
+}

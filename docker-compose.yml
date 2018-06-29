@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  wordpress:
+    build: .
+    ports:
+    - '8080:80'
+    volumes:
+     - ./:/var/www/html/wp-content/plugins/isrp-event-paygate/
+  
+  database:
+    image: mysql:latest
+    environment:
+    - MYSQL_ROOT_PASSWORD=secret
+    volumes:
+    - data-volume:/var/lib/mysql
+
+volumes:
+  data-volume:

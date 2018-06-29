@@ -1,0 +1,13 @@
+<form name="pelepayform" action="https://www.pelepay.co.il/pay/paypage.aspx" method="post">
+<input type="hidden" value="treasurer@roleplay.org.il" name="business">
+<INPUT TYPE="hidden" value="50" NAME="amount">
+<INPUT TYPE="hidden" value="קנה כרטיס" NAME="description">
+
+<input type="hidden" name="success_return" value="{{onsuccess}}">
+<input type="hidden" name="fail_return" value="{{onfail}}">
+<input type="hidden" name="cancel_return" value="{{oncancel}}">
+<input type="hidden" name="notify_url" value="{{onb2bcomplete}}">
+<input type="hidden" name="active_notify_url" value="1">
+
+<input type="image" src="http://www.pelepay.co.il/btn_images/pay_button_1.gif" name="submit" alt="Make payments with pelepay">
+</form>
