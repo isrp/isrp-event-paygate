@@ -152,7 +152,7 @@ class PayGateShortcodes {
 		if (empty($ticketType))
 			return 'PRICE ERROR';
 		ob_start();
-		$fieldid = uniqid();
+		$fieldid = bin2hex(openssl_random_pseudo_bytes(8));
 		?>
 		<span id="<?php echo $fieldid ?>"></span>
 		<script>
