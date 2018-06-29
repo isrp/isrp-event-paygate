@@ -38,14 +38,14 @@ class PayGatePelepayProcessor {
 		$result['message'] = $resmessage;
 		list($orderCode, $cpgid) = explode(':', $result['orderid']);
 		if ($result['Response'] == '000' && $orderCode == 'paygate') {
-			error_log("PayGate transaction successful: ". print_r($result, true));
+			error_log("PayGate: transaction successful: ". print_r($result, true));
 			return [
 				'amount' => $result['amount'],
 				'campaign' => $cpgid,
 			];
 		}
 		
-		error_log("PayGate transaction failed: ". print_r($result, true));
+		error_log("PayGate: transaction failed: ". print_r($result, true));
 		return false;
 	}
 	

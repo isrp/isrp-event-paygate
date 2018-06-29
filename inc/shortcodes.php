@@ -196,7 +196,7 @@ class PayGateShortcodes {
 	private function getTicketPrice($ticketType) {
 		$isDragon = !is_null($this->currentDragonId);
 		if ($isDragon)
-			error_log("Calculating price for dragon ticket");
+			error_log("PayGate: Calculating price for dragon ticket");
 		return $this->pg->database()->getCurrentTicketPrice($ticketType, $isDragon);
 	}
 	

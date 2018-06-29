@@ -24,6 +24,7 @@ class PayGateDatabase {
 	}
 	
 	public function install() {
+		error_log("PayGate: Creating database tables");
 		$this->createTable();
 		add_option( 'paygate_db_version', $this->db_version );
 	}
@@ -282,10 +283,10 @@ class PayGateDatabase {
 				"ORDER BY period_end ASC".
 			") ".
 			"HAVING price > 0");
-		error_log("Calculated price for $ticketType, $isDragon in event $activeEventId: $price");
+		error_log("PayGate: Calculated price for $ticketType, $isDragon in event $activeEventId: $price");
 		if ($price == 0 and $isDragon) {
 			$price = $this->getCurrentTicketPrice($ticketType, false);
-			error_log("No dragon price, getting full price: $price");
+			error_log("PayGate: No dragon price, getting full price: $price");
 		}
 		if ($price == 0)
 			return null;

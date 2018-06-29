@@ -21,9 +21,8 @@ class PayGate {
 	}
 	
 	public function handleCallbacks($wpquery) {
-		error_log("running paygate handler for ".print_r($wpquery, true));
 		$pagename = $wpquery->query_vars['name'] ?: $wpquery->query_vars['pagename'];
-		error_log("Page name determined: $pagename");
+		error_log("PayGate: Page name determined: $pagename");
 		if (strpos($wpquery->request, 'paygate-handler') !== 0)
 			return;
 		
@@ -54,7 +53,7 @@ class PayGate {
 	
 	public function custom_wp_admin_style($hook) {
 		// Load only on my settings page
-		error_log("run hook on $hook ?");
+		error_log("PayGate: run hook on $hook ?");
 		if (preg_match('/(?:page_paygate-\w+|toplevel_page_paygate)$/', $hook)) {
 			wp_enqueue_style( 'paygate_wp_admin_css', plugins_url('admin-style.css', __FILE__), [], 6 );
 			wp_enqueue_style( 'paygate_wp_admin_fa', 'https://use.fontawesome.com/releases/v5.1.0/css/all.css' );
@@ -78,7 +77,7 @@ class PayGate {
 	public function dragonMembers() {
 		//putenv('BLOCKSPRING_URL=http://sender.blockspring.com');
 		$dragon_url = $this->settings()->getDragonListURL();
-		error_log("Loading dragon memebers from $dragon_url");
+		error_log("PayGate: Loading dragon memebers from $dragon_url");
 		if (!$dragon_url or strpos($dragon_url, "http") !== 0)
 			return [];
 		
@@ -90,7 +89,7 @@ class PayGate {
 		])->params;
 		
 		$list = $resp['data'];
-		error_log("Loaded " . count($list) . " member records");
+		error_log("PayGate: Loaded " . count($list) . " member records");
 		return $list;
 	}
 	
@@ -104,7 +103,7 @@ class PayGate {
 		foreach ($this->dragonMembers() as $record) {
 			$recemail = trim($record['email']);
 			if (!empty($recemail) and $email == $recemail) {
-				error_log("Found dragon user $email at ".print_r($record, true));
+				error_log("PayGate: Found dragon user $email at ".print_r($record, true));
 				return substr(md5($email.$record['member_number']), 0, 6);
 			}
 		}
@@ -142,7 +141,7 @@ class PayGate {
 	}
 	
 	private function createPayment() {
-		error_log("Starting to process payment request: " . print_r($_POST, true));
+		error_log("PayGate: Starting to process payment request: " . print_r($_POST, true));
 		$dragon_id = @$_REQUEST['paygate-dragon-id'];
 		$tickets = @$_REQUEST['tickets'];
 		if (!$tickets)
@@ -152,12 +151,12 @@ class PayGate {
 		if ($dragon_id) {
 			$member = $this->getDragonCard($dragon_id);
 			if (!$member) {
-				error_log("Invalid dragon ID submitted, ignoring");
+				error_log("PayGate: Invalid dragon ID submitted, ignoring");
 				$dragon_id = null;
 			} else {
 				$mid = $member['member_number'];
 				if ($this->database()->checkUsedDragonId($mid)) {
-					error_log("Dragon ID used before in current event, ignoring");
+					error_log("PayGate: Dragon ID used before in current event, ignoring");
 					$dragon_id = null;
 				}
 			}
@@ -172,7 +171,7 @@ class PayGate {
 				list($price, $name) = explode(":", $ticket);
 				$dbprice = $this->database()->getCurrentTicketPrice($ticketType, !$dragon_id_already_used);
 				if ($price != $dbprice)
-					error_log("User submitted price $price is different from database: $dbprice, ignoring");
+					error_log("PayGate: User submitted price $price is different from database: $dbprice, ignoring");
 				$ticketdata[] = [ $name, $ticketType, $dbprice, !$dragon_id_already_used ];
 				$dragon_id_already_used = true;
 				$total += $dbprice;
@@ -208,7 +207,7 @@ class PayGate {
 		$resmessage = PayGatePelepayConstants::RESPONSE_CODES[$result['Response']];
 		
 		if ($result['Response'] != '000') {
-			error_log("PayGate transaction failed: ". print_r($result, true));
+			error_log("PayGate: PayGate transaction failed: ". print_r($result, true));
 			wp_die("חלה שגיאה בעיבוד התשלום - $resmessage. אנא פנו למנהל האתר");
 		}
 		
@@ -287,7 +286,7 @@ class PayGate {
 		
 		$successpage = '/' . $this->database()->getSuccessLandingPage($tickets['period']);
 		header('Location: ' . $successpage);
-		error_log("Send redirect - Location: $successpage");
+		error_log("PayGate: Send redirect - Location: $successpage");
 		exit();
 	}
 	
