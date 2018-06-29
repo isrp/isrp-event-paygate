@@ -19,6 +19,8 @@ class PayGateDatabase {
 		register_activation_hook( $mainfile, [ $this, 'install' ]);
 		add_action( 'plugins_loaded', [ $this, 'updateDB']);
 		
+		if($this->db->get_var("SHOW TABLES LIKE '$this->reg_table_name'") != $this->reg_table_name)
+			$this->createTable();
 	}
 	
 	public function install() {
