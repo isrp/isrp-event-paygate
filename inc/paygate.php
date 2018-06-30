@@ -154,14 +154,16 @@ class PayGate {
 				error_log("PayGate: Invalid dragon ID submitted, ignoring");
 				$dragon_id = null;
 			} else {
-				$mid = $member['member_number'];
-				if ($this->database()->checkUsedDragonId($mid)) {
+				$dragon_id = $member['member_number'];
+				if ($this->database()->checkUsedDragonId($dragon_id)) {
 					error_log("PayGate: Dragon ID used before in current event, ignoring");
 					$dragon_id = null;
 				}
 			}
-		}
-		$dragon_id_already_used = empty($dragon_id) ? true : false;
+		} else
+			$dragon_id = null;
+		
+		$has_dragon_id = is_null($dragon_id) ? false : true;
 		$ticketdata = [];
 		$period = $this->database()->getActivePeriod();
 		$orderid = bin2hex(openssl_random_pseudo_bytes(4));
@@ -169,11 +171,11 @@ class PayGate {
 		foreach ($tickets as $ticketType => $ticketList) {
 			foreach ($ticketList as $ticket) {
 				list($price, $name) = explode(":", $ticket);
-				$dbprice = $this->database()->getCurrentTicketPrice($ticketType, !$dragon_id_already_used);
+				$dbprice = $this->database()->getCurrentTicketPrice($ticketType, $has_dragon_id);
 				if ($price != $dbprice)
 					error_log("PayGate: User submitted price $price is different from database: $dbprice, ignoring");
-				$ticketdata[] = [ $name, $ticketType, $dbprice, !$dragon_id_already_used ];
-				$dragon_id_already_used = true;
+				$ticketdata[] = [ $name, $ticketType, $dbprice, $has_dragon_id ];
+				$has_dragon_id = false;
 				$total += $dbprice;
 			}
 		}
