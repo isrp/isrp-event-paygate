@@ -161,7 +161,7 @@ class PayGate {
 				}
 			}
 		}
-		$dragon_id_already_used = is_null($dragon_id) ? true : false;
+		$dragon_id_already_used = empty($dragon_id) ? true : false;
 		$ticketdata = [];
 		$period = $this->database()->getActivePeriod();
 		$orderid = bin2hex(openssl_random_pseudo_bytes(4));
