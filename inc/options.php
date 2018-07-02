@@ -329,12 +329,16 @@ class PayGateSettingsPage {
 		</thead>
 		<tbody>
 		<?php foreach ($priceMatrix as $ticketType => $ticketPeriods):?>
+		<?php $ticketid = bin2hex(openssl_random_pseudo_bytes(4))?>
 		<tr>
 			<th>
 			<a href="<?php echo $action_url?>&prices-action=delete-type&ticket-type=<?php echo urlencode($ticketType)?>"
 				title="הסרת כרטיס מסוג <?php echo $ticketType?>" style="color: inherit;"
 				><i class="fas fa-trash-alt"></i></a>
+				<a onclick="document.getElementById('<?php echo $ticketid?>').select();document.execCommand('copy');return false;"
+					href="#" style="color: inherit;"><i class="far fa-clipboard"></i></a>
 			<?php echo $ticketType?>
+			<input type="text" style="display: none;" id="<?php echo $ticketid?>" value="<?php echo $ticketType?>">
 			</th>
 			<?php foreach ($periods as $period):?>
 			<?php
