@@ -42,7 +42,8 @@ class PayGate {
 		
 		
 		if ($res == 'failure') {
-			wp_die("חלה שגיאה במהלך התשלום - אנא נסו שנית");
+			$resmessage = PayGatePelepayConstants::RESPONSE_CODES[$result['Response']];
+			wp_die("חלה שגיאה במהלך התשלום - אנא נסו שנית:\n\n$resmessage");
 		}
 		
 		if ($res == 'success')
