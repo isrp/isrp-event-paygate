@@ -249,7 +249,7 @@ class PayGateShortcodes {
 			width="<?php echo $atts['width']; ?>"
 			value="<?php echo $atts['value']; ?>"
 			style="<?php echo $atts['style']; ?>">
-		<button type="submit">שלח</button>
+		<button type="submit">שליחה</button>
 		</form>
 		</div>
 		<?php
