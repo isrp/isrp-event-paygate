@@ -93,7 +93,7 @@ class PayGateShortcodes {
 					if (!this.allowMultiple)
 						return this.form.submit();
 					this.updateTicketPrices();
-					this.nameField.value = '';
+					//this.nameField.value = '';
 				};
 
 				this.addTicketField = function(type, price, name) {
