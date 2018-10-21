@@ -77,6 +77,7 @@ class PayGateShortcodes {
 				};
 				
 				this.addTicket = function(type) {
+					if (!type) return;
 					if (!this.nameField.value)
 						return alert("יש למלא שם של מחזיק הכרטיס");
 						
