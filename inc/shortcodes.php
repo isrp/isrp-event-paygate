@@ -132,7 +132,7 @@ class PayGateShortcodes {
 		$this->verifyDragonCode();
 		if (empty($atts['value']) and $this->currentDragonId) {
 			$member = $this->pg->getDragonCard($this->currentDragonId);
-			$atts['value'] = $member['firstname'] . ' ' . $member['lastname'];
+			$atts['value'] = $member->firstname . ' ' . $member->lastname;
 		}
 			
 		?>
@@ -211,7 +211,7 @@ class PayGateShortcodes {
 			}
 			
 			$this->currentDragonId = $dragonid;
-			$mid = $this->pg->getDragonCard($dragonid)['member_number'];
+			$mid = $this->pg->getDragonCard($dragonid)->member_number;
 			if ($this->pg->database()->checkUsedDragonId($mid)) {
 				ob_start()
 				?>
