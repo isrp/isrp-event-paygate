@@ -120,7 +120,7 @@ class PayGate {
 				error_log("PayGate: Invalid dragon ID submitted, ignoring");
 				$dragon_id = null;
 			} else {
-				$dragon_id = $member['member_number'];
+				$dragon_id = $member->member_number;
 				if ($this->database()->checkUsedDragonId($dragon_id)) {
 					error_log("PayGate: Dragon ID used before in current event, ignoring");
 					$dragon_id = null;
@@ -225,7 +225,7 @@ class PayGate {
 				$name = $payerName;
 			$orderid = $tickets['order_id'] . ':' . bin2hex(openssl_random_pseudo_bytes(2));
 			$this->database()->storeRegistration($name, $ticket[1], $tickets['period'],
-				$ticket[2], $tickets['time'], $orderid, $ticket[3] ? $dragoncard['member_number'] : null,
+				$ticket[2], $tickets['time'], $orderid, $ticket[3] ? $dragoncard->member_number : null,
 				json_encode($result, JSON_UNESCAPED_UNICODE));
 			?>
 			<tr>
