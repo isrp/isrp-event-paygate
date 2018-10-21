@@ -71,45 +71,15 @@ class PayGate {
 	}
 	
 	/**
-	 * Retrieve a list of dragon members from the database specified under the dragon-members-url
-	 * setting. The resulting array contains a list of records, for each dragon card record. Each
-	 * record is an array with the following keys: 'email', 'firstname', 'lastname', 'member_number'
-	 * @return array list of dragon members
-	 */
-	public function dragonMembers() {
-		//putenv('BLOCKSPRING_URL=http://sender.blockspring.com');
-		$dragon_url = $this->settings()->getDragonListURL();
-		error_log("PayGate: Loading dragon memebers from $dragon_url");
-		if (!$dragon_url or strpos($dragon_url, "http") !== 0)
-			return [];
-		
-		$resp = Blockspring::runParsed("query-public-google-spreadsheet", [
-			"query" => "SELECT E, C, D, M",
-			"url" => $dragon_url,
-		], [
-			"api_key" => "br_91525_bc9d6103a36fc70c5101fddea3d35bc3b23f3242"
-		])->params;
-		
-		$list = $resp['data'];
-		error_log("PayGate: Loaded " . count($list) . " member records");
-		return $list;
-	}
-	
-	/**
 	 * Generate a unique ID for each dragon member
 	 * @param string $email
 	 * @return string|boolean
 	 */
 	public function getDragonId($email) {
-		$email = trim($email);
-		foreach ($this->dragonMembers() as $record) {
-			$recemail = trim($record['email']);
-			if (!empty($recemail) and $email == $recemail) {
-				error_log("PayGate: Found dragon user $email at ".print_r($record, true));
-				return substr(md5($email.$record['member_number']), 0, 6);
-			}
-		}
-		return false;
+		$res = @file_get_contents("http://api.roleplay.org.il/club/email/$email");
+		if (!$res)
+			return false;
+		return json_decode($res)->token;
 	}
 	
 	/**
@@ -118,13 +88,10 @@ class PayGate {
 	 * @return boolean
 	 */
 	public function verifyDragonId($id) {
-		foreach ($this->dragonMembers() as $record) {
-			$email = trim($record['email']);
-			$calcid = substr(md5($email.$record['member_number']), 0, 6);
-			if (trim($id) == $calcid)
-				return true;
-		}
-		return false;
+		$res = @file_get_contents("http://api.roleplay.org.il/club/token/$id");
+		if (!$res)
+			return false;
+		return true;
 	}
 	
 	/**
@@ -133,13 +100,10 @@ class PayGate {
 	 * @return array|boolean
 	 */
 	public function getDragonCard($id) {
-		foreach ($this->dragonMembers() as $record) {
-			$email = trim($record['email']);
-			$calcid = substr(md5($email.$record['member_number']), 0, 6);
-			if (trim($id) == $calcid)
-				return $record;
-		}
-		return false;
+		$res = @file_get_contents("http://api.roleplay.org.il/club/token/$id");
+		if (!$res)
+			return false;
+		return json_decode($res);
 	}
 	
 	private function createPayment() {

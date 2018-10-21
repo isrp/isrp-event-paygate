@@ -12,7 +12,6 @@ $paygate_default_tz = new DateTimeZone('Asia/Jerusalem');
 class PayGateSettingsPage {
 	private $pg;
 	private $pelepay_account;
-	private $dragon_members_url;
 	private $accept_test_transaction;
 	private $allowMultiple;
 	
@@ -24,7 +23,6 @@ class PayGateSettingsPage {
 		add_action( 'admin_init', array( $this, 'page_init' ) );
 		
 		$this->pelepay_account = new PayGatePelePayAccountSetting('paygate_section_global');
-		$this->dragon_members_url = new PayGateDragonMembersURLSetting('paygate_section_global');
 		$this->accept_test_transaction = new PayGateAcceptTestSetting('paygate_section_global');
 		$this->allowMultiple = new PayGateAllowMultipleSetting('paygate_section_global');
 	}
@@ -60,7 +58,6 @@ class PayGateSettingsPage {
 			[ $this, 'print_section_info_api'], 'paygate-settings');
 		
 		$this->pelepay_account->register();
-		$this->dragon_members_url->register();
 		$this->accept_test_transaction->register();
 		$this->allowMultiple->register();
 	}
@@ -89,10 +86,6 @@ class PayGateSettingsPage {
 	 */
 	public function print_section_info_api() {
 		//print 'Setup global options';
-	}
-	
-	public function getDragonListURL() {
-		return $this->dragon_members_url->getValue();
 	}
 	
 	public function getPelepayAccount() {
