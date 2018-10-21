@@ -157,7 +157,7 @@ class PayGateShortcodes {
 		?>
 		<span id="<?php echo $fieldid ?>"></span>
 		<script>
-		window.paygate_price_handlers  = window.price_handlers || {};
+		window.paygate_price_handlers  = window.paygate_price_handlers || {};
 		window.paygate_price_handlers['<?php echo $ticketType?>'] = window.paygate_price_handlers['<?php echo $ticketType?>'] || [];
 		window.paygate_price_handlers['<?php echo $ticketType?>'].push(function(price) {
 			document.getElementById('<?php echo $fieldid?>').innerHTML = price;
