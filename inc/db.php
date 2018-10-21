@@ -206,9 +206,10 @@ class PayGateDatabase {
 	}
 	
 	private function verifyCanDeletePrice($periodId, $type) {
-		if ($this->db->get_var("SELECT COUNT(*) FROM $this->reg_table_name ".
-			"WHERE period_id = " . ((int)$periodId) . " " .
-			"AND ticket_type = '".esc_sql($type)."'") > 0) {
+		$sql = $this->db->prepare("SELECT COUNT(*) FROM $this->reg_table_name AS regs ".
+			"INNER JOIN $this->prices_table_name AS prices ON regs.price_id = prices.id ".
+			"WHERE prices.period_id = %d AND prices.ticket_type = %s", $periodId, $type);
+		if ($this->db->get_var($sql) > 0) {
 			add_settings_error('paygate', 'registrations', 'Cannot delete period as there are ticket sold!');
 			return false;
 		}
@@ -216,6 +217,7 @@ class PayGateDatabase {
 	}
 	
 	public function deletePriceForAllPeriods($eventId, $type) {
+		$type = stripslashes($type);
 		foreach ($this->listPeriods($eventId) as $period)
 			if (!$this->verifyCanDeletePrice($period->id, $type))
 				return false;
@@ -227,6 +229,7 @@ class PayGateDatabase {
 	public function deletePrice($periodId, $type) {
 		if (!$this->verifyCanDeletePrice($periodId, $type))
 			return false;
+		
 		$this->db->delete($this->prices_table_name, [
 			'period_id' => $periodId,
 			'ticket_type' => $type,
