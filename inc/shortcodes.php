@@ -183,7 +183,7 @@ class PayGateShortcodes {
 		ob_start();
 		?>
 		<button type="button" onclick="PayGateCheckout.addTicket('<?php echo $atts['type']?>')">
-		<?php echo do_shortcode($content) ?>
+		<?php echo do_shortcode(trim($content)) ?>
 		</button>
 		<script>
 		window.paygate_ticket_types = window.paygate_ticket_types || {};
