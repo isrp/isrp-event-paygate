@@ -55,6 +55,7 @@ class PayGateShortcodes {
 		<script>
 		jQuery(document).ready(function(){
 			window.PayGateCheckout = new (function() {
+				this.cart = <?php if ($this->pg->settings()->allowMultipleTickets()): ?>true<?php else:?>false<?php endif;?>;
 				this.table = document.getElementById("paygate-cart");
 				this.form = document.getElementById("paygate-form");
 				this.nameField = document.getElementById("paygate-ticket-name");
@@ -78,17 +79,19 @@ class PayGateShortcodes {
 				
 				this.addTicket = function(type) {
 					if (!type) return;
-					if (!this.nameField.value)
+					if (this.nameField && !this.nameField.value)
 						return alert("יש למלא שם של מחזיק הכרטיס");
 						
 					var price = parseFloat(window.paygate_ticket_types[type][this.total == 0 ? 0 : 1]);
-					var ticket = document.createElement('tr');
-					ticket.appendChild(this.makeCell(type));
-					ticket.appendChild(this.makeCell(price));
-					ticket.appendChild(this.makeCell(this.nameField.value));
-					this.addTicketField(type, price, this.nameField.value);
+					if (this.cart) {
+						var ticket = document.createElement('tr');
+						ticket.appendChild(this.makeCell(type));
+						ticket.appendChild(this.makeCell(price));
+						ticket.appendChild(this.makeCell(this.nameField.value));
+						this.table.tBodies[0].appendChild(ticket);
+					}
+					this.addTicketField(type, price, this.nameField ? this.nameField.value: '');
 					this.total += price;
-					this.table.tBodies[0].appendChild(ticket);
 					this.totalField.innerHTML = this.total;
 					if (!this.allowMultiple)
 						return this.form.submit();
