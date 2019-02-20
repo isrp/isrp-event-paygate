@@ -241,9 +241,12 @@ class PayGateShortcodes {
 		// if there is already a dragon code, don't show
 		if (@$_REQUEST['dragon-id'])
 			return '';
-			
-			ob_start();
-			?>
+		
+		if (empty($atts['success']))
+			$atts['success'] = $_SERVER['HTTP_REFERER'];
+		
+		ob_start();
+		?>
 		<div class="paygate-dragon-club">
 		<form method="post" action="/paygate-handler">
 		<input type="hidden" name="action" value="dragon-verify">
