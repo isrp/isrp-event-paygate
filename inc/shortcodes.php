@@ -8,6 +8,7 @@ class PayGateShortcodes {
 	private $settings;
 	private $currentTicketType = null;
 	private $currentDragonId = null;
+	private $currentDragonIdWasUsed = false;
 	
 	public function __construct(PayGate $paygate) {
 		$this->pg = $paygate;
@@ -198,7 +199,7 @@ class PayGateShortcodes {
 	}
 	
 	private function getTicketPrice($ticketType) {
-		$isDragon = !is_null($this->currentDragonId);
+		$isDragon = !is_null($this->currentDragonId) && !($this->currentDragonIdWasUsed);
 		if ($isDragon)
 			error_log("PayGate: Calculating price for dragon ticket");
 		return $this->pg->database()->getCurrentTicketPrice($ticketType, $isDragon);
@@ -206,17 +207,18 @@ class PayGateShortcodes {
 	
 	private function verifyDragonCode() {
 		if ($this->currentDragonId)
-			return true;
+			return;
 		$dragonid = $_REQUEST['dragon-id'];
 		if (!empty($dragonid)) {
 			if (!$this->pg->verifyDragonId($dragonid)) {
 				print 'כרטיס דרקון לא חוקי!';
-				return '';
+				return;
 			}
 			
 			$this->currentDragonId = $dragonid;
 			$mid = $this->pg->getDragonCard($dragonid)->member_number;
 			if ($this->pg->database()->checkUsedDragonId($mid)) {
+				$this->currentDragonIdWasUsed = true;
 				ob_start()
 				?>
 				<div class="paygate-no-dragon">
@@ -226,7 +228,7 @@ class PayGateShortcodes {
 				</form>
 				</div>
 				<?php
-				return ob_get_clean();
+				print ob_get_clean();
 			}
 		}
 	}
