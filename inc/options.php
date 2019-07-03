@@ -199,6 +199,7 @@ class PayGateSettingsPage {
 						<input type="hidden" name="event-id" value="<?php echo $ev->id?>">
 						<button type="submit" name="events-action" title="עריכת ארוע" value="edit"><i class="far fa-edit"></i></button>
 						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-prices&event-id=$ev->id")?>" title="מחירים"><i class="fas fa-hand-holding-usd"></i></a>
+						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-reports&event-id=$ev->id")?>" title="דוחות"><i class="fas fa-clipboard-list"></i></a>
 						<button type="submit" name="events-action" title="מחיקת ארוע" value="delete"><i class="far fa-trash-alt"></i></button>
 					</form>
 				</td>
@@ -387,21 +388,39 @@ class PayGateSettingsPage {
 		if (!current_user_can('manage_options'))
 			wp_die( __('You do not have sufficient permissions to access this page.') );
 		
+		$eventId = @$_REQUEST['event-id'];
 		switch ($_POST['paygate-action']) {
 			case 'delete':
 				$this->pg->database()->deleteRegistration($_POST['id']);
 				break;
 		}
-		$this->showReport();
+		$this->showReport($eventId);
 	}
 	
-	private function showReport() {
+	private function showReport($eventId) {
 		global $paygate_default_tz;
 		settings_errors();
+
+		?>
+		<form method="get" action="<?php echo admin_url("admin.php");?>">
+		<input type="hidden" name="page" value="paygate-reports">
+		<label>כנס:
+		<select name="event-id" onchange="this.form.submit();">
+		<option>בחר כנס</option>
+		<?php foreach ($this->pg->database()->listEvents() as $ev):?>
+		<option value="<?php echo $ev->id?>" <?php
+			if ($ev->id == $eventId) echo "selected";
+		?>><?php echo $ev->name ?></option>
+		<?php endforeach;?>
+		</select>
+		</label>
+		</form>
+		<?php		
+		
 		$dt = new DateTime("now", $paygate_default_tz);
 		
 		$page_size = (int)(@$_REQUEST['page-size'] ? $_REQUEST['page-size'] : 50);
-		$page_count = $this->pg->database()->getRegistrationPageCount($page_size);
+		$page_count = $this->pg->database()->getRegistrationPageCount($eventId, $page_size);
 		$page = (int)@$_REQUEST['page'];
 		if (!$page) $page = 1;
 		if ($page > $page_count) $page = $page_count;
@@ -416,7 +435,7 @@ class PayGateSettingsPage {
 			<th>כרטיס דרקון</th><th>אישור פלאפיי</th><th>קוד</th><th></th></tr>
 		</thead>
 		<tbody>
-		<?php foreach ($this->pg->database()->getRegistrationsPage($page, $page_size) as $row): ?>
+		<?php foreach ($this->pg->database()->getRegistrationsPage($eventId, $page, $page_size) as $row): ?>
 		<?php
 		$details = json_decode($row->details);
 		$dt->setTimestamp($row->order_time);

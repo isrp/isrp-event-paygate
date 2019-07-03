@@ -321,12 +321,14 @@ class PayGateDatabase {
 		return $this->db->get_results("SELECT * FROM $this->reg_table_name");
 	}
 	
-	public function getRegistrationPageCount($pageSize) {
-		return ceil($this->db->get_var("SELECT COUNT(*) FROM $this->reg_table_name" ) / $pageSize);
+	public function getRegistrationPageCount($eventId, $pageSize) {
+		return ceil($this->db->get_var("SELECT COUNT(*) FROM $this->reg_table_name ".
+			"WHERE event_id = " . ((int)$eventId)) / $pageSize);
 	}
 	
-	public function getRegistrationsPage($page, $pageSize) {
+	public function getRegistrationsPage($eventId, $page, $pageSize) {
 		return $this->db->get_results("SELECT * FROM $this->reg_table_name ".
+			"WHERE event_id = " . ((int)$eventId) . " " .
 			"ORDER BY order_time DESC LIMIT $pageSize OFFSET " . (($page-1) * $pageSize));
 	}
 	
