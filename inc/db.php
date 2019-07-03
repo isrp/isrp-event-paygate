@@ -173,6 +173,15 @@ class PayGateDatabase {
 			"WHERE period_id = " . ((int)$periodId));
 	}
 	
+	public function listEventCurrentPrices($eventId) {
+		return $this->db->get_results("SELECT * FROM $this->prices_table_name ".
+			"WHERE period_id = (".
+				"SELECT id FROM $this->periods_table_name ".
+				"WHERE period_end > UNIX_TIMESTAMP(now()) AND event_id = " . ((int)$eventId) . " ".
+				"ORDER BY period_end ASC ".
+				"LIMIT 1)");
+	}
+	
 	public function addPriceForAllPeriods($eventId, $type) {
 		foreach ($this->listPeriods($eventId) as $period)
 			$this->addPrice($period->id, $type);
@@ -249,7 +258,7 @@ class PayGateDatabase {
 	}
 	
 	public function getActiveEventId() {
-		return $this->db->get_var("SELECT event_id ".
+		return (int)$this->db->get_var("SELECT event_id ".
 			"FROM $this->periods_table_name ".
 			"WHERE period_end > UNIX_TIMESTAMP(now()) ".
 			"ORDER BY period_end ASC ".

@@ -6,6 +6,8 @@ class PayGateShortcodes {
 	private $pelepay_account;
 	private $processor;
 	private $settings;
+	private $currentEvent;
+	private $prices = [];
 	private $currentTicketType = null;
 	private $currentDragonId = null;
 	private $currentDragonIdWasUsed = false;
@@ -14,6 +16,10 @@ class PayGateShortcodes {
 		$this->pg = $paygate;
 		$this->pelepay_account = get_option('paygate-pelepay-account');
 		$this->processor = new PayGatePelepayProcessor($this->pelepay_account);
+		$this->currentEvent = $this->pg->database()->getActiveEventId();
+		foreach ($this->pg->database()->listEventCurrentPrices($this->currentEvent) as $ticket) {
+			$this->prices[$ticket->ticket_type] = [ $ticket->full_price, $ticket->dragon_price ];
+		}
 		
 		add_shortcode('paygate-checkout', [ $this, 'payCheckout' ]);
 		add_shortcode('paygate-name', [ $this, 'nameField' ]);
@@ -21,7 +27,7 @@ class PayGateShortcodes {
 		add_shortcode('paygate-price', [ $this, 'showPrice' ]);
 		add_shortcode('paygate-dragon-form', [ $this, 'dragonForm']);
 	}
-	
+		
 	public function payCheckout($atts, $content = null) {
 		$atts = shortcode_atts([
 		], $atts, 'paygate-checkout');
@@ -154,8 +160,15 @@ class PayGateShortcodes {
 			'type' => ''
 		], $atts, 'paygate-price');
 		$ticketType = $atts['type'] ?: $this->currentTicketType;
-		if (empty($ticketType))
-			return 'PRICE ERROR';
+		if (empty($ticketType)) {
+			if (count($this->prices) == 1)
+				$ticketType = key($this->prices);
+			else
+				return 'TYPE ERROR';
+		}
+		if (!isset($this->prices[$ticketType]))
+			return 'Invalid type: '.$ticketType;
+		
 		ob_start();
 		$fieldid = bin2hex(openssl_random_pseudo_bytes(8));
 		?>
@@ -177,20 +190,27 @@ class PayGateShortcodes {
 		], $atts, 'paygate-button');
 		$this->verifyDragonCode();
 		
-		if (empty($atts['type']))
-			return 'TYPE ERROR';
-		
-		$this->currentTicketType = $atts['type'];
+		$ticketType = $atts['type'];
+		if (empty($ticketType)) {
+			if (count($this->prices) == 1)
+				$ticketType = key($this->prices);
+			else
+				return 'TYPE ERROR';
+		}
+		if (!isset($this->prices[$ticketType]))
+			return 'Invalid type: '.$ticketType;
+
+		$this->currentTicketType = $ticketType;
 		ob_start();
 		?>
-		<button type="button" onclick="PayGateCheckout.addTicket('<?php echo $atts['type']?>')">
+		<button type="button" onclick="PayGateCheckout.addTicket('<?php echo $this->currentTicketType?>')">
 		<?php echo do_shortcode(trim($content)) ?>
 		</button>
 		<script>
 		window.paygate_ticket_types = window.paygate_ticket_types || {};
-		window.paygate_ticket_types['<?php echo $atts['type']?>'] = [
-			'<?php echo $this->getTicketPrice($atts['type']);?>',
-			'<?php echo $this->pg->database()->getCurrentTicketPrice($atts['type'], false)?>'
+		window.paygate_ticket_types['<?php echo $this->currentTicketType?>'] = [
+			'<?php echo $this->getTicketPrice(true, $this->currentTicketType);?>',
+			'<?php echo $this->getTicketPrice(false, $this->currentTicketType);?>'
 		];
 		</script>
 		<?php
@@ -198,11 +218,11 @@ class PayGateShortcodes {
 		return ob_get_clean();
 	}
 	
-	private function getTicketPrice($ticketType) {
+	private function getTicketPrice($forDragon, $ticketType) {
 		$isDragon = !is_null($this->currentDragonId) && !($this->currentDragonIdWasUsed);
 		if ($isDragon)
 			error_log("PayGate: Calculating price for dragon ticket");
-		return $this->pg->database()->getCurrentTicketPrice($ticketType, $isDragon);
+		return $this->prices[$ticketType][$isDragon ? 1 : 0];
 	}
 	
 	private function verifyDragonCode() {

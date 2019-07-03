@@ -88,7 +88,7 @@ Paygate ticket purchase button.
 
 #### Atrributes
 
-* `type` (required) ticket type of purchase. Default: the first ticket type ("standard ticket")
+* `type` (optional/required) ticket type of purchase. This attribute is optional if there is only one ticket type, otherwise the ticket type must be specified exactly.
 
 ### `[paygate-price]`
 
@@ -97,7 +97,8 @@ will show the price for the ticket of its containing pay button.
 
 #### Atrributes
 
-* `type` (optional) ticket type to display price for. Default: the first ticket type ("standard ticket"), or the type used in the containing `[paygate-button]`
+* `type` (optional) ticket type to display price for. If this shortcode is contained inside a `[paygate-button]` shortcode, the `type` attribute may be omitted and the ticket type will be taken from
+the `[paygate-button]` shortcode. The `type` attribute may also be omitted if there is only one ticket type.
 
 ### `[paygate-dragon-form]`
 
