@@ -120,8 +120,7 @@ class PayGate {
 				error_log("PayGate: Invalid dragon ID submitted, ignoring");
 				$dragon_id = null;
 			} else {
-				$dragon_id = $member->member_number;
-				if ($this->database()->checkUsedDragonId($dragon_id)) {
+				if ($this->database()->checkUsedDragonId($member->member_number)) {
 					error_log("PayGate: Dragon ID used before in current event, ignoring");
 					$dragon_id = null;
 				}
