@@ -369,7 +369,7 @@ class PayGateSettingsPage {
 		</p>
 		</form>
 		
-		<form method="post" action="<? echo $action_url ?>">
+		<form method="post" action="<?php echo $action_url ?>">
 		<h2>הוספת סוג כרטיס</h2>
 		<label>
 		<span>שם סוג כרטיס:</span>
