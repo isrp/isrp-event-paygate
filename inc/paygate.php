@@ -113,7 +113,7 @@ class PayGate {
 		if (!$tickets)
 			wp_die('בקשה לא חוקית - אנא נסה שנית');
 		
-		// replay the transactios, just to be sure:
+		// replay the transactions, just to be sure:
 		if ($dragon_id) {
 			$member = $this->getDragonCard($dragon_id);
 			if (!$member) {

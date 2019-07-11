@@ -287,15 +287,14 @@ class PayGateDatabase {
 	public function getCurrentTicketPrice($ticketType, $isDragon) {
 		$column = $isDragon ? 'dragon_price' : 'full_price';
 		$activeEventId = $this->getActiveEventId();
-		$price = $this->db->get_var($this->db->prepare(
-			"SELECT $column as price FROM $this->prices_table_name ".
-			"WHERE period_id in (".
-				"SELECT id FROM $this->periods_table_name ".
-				"WHERE period_end > UNIX_TIMESTAMP(now()) AND event_id = %d ".
-				"ORDER BY period_end ASC".
-			") ".
+		$price = $this->db->get_var($this->db->prepare(		
+			"SELECT $column as price FROM $this->prices_table_name as prices ".
+			"INNER JOIN $this->periods_table_name AS periods on prices.period_id = periods.id ".
+			"WHERE period_end > UNIX_TIMESTAMP(now()) ".
+			"AND event_id = %d ".
 			"AND ticket_type = %s ".
-			"HAVING price > 0", $activeEventId, $ticketType));
+			"ORDER BY period_end ASC ".
+			"LIMIT 1", $activeEventId, $ticketType));
 		error_log("PayGate: Calculated price for $ticketType, $isDragon in event $activeEventId: $price");
 		if ($price == 0 and $isDragon) {
 			$price = $this->getCurrentTicketPrice($ticketType, false);
