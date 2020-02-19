@@ -22,7 +22,6 @@ class PayGate {
 	
 	public function handleCallbacks($wpquery) {
 		$pagename = $wpquery->query_vars['name'] ?: $wpquery->query_vars['pagename'];
-		error_log("PayGate: Page name determined: $pagename");
 		if (strpos($wpquery->request, 'paygate-handler') !== 0)
 			return;
 		
@@ -55,7 +54,6 @@ class PayGate {
 	
 	public function custom_wp_admin_style($hook) {
 		// Load only on my settings page
-		error_log("PayGate: run hook on $hook ?");
 		if (preg_match('/(?:page_paygate-\w+|toplevel_page_paygate)$/', $hook)) {
 			wp_enqueue_style( 'paygate_wp_admin_css', plugins_url('admin-style.css', __FILE__), [], 6 );
 			wp_enqueue_style( 'paygate_wp_admin_fa', 'https://use.fontawesome.com/releases/v5.1.0/css/all.css' );
