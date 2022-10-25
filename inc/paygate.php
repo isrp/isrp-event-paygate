@@ -152,11 +152,12 @@ class PayGate {
 			'period' => $period->id,
 			'tickets' => $ticketdata,
 		], JSON_UNESCAPED_UNICODE);
+		$_SESSION['paygate_calldata'] = $calldata;
 		$transaction_id = md5($calldata . "secret");
 		$event = $this->database()->getEvent($this->database()->getActiveEventId());
 		print $this->processor->get_form('לאתר התשלומים', $total,
 			count($ticketdata) . " כרטיסים ל-" . $event->name, $transaction_id,
-			home_url('/paygate-handler/success/'. base64_encode($calldata)), home_url('/paygate-handler/failure'));
+			home_url('/paygate-handler/success/'. base64_encode($transaction_id)), home_url('/paygate-handler/failure'));
 		?>
 		<script>
 		document.forms[0].getElementsByTagName('button')[0].disabled = true;
@@ -179,7 +180,7 @@ class PayGate {
 		}
 		
 		@list($prefix, $transaction_id) = explode(':',$result['orderid']);
-		$calldata = base64_decode($code);
+		$calldata = $_SESSION['paygate_calldata'];
 		if ($transaction_id != md5($calldata . "secret")) {
 			wp_die("אישור תשלום לא חוקי!");
 		}
