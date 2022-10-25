@@ -1,7 +1,7 @@
 <?php
 
 class PayGateDatabase {
-	var $db_version = '7';
+	var $db_version = '8';
 	var $reg_table_name;
 	var $events_table_name;
 	var $periods_table_name;
@@ -45,6 +45,7 @@ class PayGateDatabase {
 		dbDelta("CREATE TABLE $this->events_table_name (
 			id int NOT NULL AUTO_INCREMENT,
 			name varchar(255) NOT NULL,
+			created INT NOT NULL DEFAULT 0,
 			success_page varchar(255) NOT NULL DEFAULT 'paygate-success',
 			PRIMARY KEY (id)
 		) $charset_collate;");
@@ -91,6 +92,7 @@ class PayGateDatabase {
 		return $this->db->insert($this->events_table_name, [
 			'name' => $name,
 			'success_page' => $success_page,
+			'created' => time()
 		]);
 	}
 	

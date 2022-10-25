@@ -166,31 +166,36 @@ class PayGateSettingsPage {
 				<td>
 				<table class="internal">
 				<tbody>
-				<?php $periodStart = ""; ?>
+				<?php $periodStart = date("j.n.Y",$ev->created ?: 0); ?>
+				<?php if (!empty($periods)): ?>
 				<?php foreach ($periods as $period):?>
 					<tr>
 					<td>
 					<form method="post" action="">
 					<input type="hidden" name="event-id" value="<?php echo $ev->id?>">
 					<input type="hidden" name="period-id" value="<?php echo $period->id?>">
-					<button type="submit" name="events-action" value="delete-period"><i class="far fa-calendar-minus"></i></button>
+					<button type="submit" name="events-action" value="delete-period"><i title="<?php _e('Remove period', 'isrp-event-paygate')?>" class="far fa-calendar-minus"></i></button>
 					</form>
 					</td>
-					<td><?php echo $period->name?></td>
-					<td><?php echo $periodStart?></td>
+					<td><?php echo $period->name?>:</td>
+					<td><?php echo $periodStart ?: _e('Today','isrp-event-paygate')?></td>
 					<td> - </td>
 					<td><?php echo date("j.n.Y",$period->period_end)?></td>
 					<?php $periodStart = date("j.n.Y",$period->period_end + 86400)?>
 					</tr>
 				<?php endforeach;?>
+				<?php else: ?>
+				<p><?php _e('No ticket sale periods are defined for this event yet.', 'isrp-event-paygate');?></p>
+				<p><?php _e('Create a new period by setting a period name and clicking the add button', 'isrp-event-paygate');?></p>
+				<?php endif;?>
 				</tbody>
 				</table>
 				<form method="post" action="">
 				<input type="hidden" name="event-id" value="<?php echo $ev->id?>">
 				<p>
 					<input type="text" name="name">
-					<input type="date" name="end-period" value="<?php echo date("Y-m-d")?>">
-					<button type="submit" name="events-action" value="add-period"><i class="far fa-calendar-plus"></i></button>
+					<input type="date" name="end-period" value="<?php echo date("Y-m-d")?>" title="<?php _e('End date for the new sale period','isrp-event-paygate')?>">
+					<button type="submit" name="events-action" value="add-period"><i title="<?php _e('Add period', 'isrp-event-paygate')?>" class="far fa-calendar-plus"></i></button>
 				</p>
 				</form>
 				</td>
@@ -298,7 +303,7 @@ class PayGateSettingsPage {
 		if (!$event)
 			return;
 		$periods = $this->pg->database()->listPeriods($event->id);
-		$periodStart = '';
+		$periodStart = date("j.n.Y",$event->created ?: 0);
 		$priceMatrix = [];
 		?>
 		
@@ -365,6 +370,10 @@ class PayGateSettingsPage {
 		<?php endforeach;?>
 		</tbody>
 		</table>
+		<?php if (empty($periods)): ?>
+		<p><?php _e('No ticket sale periods are set for event.', 'isrp-event-paygate') ?></p>
+		<p><?php _e('Please create at least one ticket sale periods in the event configuration.', 'isrp-event-paygate')?></p>
+		<?php else: ?>
 		<p>
 		<button type="submit" name="prices-action" value="update-prices">עדכן מחירים</button>
 		</p>
@@ -381,6 +390,7 @@ class PayGateSettingsPage {
 		</form>
 		</div>
 		<?php
+		endif;
 	}
 	
 	public function reportsPage() {
