@@ -167,7 +167,6 @@ class PayGate {
 		$_SESSION['paygate_calldata'] = $calldata;
 		$transaction_id = md5($calldata . "secret");
 		$event = $this->database()->getEvent($this->database()->getActiveEventId());
-		var_dump($_SESSION['counter'] += 1);
 		print $this->processor->get_form('לאתר התשלומים', $total,
 			count($ticketdata) . " כרטיסים ל-" . $event->name, $transaction_id,
 			home_url('/paygate-handler/success/'. base64_encode($transaction_id)), home_url('/paygate-handler/failure'));
