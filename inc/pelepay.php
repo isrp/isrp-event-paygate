@@ -28,7 +28,6 @@ class PayGatePelepayProcessor {
 		</form>
 		<?php
 		return ob_get_clean();
-		
 	}
 	
 	public function parse($result) {
