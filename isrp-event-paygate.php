@@ -14,6 +14,8 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+define('ISRP_EVENT_PAYGATE_DIR', basename(dirname(__FILE__)));
+define('ISRP_EVENT_PAYGATE_URL', plugins_url(ISRP_EVENT_PAYGATE_DIR));
 
 require_once __DIR__.'/inc/paygate.php';
 
