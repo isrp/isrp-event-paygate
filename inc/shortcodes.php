@@ -11,12 +11,15 @@ class PayGateShortcodes {
 	private $currentTicketType = null;
 	private $currentDragonId = null;
 	private $currentDragonIdWasUsed = false;
+	private $availableTickets = -1;
 	
 	public function __construct(PayGate $paygate) {
 		$this->pg = $paygate;
 		$this->pelepay_account = get_option('paygate-pelepay-account');
 		$this->processor = new PayGatePelepayProcessor($this->pelepay_account);
 		$this->currentEvent = $this->pg->database()->getActiveEventId();
+		$evData = $this->pg->database()->getEvent($this->currentEvent);
+		$this->availableTickets = $evData->max_tickets > 0 ? max(0, $evData->max_tickets - $evData->sold) : -1;
 		foreach ($this->pg->database()->listEventCurrentPrices($this->currentEvent) as $ticket) {
 			$this->prices[$ticket->ticket_type] = [ $ticket->full_price, $ticket->dragon_price ];
 		}
@@ -37,10 +40,21 @@ class PayGateShortcodes {
 		$jsAllowCart = $this->pg->settings()->allowMultipleTickets() ? 'true' : 'false';
 		
 		ob_start();
+		if ($this->availableTickets == 0) {
+			?>
+			<h2><?php _e('No More Tickets Available', 'isrp-event-paygate')?></h2>
+			<p>
+			<?php _e('Unfortunately, the event is now full and no more tickets are available for purchase.', 'isrp-event-paygate')?>
+			</p>
+			<?php
+			return ob_get_clean();
+		}
+		
 		?>
 		<script>
 		jQuery(document).ready(function() {
-			window.PayGateCheckout = new EventPayGate(<?php echo $jsAllowCart?>);
+			window.PayGateCheckout = new EventPayGate(<?php echo $jsAllowCart?>, <?php echo $this->availableTickets?>,
+											 '<?php _e('Sold out', 'isrp-event-paygate')?>');
 		});
 		</script>
 		<div class="paygate-tickets">
@@ -141,24 +155,32 @@ class PayGateShortcodes {
 
 		$this->currentTicketType = $ticketType;
 		ob_start();
+		
+		if ($this->availableTickets == 0) {
+			?>
+			<button type="button" disabled><?php _e('Sold out', 'isrp-event-paygate')?></button>
+			<?php
+			return ob_get_clean();
+		}
+		
 		?>
-		<button type="button" onclick="PayGateCheckout.addTicket('<?php echo $this->currentTicketType?>')">
-		<?php echo do_shortcode(trim($content)) ?>
-		</button>
 		<script>
 		window.paygate_ticket_types = window.paygate_ticket_types || {};
 		window.paygate_ticket_types['<?php echo $this->currentTicketType?>'] = [
-			'<?php echo $this->getTicketPrice(true, $this->currentTicketType);?>',
-			'<?php echo $this->getTicketPrice(false, $this->currentTicketType);?>'
+		'<?php echo $this->getTicketPrice(true, $this->currentTicketType);?>',
+		'<?php echo $this->getTicketPrice(false, $this->currentTicketType);?>'
 		];
 		</script>
+		<button type="button" onclick="PayGateCheckout.addTicket(this, '<?php echo $this->currentTicketType?>')">
+		<?php echo do_shortcode(trim($content)) ?>
+		</button>
 		<?php
 		$this->currentTicketType = null;
 		return ob_get_clean();
 	}
 	
 	private function getTicketPrice($forDragon, $ticketType) {
-		$isDragon = !is_null($this->currentDragonId) && !($this->currentDragonIdWasUsed);
+		$isDragon = !is_null($this->currentDragonId) && !($this->currentDragonIdWasUsed) && $forDragon;
 		if ($isDragon)
 			error_log("PayGate: Calculating price for dragon ticket");
 		return $this->prices[$ticketType][$isDragon ? 1 : 0];

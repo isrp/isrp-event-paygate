@@ -105,10 +105,12 @@ class PayGateSettingsPage {
 			case 'create':
 				if (@$_REQUEST['event-id'])
 					$this->pg->database()->updateEvent($_REQUEST['event-id'],
-						@$_REQUEST['event-name'], @$_REQUEST['event-success-page']);
+						@$_REQUEST['event-name'], @$_REQUEST['event-success-page'],
+						@$_REQUEST['limit-tickets'] ? @$_REQUEST['max-tickets'] : 0);
 				else
 					$this->pg->database()->createEvent(
-						@$_REQUEST['event-name'], @$_REQUEST['event-success-page']);
+						@$_REQUEST['event-name'], @$_REQUEST['event-success-page'],
+						@$_REQUEST['limit-tickets'] ? @$_REQUEST['max-tickets'] : 0);
 				break;
 			case 'edit':
 				return $this->showEvents($this->pg->database()->getEvent(@$_REQUEST['event-id']));
@@ -136,14 +138,14 @@ class PayGateSettingsPage {
 		$all_pages = get_pages();
 		?>
 		<div class="paygate">
-		<h1>רשימת כנסים</h1>
+		<h1><?php _e('Event List', 'isrp-event-paygate')?></h1>
 		<table>
 		<thead>
 			<tr>
 				<th>#</th>
-				<th>שם</th>
-				<th>עמוד סיום תשלום</th>
-				<th>תקופות</th>
+				<th><?php _e('Name', 'isrp-event-paygate')?></th>
+				<th><?php _e('Purchase completion page', 'isrp-event-paygate')?></th>
+				<th><?php _e('Ticket sale periods', 'isrp-event-paygate')?></th>
 				<th></th>
 			</tr>
 		</thead>
@@ -158,7 +160,14 @@ class PayGateSettingsPage {
 		?>
 			<tr>
 				<td><?php echo $ev->id?></td>
-				<td><?php echo $ev->name?></td>
+				<td>
+					<p><?php echo $ev->name?></p>
+					<p><?php _e('Tickets', 'isrp-event-paygate')?>: <?php echo $ev->sold?>
+					<?php if ($ev->max_tickets > 0):?>
+					<?php _e('of', 'isrp-event-paygate')?> <?php echo $ev->max_tickets?>
+					<?php endif?>
+					</p>
+				</td>
 				<td><a target="blank" href="<?php echo admin_url("post.php?post={$curpage->ID}&action=edit")?>">
 					<?php echo $curpage->post_title;?> <i class="fas fa-external-link-alt"></i>
 				</a></td>
@@ -216,16 +225,16 @@ class PayGateSettingsPage {
 		
 		<form method="post" action="">
 		<?php if ($editEvent):?>
-		<h2>עריכת כנס:</h2>
+		<h2><?php _e('Edit Event', 'isrp-event-paygate')?>:</h2>
 		<input type="hidden" name="event-id" value="<?php echo $editEvent->id?>">
 		<?php else:?>
-		<h2>יצירת כנס חדש:</h2>
+		<h2><?php _e('Create a new event', 'isrp-event-paygate')?>:</h2>
 		<?php endif;?>
 		
-		<p><label><span>שם כנס: </span><input type="text" name="event-name" value="<?php
+		<p><label><span><?php _e('Event name', 'isrp-event-paygate')?>: </span><input type="text" name="event-name" value="<?php
 			if ($editEvent) echo $editEvent->name
 			?>"></label></p>
-		<p><label><span>עמוד סיום תשלום: </span>
+		<p><label><span><?php _e('Purchase completion page', 'isrp-event-paygate')?>: </span>
 			<select name="event-success-page">
 			<?php foreach ($all_pages as $page): ?>
 			<option value="<?php echo $page->post_name?>" <?php
@@ -234,12 +243,33 @@ class PayGateSettingsPage {
 			<?php endforeach; ?>
 			</select>
 		</label></p>
-		
+		<p><label><span><?php _e('Limit amount of tickets available', 'isrp-event-paygate')?>: </span>
+			<input type="checkbox" name="limit-tickets" value="1" <?php
+				if ($editEvent && $editEvent->max_tickets > 0) echo 'checked';
+			?> onclick="activateMaxTickets(this);">
+		</label></p>
+		<p><label><span><?php _e('No. of tickets', 'isrp-event-paygate')?>: </span>
+			<input id="event-edit-max-tickets" type="number" min="1" name="max-tickets" value="<?php
+			if ($editEvent && $editEvent->max_tickets > 0) echo $editEvent->max_tickets
+				?>" <?php if (!$editEvent || $editEvent->max_tickets <= 0):?>disabled<?php endif?>>
+		</label></p>
+		<script>
+		function activateMaxTickets(chkbox) {
+			let inp = document.getElementById('event-edit-max-tickets');
+			if (chkbox.checked) {
+				inp.disabled = false;
+				return;
+			}
+			inp.disabled = true;
+			inp.value = '';
+		}
+		</script>
+				
 		<button type="submit" name="events-action" value="create">
 		<?php if ($editEvent):?>
-		עדכון
+		<?php _e('Update', 'isrp-event-paygate')?>
 		<?php else:?>
-		יצירת כנס חדש
+		<?php _e('Create new event', 'isrp-event-paygate')?>
 		<?php endif;?>
 		</button>
 		

@@ -1,4 +1,4 @@
-EventPayGate = function(allowCart) {
+EventPayGate = function(allowCart, maxTickets, soldOutText) {
 	this.table = document.getElementById("paygate-cart");
 	this.form = document.getElementById("paygate-form");
 	this.nameField = document.getElementById("paygate-ticket-name");
@@ -7,6 +7,7 @@ EventPayGate = function(allowCart) {
 	this.allowMultiple = !!allowCart;
 	this.total = 0;
 	this.checkoutButton.setAttribute('disabled','disabled');
+	this.maxTickets = maxTickets;
 	
 	this.updateTicketPrices = function() {
 		if (!window.paygate_ticket_types) return;
@@ -20,8 +21,8 @@ EventPayGate = function(allowCart) {
 		}
 	};
 	
-	this.addTicket = function(type) {
-		if (!type) return false;
+	this.addTicket = function(button, type) {
+		if (!button || !type) return false;
 		if (this.nameField && !this.nameField.value)
 			return alert("יש למלא שם של מחזיק הכרטיס");
 		
@@ -39,7 +40,12 @@ EventPayGate = function(allowCart) {
 		if (!this.allowMultiple)
 			return this.form.submit();
 		this.updateTicketPrices();
-		//this.nameField.value = '';
+		if (this.maxTickets > 0)
+			this.maxTickets-=1;
+		if (this.maxTickets == 0 && soldOutText) {
+			button.disabled = true;
+			button.innerHTML = soldOutText;
+		}
 	};
 	
 	this.addTicketField = function(type, price, name) {
