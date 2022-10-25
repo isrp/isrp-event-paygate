@@ -16,12 +16,16 @@ class PayGate {
 		$this->shortcodes = new PayGateShortcodes($this);
 		$this->processor = new PayGatePelepayProcessor($this->settings()->getPelepayAccount());
 		
-		add_action( 'admin_enqueue_scripts', [ $this, 'custom_wp_admin_style'] );
-		add_action( 'parse_request', [ $this, 'handleCallbacks']);
+		add_action( 'admin_enqueue_scripts', [ $this, 'custom_wp_admin_style' ]);
+		add_action( 'plugins_loaded', [ $this, 'initTextDomain' ]);
+		add_action( 'parse_request', [ $this, 'handleCallbacks' ]);
+	}
+	
+	public function initTextDomain() {
+		$res = load_plugin_textdomain('isrp-event-paygate', false, ISRP_EVENT_PAYGATE_DIR . '/languages');
 	}
 	
 	public function handleCallbacks($wpquery) {
-		$pagename = $wpquery->query_vars['name'] ?: $wpquery->query_vars['pagename'];
 		if (strpos($wpquery->request, 'paygate-handler') !== 0)
 			return;
 		

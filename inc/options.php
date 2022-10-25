@@ -32,22 +32,21 @@ class PayGateSettingsPage {
 	 */
 	public function add_plugin_page() {
 		// This page will be under "Settings"
-		add_options_page(
-			'הגדרות שער תשלום',
-			'שער תשלום',
-			'manage_options',
-			'paygate-admin',
-			[ $this, 'create_admin_page' ]
-			);
+		add_options_page(__('Paygate Options', 'isrp-event-paygate'),
+						 __('Paygate', 'isrp-event-paygate'),
+						 'manage_options', 'paygate-admin', [ $this, 'create_admin_page' ]);
 		
-		add_menu_page( 'כנסים', 'שער תשלום', 'manage_options',
-			'paygate', [$this, 'managementPage' ], static::PAY_ICON);
+		add_menu_page(__('Paygate', 'isrp-event-paygate'),
+					  __('Paygate', 'isrp-event-paygate'), 'manage_options',
+					  'paygate', [$this, 'managementPage' ], static::PAY_ICON);
 		
-		add_submenu_page( 'paygate', 'מחירים', 'מחירים', 'manage_options', 'paygate-prices',
-			[ $this, 'pricesPage' ]);
+		add_submenu_page('paygate', __('Prices', 'isrp-event-paygate'),
+						 __('Prices', 'isrp-event-paygate'),
+						 'manage_options', 'paygate-prices', [ $this, 'pricesPage' ]);
 		
-		add_submenu_page( 'paygate', 'דוחות', 'דוחות', 'manage_options', 'paygate-reports',
-			[ $this, 'reportsPage' ]);
+		add_submenu_page('paygate', __('Reports', 'isrp-event-paygate'),
+						 __('Reports', 'isrp-event-paygate'),
+						 'manage_options', 'paygate-reports', [ $this, 'reportsPage' ]);
 	}
 	
 	/**
@@ -186,7 +185,7 @@ class PayGateSettingsPage {
 				<?php endforeach;?>
 				<?php else: ?>
 				<p><?php _e('No ticket sale periods are defined for this event yet.', 'isrp-event-paygate');?></p>
-				<p><?php _e('Create a new period by setting a period name and clicking the add button', 'isrp-event-paygate');?></p>
+				<p><?php _e('Create a new period by setting a period name and period end date.', 'isrp-event-paygate');?></p>
 				<?php endif;?>
 				</tbody>
 				</table>
