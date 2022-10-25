@@ -16,13 +16,22 @@ class PayGate {
 		$this->shortcodes = new PayGateShortcodes($this);
 		$this->processor = new PayGatePelepayProcessor($this->settings()->getPelepayAccount());
 		
-		add_action( 'admin_enqueue_scripts', [ $this, 'custom_wp_admin_style'] );
-		add_action( 'parse_request', [ $this, 'handleCallbacks']);
+		add_action( 'admin_enqueue_scripts', [ $this, 'custom_wp_admin_style' ]);
+		add_action( 'plugins_loaded', [ $this, 'initTextDomain' ]);
+		add_action( 'parse_request', [ $this, 'handleCallbacks' ]);
+		add_action( 'init', [ $this, 'startSession' ]);
+	}
+	
+	public function initTextDomain() {
+		$res = load_plugin_textdomain('isrp-event-paygate', false, ISRP_EVENT_PAYGATE_DIR . '/languages');
+	}
+	
+	public function startSession() {
+		if (!session_id())
+			session_start();
 	}
 	
 	public function handleCallbacks($wpquery) {
-		$pagename = $wpquery->query_vars['name'] ?: $wpquery->query_vars['pagename'];
-		error_log("PayGate: Page name determined: $pagename");
 		if (strpos($wpquery->request, 'paygate-handler') !== 0)
 			return;
 		
@@ -55,7 +64,6 @@ class PayGate {
 	
 	public function custom_wp_admin_style($hook) {
 		// Load only on my settings page
-		error_log("PayGate: run hook on $hook ?");
 		if (preg_match('/(?:page_paygate-\w+|toplevel_page_paygate)$/', $hook)) {
 			wp_enqueue_style( 'paygate_wp_admin_css', plugins_url('admin-style.css', __FILE__), [], 6 );
 			wp_enqueue_style( 'paygate_wp_admin_fa', 'https://use.fontawesome.com/releases/v5.1.0/css/all.css' );
@@ -131,6 +139,7 @@ class PayGate {
 		$has_dragon_id = is_null($dragon_id) ? false : true;
 		$ticketdata = [];
 		$period = $this->database()->getActivePeriod();
+		$event = $this->database()->getEvent($period->event_id);
 		$orderid = bin2hex(openssl_random_pseudo_bytes(4));
 		$total = 0;
 		foreach ($tickets as $ticketType => $ticketList) {
@@ -145,6 +154,9 @@ class PayGate {
 			}
 		}
 		
+		if ($event->max_tickets > 0 && $event->sold  + count($ticketdata) > $event->max_tickets) {
+				wp_die(sprintf(esc_html__('Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again.', 'isrp-event-paygate'), $event->max_tickets - $event->sold, count($ticketdata)));
+		}
 		$calldata = json_encode([
 			'time' => time(),
 			'dragon_id' => $dragon_id,
@@ -155,6 +167,7 @@ class PayGate {
 		$_SESSION['paygate_calldata'] = $calldata;
 		$transaction_id = md5($calldata . "secret");
 		$event = $this->database()->getEvent($this->database()->getActiveEventId());
+		var_dump($_SESSION['counter'] += 1);
 		print $this->processor->get_form('לאתר התשלומים', $total,
 			count($ticketdata) . " כרטיסים ל-" . $event->name, $transaction_id,
 			home_url('/paygate-handler/success/'. base64_encode($transaction_id)), home_url('/paygate-handler/failure'));
@@ -172,21 +185,24 @@ class PayGate {
 		//   Response=000&ConfirmationCode=0656742&index=T478514&amount=250.00&firstname=עודד&lastname=ארבל&
 		//   email=oded@geek.co.il&phone=054-7340014&payfor=כרטיס לליברה 5: יחיד - רישום מוקדם&custom=&orderid=paygate:dae321616c1af325fae085fb4b68ab03
 		$result = wp_parse_args($query);
-		$resmessage = PayGatePelepayConstants::RESPONSE_CODES[$result['Response']];
+		$resmessage = PayGatePelepayConstants::RESPONSE_CODES[$result['Response']] ?: 'Unknown error';
 		
 		if ($result['Response'] != '000') {
 			error_log("PayGate: PayGate transaction failed: ". print_r($result, true));
-			wp_die("חלה שגיאה בעיבוד התשלום - $resmessage. אנא פנו למנהל האתר");
+			wp_die(sprintf(
+				esc_html__('Error processing payment - "%1$s". Please contact the site administrator','isrp-event-paygate'),
+				$resmessage));
 		}
 		
 		@list($prefix, $transaction_id) = explode(':',$result['orderid']);
 		$calldata = $_SESSION['paygate_calldata'];
 		if ($transaction_id != md5($calldata . "secret")) {
-			wp_die("אישור תשלום לא חוקי!");
+			error_log("Transaction id verification failed: " . print_r($calldata, true));
+			wp_die(esc_html__('Invalid payment confirmation!', 'isrp-event-paygate'));
 		}
 		
 		if (!$this->settings()->allowTestTransaction() and $result['index'][0] == 'T') {
-			wp_die("אין אפשרות לרכוש כרטיסים עם חשבון בדיקה!");
+			wp_die(esc_html__('A payment test account is not valid on this site!', 'isrp-event-paygate'));
 		}
 		
 		$tickets = json_decode($calldata, true);

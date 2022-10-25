@@ -10,9 +10,10 @@ class PayGatePelepayProcessor {
 	}
 	
 	public function get_form($buttontext, $amount, $description, $order, $okurl, $failurl) {
+		$paymentURL = 'https://www.pelepay.co.il/pay/paypage.aspx';
 		ob_start();
 		?>
-		<form name="pelepayform" action="https://www.pelepay.co.il/pay/paypage.aspx" method="post">
+		<form name="pelepayform" action="<?php echo $paymentURL?>" method="post">
 		<input type="hidden" name="business" value="<?php echo $this->account;?>">
 		<INPUT type="hidden" name="amount" value="<?php echo $amount;?>">
 		<INPUT type="hidden" name="description" value="<?php echo $description?>">
@@ -28,7 +29,6 @@ class PayGatePelepayProcessor {
 		</form>
 		<?php
 		return ob_get_clean();
-		
 	}
 	
 	public function parse($result) {

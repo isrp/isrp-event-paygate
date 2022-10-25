@@ -1,4 +1,6 @@
 /.ptp-sync/
 .ptp-sync-folder
+.directory
 /.svn/
 *.zip
+languages/main.lqa

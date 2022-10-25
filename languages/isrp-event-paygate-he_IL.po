@@ -1,0 +1,178 @@
+# Copyright (C) 2022 Oded Arbel
+# This file is distributed under the GPL2.
+msgid ""
+msgstr ""
+"Project-Id-Version: ISRP Event PayGate 1.3.2\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/isrp-event-"
+"paygate\n"
+"POT-Creation-Date: 2022-10-25T21:56:20+00:00\n"
+"PO-Revision-Date: 2022-10-26 00:56+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: he_IL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : n==2 ? 1 : n>10 && n%10==0 ? "
+"2 : 3);\n"
+"X-Generator: Poedit 3.1.1\n"
+"X-Domain: isrp-event-paygate\n"
+
+#. Plugin Name of the plugin
+msgid "ISRP Event PayGate"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "http://github.com/isrp/isrp-event-paygate"
+msgstr ""
+
+#. Description of the plugin
+msgid ""
+"Plugin for the Israeli Society of Roleplayers' day-event payments system"
+msgstr ""
+
+#. Author of the plugin
+msgid "Oded Arbel"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://github.com/isrp/isrp-event-paygate"
+msgstr ""
+
+#: inc/options.php:35
+msgid "Paygate Options"
+msgstr "אפשרויות שער תשלום"
+
+#: inc/options.php:36 inc/options.php:39 inc/options.php:40
+msgid "Paygate"
+msgstr "שער תשלום"
+
+#: inc/options.php:43 inc/options.php:44
+msgid "Prices"
+msgstr "מחירים"
+
+#: inc/options.php:47 inc/options.php:48
+msgid "Reports"
+msgstr "דוחות"
+
+#: inc/options.php:141
+msgid "Event List"
+msgstr "רשימת כנסים"
+
+#: inc/options.php:146
+msgid "Name"
+msgstr "שם"
+
+#: inc/options.php:147 inc/options.php:237
+msgid "Purchase completion page"
+msgstr "עמוד סיום תשלום"
+
+#: inc/options.php:148
+msgid "Ticket sale periods"
+msgstr "תקופות מכירת כרטיסים"
+
+#: inc/options.php:165
+msgid "Tickets"
+msgstr "כרטיסים"
+
+#: inc/options.php:167
+msgid "of"
+msgstr "מתוך"
+
+#: inc/options.php:185
+msgid "Remove period"
+msgstr "הסרת תקופה"
+
+#: inc/options.php:189
+msgid "Today"
+msgstr "היום"
+
+#: inc/options.php:196
+msgid "No ticket sale periods are defined for this event yet."
+msgstr "עדיין לא מוגדרות תקופות מכירת כרטיסים בארוע."
+
+#: inc/options.php:197
+msgid "Create a new period by setting a period name and period end date."
+msgstr "יש ליצור תקופה חדשה על ידי הכנסת שם ותאריך סיום תקופת המכירה."
+
+#: inc/options.php:205
+msgid "End date for the new sale period"
+msgstr "תאריך סיום תקופת מכירה"
+
+#: inc/options.php:206
+msgid "Add period"
+msgstr "הוספת תקופה"
+
+#: inc/options.php:228
+msgid "Edit Event"
+msgstr "עריכת כנס"
+
+#: inc/options.php:231
+msgid "Create a new event"
+msgstr "יצירת כנס חדש"
+
+#: inc/options.php:234
+msgid "Event name"
+msgstr "שם כנס"
+
+#: inc/options.php:246
+msgid "Limit amount of tickets available"
+msgstr "הגבלת מספר הכרטיסים"
+
+#: inc/options.php:251
+msgid "No. of tickets"
+msgstr "מס. כרטיסים"
+
+#: inc/options.php:270
+msgid "Update"
+msgstr "עדכון"
+
+#: inc/options.php:272
+msgid "Create new event"
+msgstr "יצירת כנס חדש"
+
+#: inc/options.php:403
+msgid "No ticket sale periods are set for event."
+msgstr "בארוע לא הוגדרו תקופות מכירת כרטיסים."
+
+#: inc/options.php:404
+msgid ""
+"Please create at least one ticket sale periods in the event configuration."
+msgstr "יש ליצור לפחות תקופת מכירת כרטיסים אחת בהגדרות הארוע."
+
+#: inc/paygate.php:158
+msgid ""
+"Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try "
+"again."
+msgstr ""
+"נשארו רק %1$s כרטיסים, אבל נסיתם לרכוש %2$s. אנא חזרו לעמוד הקודם ונסו שוב."
+
+#: inc/paygate.php:194
+msgid ""
+"Error processing payment - \"%1$s\". Please contact the site administrator"
+msgstr "חלה שגיאה בעיבוד התשלום: \"%1$s\". אנא פנו למנהל האתר."
+
+#: inc/paygate.php:201
+msgid "Invalid payment confirmation!"
+msgstr "אישור תשלום לא חוקי!"
+
+#: inc/paygate.php:205
+msgid "A payment test account is not valid on this site!"
+msgstr "אין אפשרות לרכוש כרטיסים עם חשבון בדיקה!"
+
+#: inc/shortcodes.php:45
+msgid "No More Tickets Available"
+msgstr "נגמרו הכרטיסים"
+
+#: inc/shortcodes.php:47
+msgid ""
+"Unfortunately, the event is now full and no more tickets are available for "
+"purchase."
+msgstr "לצערנו, אזלו כל הכרטיסים לכנס."
+
+#: inc/shortcodes.php:57 inc/shortcodes.php:161
+msgid "Sold out"
+msgstr "אזלו הכרטיסים"
+
+#~ msgid "Paygate Events"
+#~ msgstr "אירועי שער תשלום"

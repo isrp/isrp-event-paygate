@@ -1,0 +1,169 @@
+# Copyright (C) 2022 Oded Arbel
+# This file is distributed under the GPL2.
+msgid ""
+msgstr ""
+"Project-Id-Version: ISRP Event PayGate 1.3.2\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/isrp-event-paygate\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2022-10-25T21:56:20+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.7.1\n"
+"X-Domain: isrp-event-paygate\n"
+
+#. Plugin Name of the plugin
+msgid "ISRP Event PayGate"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "http://github.com/isrp/isrp-event-paygate"
+msgstr ""
+
+#. Description of the plugin
+msgid "Plugin for the Israeli Society of Roleplayers' day-event payments system"
+msgstr ""
+
+#. Author of the plugin
+msgid "Oded Arbel"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://github.com/isrp/isrp-event-paygate"
+msgstr ""
+
+#: inc/options.php:35
+msgid "Paygate Options"
+msgstr ""
+
+#: inc/options.php:36
+#: inc/options.php:39
+#: inc/options.php:40
+msgid "Paygate"
+msgstr ""
+
+#: inc/options.php:43
+#: inc/options.php:44
+msgid "Prices"
+msgstr ""
+
+#: inc/options.php:47
+#: inc/options.php:48
+msgid "Reports"
+msgstr ""
+
+#: inc/options.php:141
+msgid "Event List"
+msgstr ""
+
+#: inc/options.php:146
+msgid "Name"
+msgstr ""
+
+#: inc/options.php:147
+#: inc/options.php:237
+msgid "Purchase completion page"
+msgstr ""
+
+#: inc/options.php:148
+msgid "Ticket sale periods"
+msgstr ""
+
+#: inc/options.php:165
+msgid "Tickets"
+msgstr ""
+
+#: inc/options.php:167
+msgid "of"
+msgstr ""
+
+#: inc/options.php:185
+msgid "Remove period"
+msgstr ""
+
+#: inc/options.php:189
+msgid "Today"
+msgstr ""
+
+#: inc/options.php:196
+msgid "No ticket sale periods are defined for this event yet."
+msgstr ""
+
+#: inc/options.php:197
+msgid "Create a new period by setting a period name and period end date."
+msgstr ""
+
+#: inc/options.php:205
+msgid "End date for the new sale period"
+msgstr ""
+
+#: inc/options.php:206
+msgid "Add period"
+msgstr ""
+
+#: inc/options.php:228
+msgid "Edit Event"
+msgstr ""
+
+#: inc/options.php:231
+msgid "Create a new event"
+msgstr ""
+
+#: inc/options.php:234
+msgid "Event name"
+msgstr ""
+
+#: inc/options.php:246
+msgid "Limit amount of tickets available"
+msgstr ""
+
+#: inc/options.php:251
+msgid "No. of tickets"
+msgstr ""
+
+#: inc/options.php:270
+msgid "Update"
+msgstr ""
+
+#: inc/options.php:272
+msgid "Create new event"
+msgstr ""
+
+#: inc/options.php:403
+msgid "No ticket sale periods are set for event."
+msgstr ""
+
+#: inc/options.php:404
+msgid "Please create at least one ticket sale periods in the event configuration."
+msgstr ""
+
+#: inc/paygate.php:158
+msgid "Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again."
+msgstr ""
+
+#: inc/paygate.php:194
+msgid "Error processing payment - \"%1$s\". Please contact the site administrator"
+msgstr ""
+
+#: inc/paygate.php:201
+msgid "Invalid payment confirmation!"
+msgstr ""
+
+#: inc/paygate.php:205
+msgid "A payment test account is not valid on this site!"
+msgstr ""
+
+#: inc/shortcodes.php:45
+msgid "No More Tickets Available"
+msgstr ""
+
+#: inc/shortcodes.php:47
+msgid "Unfortunately, the event is now full and no more tickets are available for purchase."
+msgstr ""
+
+#: inc/shortcodes.php:57
+#: inc/shortcodes.php:161
+msgid "Sold out"
+msgstr ""

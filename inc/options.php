@@ -32,22 +32,21 @@ class PayGateSettingsPage {
 	 */
 	public function add_plugin_page() {
 		// This page will be under "Settings"
-		add_options_page(
-			'הגדרות שער תשלום',
-			'שער תשלום',
-			'manage_options',
-			'paygate-admin',
-			[ $this, 'create_admin_page' ]
-			);
+		add_options_page(__('Paygate Options', 'isrp-event-paygate'),
+						 __('Paygate', 'isrp-event-paygate'),
+						 'manage_options', 'paygate-admin', [ $this, 'create_admin_page' ]);
 		
-		add_menu_page( 'כנסים', 'שער תשלום', 'manage_options',
-			'paygate', [$this, 'managementPage' ], static::PAY_ICON);
+		add_menu_page(__('Paygate', 'isrp-event-paygate'),
+					  __('Paygate', 'isrp-event-paygate'), 'manage_options',
+					  'paygate', [$this, 'managementPage' ], static::PAY_ICON);
 		
-		add_submenu_page( 'paygate', 'מחירים', 'מחירים', 'manage_options', 'paygate-prices',
-			[ $this, 'pricesPage' ]);
+		add_submenu_page('paygate', __('Prices', 'isrp-event-paygate'),
+						 __('Prices', 'isrp-event-paygate'),
+						 'manage_options', 'paygate-prices', [ $this, 'pricesPage' ]);
 		
-		add_submenu_page( 'paygate', 'דוחות', 'דוחות', 'manage_options', 'paygate-reports',
-			[ $this, 'reportsPage' ]);
+		add_submenu_page('paygate', __('Reports', 'isrp-event-paygate'),
+						 __('Reports', 'isrp-event-paygate'),
+						 'manage_options', 'paygate-reports', [ $this, 'reportsPage' ]);
 	}
 	
 	/**
@@ -106,10 +105,12 @@ class PayGateSettingsPage {
 			case 'create':
 				if (@$_REQUEST['event-id'])
 					$this->pg->database()->updateEvent($_REQUEST['event-id'],
-						@$_REQUEST['event-name'], @$_REQUEST['event-success-page']);
+						@$_REQUEST['event-name'], @$_REQUEST['event-success-page'],
+						@$_REQUEST['limit-tickets'] ? @$_REQUEST['max-tickets'] : 0);
 				else
 					$this->pg->database()->createEvent(
-						@$_REQUEST['event-name'], @$_REQUEST['event-success-page']);
+						@$_REQUEST['event-name'], @$_REQUEST['event-success-page'],
+						@$_REQUEST['limit-tickets'] ? @$_REQUEST['max-tickets'] : 0);
 				break;
 			case 'edit':
 				return $this->showEvents($this->pg->database()->getEvent(@$_REQUEST['event-id']));
@@ -137,14 +138,14 @@ class PayGateSettingsPage {
 		$all_pages = get_pages();
 		?>
 		<div class="paygate">
-		<h1>רשימת כנסים</h1>
+		<h1><?php _e('Event List', 'isrp-event-paygate')?></h1>
 		<table>
 		<thead>
 			<tr>
 				<th>#</th>
-				<th>שם</th>
-				<th>עמוד סיום תשלום</th>
-				<th>תקופות</th>
+				<th><?php _e('Name', 'isrp-event-paygate')?></th>
+				<th><?php _e('Purchase completion page', 'isrp-event-paygate')?></th>
+				<th><?php _e('Ticket sale periods', 'isrp-event-paygate')?></th>
 				<th></th>
 			</tr>
 		</thead>
@@ -159,38 +160,50 @@ class PayGateSettingsPage {
 		?>
 			<tr>
 				<td><?php echo $ev->id?></td>
-				<td><?php echo $ev->name?></td>
+				<td>
+					<p><?php echo $ev->name?></p>
+					<p><?php _e('Tickets', 'isrp-event-paygate')?>: <?php echo $ev->sold?>
+					<?php if ($ev->max_tickets > 0):?>
+					<?php _e('of', 'isrp-event-paygate')?> <?php echo $ev->max_tickets?>
+					<?php endif?>
+					</p>
+				</td>
 				<td><a target="blank" href="<?php echo admin_url("post.php?post={$curpage->ID}&action=edit")?>">
 					<?php echo $curpage->post_title;?> <i class="fas fa-external-link-alt"></i>
 				</a></td>
 				<td>
 				<table class="internal">
 				<tbody>
-				<?php $periodStart = ""; ?>
+				<?php $periodStart = date("j.n.Y",$ev->created ?: 0); ?>
+				<?php if (!empty($periods)): ?>
 				<?php foreach ($periods as $period):?>
 					<tr>
 					<td>
 					<form method="post" action="">
 					<input type="hidden" name="event-id" value="<?php echo $ev->id?>">
 					<input type="hidden" name="period-id" value="<?php echo $period->id?>">
-					<button type="submit" name="events-action" value="delete-period"><i class="far fa-calendar-minus"></i></button>
+					<button type="submit" name="events-action" value="delete-period"><i title="<?php _e('Remove period', 'isrp-event-paygate')?>" class="far fa-calendar-minus"></i></button>
 					</form>
 					</td>
-					<td><?php echo $period->name?></td>
-					<td><?php echo $periodStart?></td>
+					<td><?php echo $period->name?>:</td>
+					<td><?php echo $periodStart ?: _e('Today','isrp-event-paygate')?></td>
 					<td> - </td>
 					<td><?php echo date("j.n.Y",$period->period_end)?></td>
 					<?php $periodStart = date("j.n.Y",$period->period_end + 86400)?>
 					</tr>
 				<?php endforeach;?>
+				<?php else: ?>
+				<p><?php _e('No ticket sale periods are defined for this event yet.', 'isrp-event-paygate');?></p>
+				<p><?php _e('Create a new period by setting a period name and period end date.', 'isrp-event-paygate');?></p>
+				<?php endif;?>
 				</tbody>
 				</table>
 				<form method="post" action="">
 				<input type="hidden" name="event-id" value="<?php echo $ev->id?>">
 				<p>
 					<input type="text" name="name">
-					<input type="date" name="end-period" value="<?php echo date("Y-m-d")?>">
-					<button type="submit" name="events-action" value="add-period"><i class="far fa-calendar-plus"></i></button>
+					<input type="date" name="end-period" value="<?php echo date("Y-m-d")?>" title="<?php _e('End date for the new sale period','isrp-event-paygate')?>">
+					<button type="submit" name="events-action" value="add-period"><i title="<?php _e('Add period', 'isrp-event-paygate')?>" class="far fa-calendar-plus"></i></button>
 				</p>
 				</form>
 				</td>
@@ -212,16 +225,16 @@ class PayGateSettingsPage {
 		
 		<form method="post" action="">
 		<?php if ($editEvent):?>
-		<h2>עריכת כנס:</h2>
+		<h2><?php _e('Edit Event', 'isrp-event-paygate')?>:</h2>
 		<input type="hidden" name="event-id" value="<?php echo $editEvent->id?>">
 		<?php else:?>
-		<h2>יצירת כנס חדש:</h2>
+		<h2><?php _e('Create a new event', 'isrp-event-paygate')?>:</h2>
 		<?php endif;?>
 		
-		<p><label><span>שם כנס: </span><input type="text" name="event-name" value="<?php
+		<p><label><span><?php _e('Event name', 'isrp-event-paygate')?>: </span><input type="text" name="event-name" value="<?php
 			if ($editEvent) echo $editEvent->name
 			?>"></label></p>
-		<p><label><span>עמוד סיום תשלום: </span>
+		<p><label><span><?php _e('Purchase completion page', 'isrp-event-paygate')?>: </span>
 			<select name="event-success-page">
 			<?php foreach ($all_pages as $page): ?>
 			<option value="<?php echo $page->post_name?>" <?php
@@ -230,12 +243,33 @@ class PayGateSettingsPage {
 			<?php endforeach; ?>
 			</select>
 		</label></p>
-		
+		<p><label><span><?php _e('Limit amount of tickets available', 'isrp-event-paygate')?>: </span>
+			<input type="checkbox" name="limit-tickets" value="1" <?php
+				if ($editEvent && $editEvent->max_tickets > 0) echo 'checked';
+			?> onclick="activateMaxTickets(this);">
+		</label></p>
+		<p><label><span><?php _e('No. of tickets', 'isrp-event-paygate')?>: </span>
+			<input id="event-edit-max-tickets" type="number" min="1" name="max-tickets" value="<?php
+			if ($editEvent && $editEvent->max_tickets > 0) echo $editEvent->max_tickets
+				?>" <?php if (!$editEvent || $editEvent->max_tickets <= 0):?>disabled<?php endif?>>
+		</label></p>
+		<script>
+		function activateMaxTickets(chkbox) {
+			let inp = document.getElementById('event-edit-max-tickets');
+			if (chkbox.checked) {
+				inp.disabled = false;
+				return;
+			}
+			inp.disabled = true;
+			inp.value = '';
+		}
+		</script>
+				
 		<button type="submit" name="events-action" value="create">
 		<?php if ($editEvent):?>
-		עדכון
+		<?php _e('Update', 'isrp-event-paygate')?>
 		<?php else:?>
-		יצירת כנס חדש
+		<?php _e('Create new event', 'isrp-event-paygate')?>
 		<?php endif;?>
 		</button>
 		
@@ -298,7 +332,7 @@ class PayGateSettingsPage {
 		if (!$event)
 			return;
 		$periods = $this->pg->database()->listPeriods($event->id);
-		$periodStart = '';
+		$periodStart = date("j.n.Y",$event->created ?: 0);
 		$priceMatrix = [];
 		?>
 		
@@ -365,6 +399,10 @@ class PayGateSettingsPage {
 		<?php endforeach;?>
 		</tbody>
 		</table>
+		<?php if (empty($periods)): ?>
+		<p><?php _e('No ticket sale periods are set for event.', 'isrp-event-paygate') ?></p>
+		<p><?php _e('Please create at least one ticket sale periods in the event configuration.', 'isrp-event-paygate')?></p>
+		<?php else: ?>
 		<p>
 		<button type="submit" name="prices-action" value="update-prices">עדכן מחירים</button>
 		</p>
@@ -381,6 +419,7 @@ class PayGateSettingsPage {
 		</form>
 		</div>
 		<?php
+		endif;
 	}
 	
 	public function reportsPage() {

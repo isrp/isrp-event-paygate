@@ -1,7 +1,7 @@
 <?php
 
 class PayGateDatabase {
-	var $db_version = '7';
+	var $db_version = '9';
 	var $reg_table_name;
 	var $events_table_name;
 	var $periods_table_name;
@@ -45,6 +45,8 @@ class PayGateDatabase {
 		dbDelta("CREATE TABLE $this->events_table_name (
 			id int NOT NULL AUTO_INCREMENT,
 			name varchar(255) NOT NULL,
+			created INT NOT NULL DEFAULT 0,
+			max_tickets INT NOT NULL DEFAULT 0,
 			success_page varchar(255) NOT NULL DEFAULT 'paygate-success',
 			PRIMARY KEY (id)
 		) $charset_collate;");
@@ -82,15 +84,21 @@ class PayGateDatabase {
 	}
 	
 	public function listEvents() {
-		return $this->db->get_results("SELECT * FROM $this->events_table_name");
+		return $this->db->get_results(
+			"SELECT wpe.*, count(wpr.id) AS sold FROM $this->events_table_name wpe
+			LEFT JOIN $this->reg_table_name wpr ON wpr.event_id = wpe.id
+			GROUP BY wpe.id"
+		);
 	}
 	
-	public function createEvent($name, $success_page) {
+	public function createEvent($name, $success_page, $max_tickets) {
 		if (empty($name) or empty($success_page))
 			return null;
 		return $this->db->insert($this->events_table_name, [
 			'name' => $name,
 			'success_page' => $success_page,
+			'created' => time(),
+			'max_tickets' => (int)$max_tickets,
 		]);
 	}
 	
@@ -110,15 +118,20 @@ class PayGateDatabase {
 	}
 	
 	public function getEvent($id) {
-		return $this->db->get_row("SELECT * FROM $this->events_table_name where id = " . ((int)$id));
+		return $this->db->get_row(
+			"SELECT wpe.*, count(wpr.id) AS sold FROM $this->events_table_name wpe
+			LEFT JOIN $this->reg_table_name wpr ON wpr.event_id = wpe.id
+			WHERE wpe.id = " . ((int)$id) . "
+			GROUP BY wpe.id");
 	}
 	
-	public function updateEvent($id, $name, $success_page) {
+	public function updateEvent($id, $name, $success_page, $max_tickets) {
 		if (empty($name) or !is_numeric($id) or $id <= 0 or empty($success_page))
 			return null;
 		return $this->db->update($this->events_table_name, [
 			'name' => $name,
 			'success_page' => $success_page,
+			'max_tickets' => (int)$max_tickets,
 		], [
 			'id' => (int)$id,
 		]);
