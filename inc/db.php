@@ -7,10 +7,12 @@ class PayGateDatabase {
 	var $periods_table_name;
 	var $prices_table_name;
 	var $db;
+	var $site_prefix;
 	
 	public function __construct($mainfile) {
 		global $wpdb;
 		$this->db = $wpdb;
+		$this->site_prefix = $this->db->prefix;
 		$this->reg_table_name = $this->db->prefix . "paygate_registrations";
 		$this->events_table_name = $this->db->prefix . "paygate_events";
 		$this->periods_table_name = $this->db->prefix . "paygate_periods";
@@ -24,14 +26,15 @@ class PayGateDatabase {
 	}
 	
 	public function install() {
-		error_log("PayGate: Creating database tables");
+		error_log("PayGate: Creating database tables in $this->site_prefix for version $this->db_version");
 		$this->createTable();
 		add_option( 'paygate_db_version', $this->db_version );
 	}
 	
 	public function updateDB() {
-		$version = get_option( 'paygate_db_version', $this->db_version);
+		$version = get_option( 'paygate_db_version', 0);
 		if (version_compare($version, $this->db_version) < 0) {
+			error_log("PayGate: Updating database tables in $this->site_prefix to version $this->db_version");
 			$this->createTable();
 			update_option( 'paygate_db_version', $this->db_version );
 		}
