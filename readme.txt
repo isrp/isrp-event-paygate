@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== ISRP Event Paygate ===
 Contributors: guss77
 Tags: events, payment, pelepay
 Requires at least: 5.0
