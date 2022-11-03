@@ -7,6 +7,7 @@ Stable tag: 1.4.2
 Requires PHP: 7.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Domain Path: /languages
 
 Plugin for the Israeli Society of Roleplayers' day-event payments system. Useful for organizing single-ticket events.
 
