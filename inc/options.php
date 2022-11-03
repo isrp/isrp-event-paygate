@@ -22,7 +22,7 @@ class PayGateSettingsPage {
 		add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
 		add_action( 'admin_init', array( $this, 'page_init' ) );
 		
-		$this->pelepay_account = new PayGatePelePayAccountSetting('paygate_section_global');
+		$this->pelepay_account = new PayGatePelePayAccountSetting('paygate_section_processor');
 		$this->accept_test_transaction = new PayGateAcceptTestSetting('paygate_section_global');
 		$this->allowMultiple = new PayGateAllowMultipleSetting('paygate_section_global');
 	}
@@ -32,12 +32,12 @@ class PayGateSettingsPage {
 	 */
 	public function add_plugin_page() {
 		// This page will be under "Settings"
-		add_options_page(__('Paygate Options', 'isrp-event-paygate'),
-						 __('Paygate', 'isrp-event-paygate'),
+		add_options_page(__('SETTINGS', 'isrp-event-paygate'),
+						 __('Event Paygate', 'isrp-event-paygate'),
 						 'manage_options', 'paygate-admin', [ $this, 'create_admin_page' ]);
 		
-		add_menu_page(__('Paygate', 'isrp-event-paygate'),
-					  __('Paygate', 'isrp-event-paygate'), 'manage_options',
+		add_menu_page(__('MANAGEMENT', 'isrp-event-paygate'),
+					  __('Event Paygate', 'isrp-event-paygate'), 'manage_options',
 					  'paygate', [$this, 'managementPage' ], static::PAY_ICON);
 		
 		add_submenu_page('paygate', __('Prices', 'isrp-event-paygate'),
@@ -53,12 +53,14 @@ class PayGateSettingsPage {
 	 * Register and add settings
 	 */
 	public function page_init() {
-		add_settings_section('paygate_section_global', 'הגדרות כלליות',
-			[ $this, 'print_section_info_api'], 'paygate-settings');
+		add_settings_section('paygate_section_global', 'General Settings',
+				function() { _e('Global Event Paygate configuration options', 'isrp-event-paygate'); }, 'paygate-settings');
+		add_settings_section('paygate_section_processor', 'Payment Processor Settings',
+				function() { _e('Configuration of the Pelepay payment processor account', 'isrp-event-paygate'); }, 'paygate-settings');
 		
-		$this->pelepay_account->register();
 		$this->accept_test_transaction->register();
 		$this->allowMultiple->register();
+		$this->pelepay_account->register();
 	}
 	
 	/**
@@ -68,23 +70,17 @@ class PayGateSettingsPage {
 		?>
 		<div class="wrap">
 			<form method="post" action="options.php">
-			<h2>הגדרות שער תשלום</h2>
+			<h2><?php _e('Event Paygate Settings', 'isrp-event-paygate')?></h2>
 			<?php
 				// This prints out all hidden setting fields
 				settings_fields('paygate_setting_group');
 				do_settings_sections('paygate-settings');
+				do_settings_sections('paygate-settings-processor');
 				submit_button();
 			?>
 			</form>
 		</div>
 		<?php
-	}
-	
-	/**
-	 * Print the Section text
-	 */
-	public function print_section_info_api() {
-		//print 'Setup global options';
 	}
 	
 	public function getPelepayAccount() {
