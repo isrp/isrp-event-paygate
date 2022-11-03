@@ -99,6 +99,16 @@ class PayGateSettingsPage {
 		return $this->allowMultiple->getValue();
 	}
 	
+	public function setStyleDirection() {
+		?>
+		<style>
+		:root {
+			--paygate-admin-direction: <?php echo is_rtl() ? 'rtl' : 'ltr' ?> !important;
+		}
+		</style>
+		<?php
+	}
+	
 	public function managementPage() {
 		global $paygate_default_tz;
 		switch (@$_REQUEST['events-action']) {
@@ -135,6 +145,7 @@ class PayGateSettingsPage {
 	
 	private function showEvents($editEvent = null) {
 		settings_errors();
+		$this->setStyleDirection();
 		$all_pages = get_pages();
 		?>
 		<div class="paygate">
@@ -304,6 +315,7 @@ class PayGateSettingsPage {
 	
 	public function showPriceEditor($eventId) {
 		settings_errors();
+		$this->setStyleDirection();
 		$action_url = admin_url("admin.php?page=paygate-prices&event-id=$eventId");
 		?>
 		<div class="paygate">
@@ -439,7 +451,7 @@ class PayGateSettingsPage {
 	private function showReport($eventId) {
 		global $paygate_default_tz;
 		settings_errors();
-
+		$this->setStyleDirection();
 		?>
 		<form method="get" action="<?php echo admin_url("admin.php");?>">
 		<input type="hidden" name="page" value="paygate-reports">
