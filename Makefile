@@ -1,9 +1,9 @@
-COMPOSE := podman-compose
+COMPOSE := docker-compose
 MSGLANGS=$(notdir $(wildcard languages/*.po))
 MSGOBJS=$(addprefix languages/,$(MSGLANGS:.po=.mo))
 
 run-server:
-	docker-compose -f dev-compose.yaml up
+	$(COMPOSE) -f dev-compose.yaml up
 
 zip:
 	zip -r isrp-event-paygate.zip ./ --exclude '.git/*' --exclude '*/.??*' --exclude '.??*' --exclude Makefile --exclude isrp-event-paygate.zip
