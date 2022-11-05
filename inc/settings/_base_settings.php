@@ -27,7 +27,7 @@ class PayGateSettingsBase {
 	
 	public function register() {
 		register_setting('paygate_setting_group', 'paygate-' . $this->name);
-		add_settings_field($this->name, $this->title,
+		add_settings_field($this->name, __($this->title, 'isrp-event-paygate'),
 			[ $this, 'display' ], 'paygate-settings', $this->section);
 	}
 	

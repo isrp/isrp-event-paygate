@@ -32,11 +32,11 @@ class PayGateSettingsPage {
 	 */
 	public function add_plugin_page() {
 		// This page will be under "Settings"
-		add_options_page(__('SETTINGS', 'isrp-event-paygate'),
+		add_options_page(__('Event Paygate Settings', 'isrp-event-paygate'),
 						 __('Event Paygate', 'isrp-event-paygate'),
 						 'manage_options', 'paygate-admin', [ $this, 'create_admin_page' ]);
 		
-		add_menu_page(__('MANAGEMENT', 'isrp-event-paygate'),
+		add_menu_page(__('Manage Paygate Events', 'isrp-event-paygate'),
 					  __('Event Paygate', 'isrp-event-paygate'), 'manage_options',
 					  'paygate', [$this, 'managementPage' ], static::PAY_ICON);
 		
@@ -53,9 +53,9 @@ class PayGateSettingsPage {
 	 * Register and add settings
 	 */
 	public function page_init() {
-		add_settings_section('paygate_section_global', 'General Settings',
+		add_settings_section('paygate_section_global', __('General Settings', 'isrp-event-paygate'),
 				function() { _e('Global Event Paygate configuration options', 'isrp-event-paygate'); }, 'paygate-settings');
-		add_settings_section('paygate_section_processor', 'Payment Processor Settings',
+		add_settings_section('paygate_section_processor', __('Payment Processor Settings', 'isrp-event-paygate'),
 				function() { _e('Configuration of the Pelepay payment processor account', 'isrp-event-paygate'); }, 'paygate-settings');
 		
 		$this->accept_test_transaction->register();
@@ -217,10 +217,10 @@ class PayGateSettingsPage {
 				<td style="font-size: 180%;">
 					<form method="post" action="">
 						<input type="hidden" name="event-id" value="<?php echo $ev->id?>">
-						<button type="submit" name="events-action" title="עריכת ארוע" value="edit"><i class="far fa-edit"></i></button>
-						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-prices&event-id=$ev->id")?>" title="מחירים"><i class="fas fa-hand-holding-usd"></i></a>
-						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-reports&event-id=$ev->id")?>" title="דוחות"><i class="fas fa-clipboard-list"></i></a>
-						<button type="submit" name="events-action" title="מחיקת ארוע" value="delete"><i class="far fa-trash-alt"></i></button>
+						<button type="submit" name="events-action" title="<?php _e('Edit event','isrp-event-paygate')?>" value="edit"><i class="far fa-edit"></i></button>
+						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-prices&event-id=$ev->id")?>" title="<?php _e('Prices', 'isrp-event-paygate')?>"><i class="fas fa-hand-holding-usd"></i></a>
+						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-reports&event-id=$ev->id")?>" title="<?php _e('ּReports', 'isrp-event-paygate')?>"><i class="fas fa-clipboard-list"></i></a>
+						<button type="submit" name="events-action" title="<?php _e('Delete event','isrp-event-paygate')?>" value="delete"><i class="far fa-trash-alt"></i></button>
 					</form>
 				</td>
 			</tr>
@@ -315,13 +315,13 @@ class PayGateSettingsPage {
 		$action_url = admin_url("admin.php?page=paygate-prices&event-id=$eventId");
 		?>
 		<div class="paygate">
-		<h1>עריכת מחירי כרטיסים</h1>
+		<h1><?php _e('Edit Ticket Prices', 'isrp-event-paygate')?></h1>
 		<form method="get" action="<?php echo admin_url("admin.php");?>">
 		<input type="hidden" name="page" value="paygate-prices">
 		<label>
-		כנס:
+		<?php _e('Event', 'isrp-event-paygate')?>:
 		<select name="event-id" onchange="this.form.submit();">
-		<option>בחר כנס</option>
+		<option><?php _e('Choose Event', 'isrp-event-paygate')?>:</option>
 		<?php foreach ($this->pg->database()->listEvents() as $ev):?>
 		<option value="<?php echo $ev->id?>" <?php
 			if ($ev->id == $eventId) echo "selected";
@@ -348,7 +348,7 @@ class PayGateSettingsPage {
 		<table>
 		<thead>
 			<tr>
-			<th>סוג כרטיס</th>
+			<th><?php _e('Ticket Type', 'isrp-event-paygate')?></th>
 			<?php foreach ($periods as $period):?>
 			<?php
 			foreach ($this->pg->database()->listPrices($period->id) as $ticket) {
@@ -368,7 +368,7 @@ class PayGateSettingsPage {
 		<tr>
 			<th>
 			<a href="<?php echo $action_url?>&prices-action=delete-type&ticket-type=<?php echo urlencode($ticketType)?>"
-				title="הסרת כרטיס מסוג <?php echo $ticketType?>" style="color: inherit;"
+				title="<?php _e('Remove ticket of type', 'isrp-event-paygate')?> <?php echo $ticketType?>" style="color: inherit;"
 				><i class="fas fa-trash-alt"></i></a>
 			<?php echo $ticketType?>
 			</th>
@@ -389,15 +389,15 @@ class PayGateSettingsPage {
 			<td>
 				<p>
 				<label>
-				<span>מחיר רגיל:</span>
-				<input id="<?php echo $regularInputId?>" name="paygate-price-matrix[<?php echo $periodId?>][<?php echo $ticketType?>][full]" type="number" value="<?php echo $regularCost?>" min="0">₪
+				<span><?php _e('Standard Price', 'isrp-event-paygate')?>:</span>
+				<input id="<?php echo $regularInputId?>" name="paygate-price-matrix[<?php echo $periodId?>][<?php echo $ticketType?>][full]" type="number" value="<?php echo $regularCost?>" min="0"><?php _e('¤', 'isrp-event-paygate')?>
 				</label>
 				<button type="button" onclick="document.getElementById('<?php echo $regularInputId?>').value = '';"><i class="far fa-times-circle"></i></button>
 				</p>
 				<p>
 				<label>
-				<span>מחיר מועדון:</span>
-				<input id="<?php echo $dragonInputId?>" name="paygate-price-matrix[<?php echo $periodId?>][<?php echo $ticketType?>][dragon]" type="number" value="<?php echo $dragonCost?>" min="0">₪
+				<span><?php _e('Club Price', 'isrp-event-paygate')?>:</span>
+				<input id="<?php echo $dragonInputId?>" name="paygate-price-matrix[<?php echo $periodId?>][<?php echo $ticketType?>][dragon]" type="number" value="<?php echo $dragonCost?>" min="0"><?php _e('¤', 'isrp-event-paygate')?>
 				</label>
 				<button type="button" onclick="document.getElementById('<?php echo $dragonInputId?>').value = '';"><i class="far fa-times-circle"></i></button>
 				</p>
@@ -412,18 +412,18 @@ class PayGateSettingsPage {
 		<p><?php _e('Please create at least one ticket sale periods in the event configuration.', 'isrp-event-paygate')?></p>
 		<?php else: ?>
 		<p>
-		<button type="submit" name="prices-action" value="update-prices">עדכן מחירים</button>
+		<button type="submit" name="prices-action" value="update-prices"><?php _e('Update Prices', 'isrp-event-paygate')?></button>
 		</p>
 		</form>
 		
 		<form method="post" action="<?php echo $action_url ?>">
-		<h2>הוספת סוג כרטיס</h2>
+		<h2><?php _e('Add New Ticket Type', 'isrp-event-paygate')?></h2>
 		<label>
-		<span>שם סוג כרטיס:</span>
+		<span><?php _e('Ticket Type Name', 'isrp-event-paygate')?>:</span>
 		<input type="text" name="ticket-type">
 		</label>
 		<p></p>
-		<button type="submit" name="prices-action" value="add-ticket-type">הוסף סוג כרטיס</button>
+		<button type="submit" name="prices-action" value="add-ticket-type"><?php _e('Create Ticket Type', 'isrp-event-paygate')?></button>
 		</form>
 		</div>
 		<?php
@@ -449,11 +449,12 @@ class PayGateSettingsPage {
 		settings_errors();
 		$this->setStyleDirection();
 		?>
+		<p>
 		<form method="get" action="<?php echo admin_url("admin.php");?>">
 		<input type="hidden" name="page" value="paygate-reports">
-		<label>כנס:
+		<label><?php _e('Event', 'isrp-event-paygate')?>:
 		<select name="event-id" onchange="this.form.submit();">
-		<option>בחר כנס</option>
+		<option><?php _e('Choose Event', 'isrp-event-paygate')?></option>
 		<?php foreach ($this->pg->database()->listEvents() as $ev):?>
 		<option value="<?php echo $ev->id?>" <?php
 			if ($ev->id == $eventId) echo "selected";
@@ -462,6 +463,7 @@ class PayGateSettingsPage {
 		</select>
 		</label>
 		</form>
+		</p>
 		<?php		
 		
 		$dt = new DateTime("now", $paygate_default_tz);
@@ -475,11 +477,20 @@ class PayGateSettingsPage {
 		$at_last_page = ($page >= $page_count) ? 'disabled' : '';
 		?>
 		<div class="paygate-registrations">
-		<h1>נרשמים</h1>
+		<h1><?php _e('Ticket Registrations', 'isrp-event-paygate')?></h1>
 		<table class="widefat">
 		<thead>
-			<tr><th>#</th><th>שם</th><th>סוג</th><th>עלות</th><th>זמן הזמנה</th>
-			<th>כרטיס דרקון</th><th>אישור פלאפיי</th><th>קוד</th><th></th></tr>
+			<tr>
+				<th>#</th>
+				<th><?php _e('Name', 'isrp-event-paygate')?></th>
+				<th><?php _e('Kind', 'isrp-event-paygate')?></th>
+				<th><?php _e('Cost', 'isrp-event-paygate')?></th>
+				<th><?php _e('Order Date', 'isrp-event-paygate')?></th>
+				<th><?php _e('Club ID', 'isrp-event-paygate')?></th>
+				<th><?php _e('Transaction ID', 'isrp-event-paygate')?></th>
+				<th><?php _e('Code', 'isrp-event-paygate')?></th>
+				<th></th>
+			</tr>
 		</thead>
 		<tbody>
 		<?php foreach ($this->pg->database()->getRegistrationsPage($eventId, $page, $page_size) as $row): ?>
@@ -502,17 +513,18 @@ class PayGateSettingsPage {
 				<?php if ($details->index[0] == 'T'):?>
 				<form method="post" action="">
 				<input type="hidden" name="id" value="<?php echo $row->id?>">
-				<?php echo 'בדיקה!'?>
-				<button title="Delete <?php echo $row->name?>" type="submit" onclick="return confirm('להסיר את רישום הבדיקה של <?php echo $row->name?>?')"
+				<?php _e('‎Test!', 'isrp-event-paygate')?>
+				<button title="Delete <?php echo $row->name?>" type="submit" onclick="return confirm('<?php
+					printf(__('Remove test registration of %s?', 'isrp-event-paygate'), $row->name)?>')"
 					name="paygate-action" value="delete"><i class="fas fa-minus-circle"></i></button>
 				</form>
 			<?php endif;?></td>
 		</tr>
 		<tr style="height:0"><td colspan="9"><div class="payer-details" id="reg-<?php echo $row->id?>">
-			<strong>פרטי משלם</strong>:
+			<strong><?php _e('Payer Details', 'isrp-event-paygate')?></strong>:
 			<p><?php echo urldecode($details->firstname)?> <?php echo urldecode($details->lastname)?></p>
-			<p>טלפון: <?php echo $details->phone?></p>
-			<p>שולם: ₪<?php echo $details->amount?></p>
+			<p><?php _e('Phone', 'isrp-event-paygate')?>: <?php echo $details->phone?></p>
+			<p><?php _e('Paid', 'isrp-event-paygate')?>: <?php _e('¤', 'isrp-event-paygate')?><?php echo $details->amount?></p>
 		</div></td></tr>
 		<?php endforeach; ?>
 		</tbody>
@@ -545,18 +557,18 @@ class PayGateSettingsPage {
 	public function handleExport() {
 		$f = fopen('php://memory', 'w');
 		fputcsv($f, [
-			'מספר כרטיס',
-			'שם',
-			'סוג',
-			'עלות',
-			'זמן הזמנה',
-			'כרטיס דרקון',
-			'אישור פלאפיי',
-			'קוד',
-			'עלות הזמנה',
-			'שם הרוכש',
-			'מספר טלפון',
-			'דואר אלקטרוני',
+			__('Ticket no.', 'isrp-event-paygate'),
+			__('Name', 'isrp-event-paygate'),
+			__('Type', 'isrp-event-paygate'),
+			__('Cost', 'isrp-event-paygate'),
+			__('Order Time', 'isrp-event-paygate'),
+			__('Club ID', 'isrp-event-paygate'),
+			__('Transaction ID', 'isrp-event-paygate'),
+			__('Code', 'isrp-event-paygate'),
+			__('Total Cost', 'isrp-event-paygate'),
+			__('Payer', 'isrp-event-paygate'),
+			__('Phone', 'isrp-event-paygate'),
+			__('E-Mail', 'isrp-event-paygate'),
 		]);
 		$dt = new DateTime("now", $paygate_default_tz);
 		foreach ($this->pg->database()->getRegistrations() as $row) {
