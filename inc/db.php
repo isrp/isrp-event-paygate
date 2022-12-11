@@ -169,7 +169,7 @@ class PayGateDatabase {
 	private function verifyCanDeletePeriod($periodId) {
 		if ($this->db->get_var("SELECT COUNT(*) FROM $this->reg_table_name ".
 			"WHERE period_id = " . ((int)$periodId)) > 0) {
-			add_settings_error('paygate', 'registrations', 'Cannot delete period as there are ticket sold!');
+			add_settings_error('paygate', 'registrations', __('Cannot delete period as there are ticket sold!', 'isrp-event-paygate'));
 			return false;
 		}
 		return true;
@@ -243,7 +243,7 @@ class PayGateDatabase {
 			"INNER JOIN $this->prices_table_name AS prices ON regs.price_id = prices.id ".
 			"WHERE prices.period_id = %d AND prices.ticket_type = %s", $periodId, $type);
 		if ($this->db->get_var($sql) > 0) {
-			add_settings_error('paygate', 'registrations', 'Cannot delete period as there are ticket sold!');
+			add_settings_error('paygate', 'registrations', __('Cannot delete period as there are ticket sold!', 'isrp-event-paygate'));
 			return false;
 		}
 		return true;
