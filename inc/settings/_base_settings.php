@@ -66,7 +66,7 @@ class PayGateSettingsBase {
 			'title' => $this->description,
 		]);
 		if ($this->description)
-			echo " <label for='{$this->name}'>$this->description</label>";
+			echo " <label for='{$this->name}'>".__($this->description, 'isrp-event-paygate')."</label>";
 	}
 	
 	protected function print_tag($name, $attr) {
