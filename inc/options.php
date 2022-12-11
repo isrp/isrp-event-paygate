@@ -399,14 +399,14 @@ class PayGateSettingsPage {
 				<span><?php _e('Standard Price', 'isrp-event-paygate')?>:</span>
 				<input id="<?php echo $regularInputId?>" name="paygate-price-matrix[<?php echo $periodId?>][<?php echo $ticketType?>][full]" type="number" value="<?php echo $regularCost?>" min="0"><?php _e('¤', 'isrp-event-paygate')?>
 				</label>
-				<button type="button" onclick="document.getElementById('<?php echo $regularInputId?>').value = '';"><i class="far fa-times-circle"></i></button>
+				<button type="button" title="<?php _e('Clear', 'isrp-event-paygate')?>" onclick="document.getElementById('<?php echo $regularInputId?>').value = '';"><i class="far fa-times-circle"></i></button>
 				</p>
 				<p>
 				<label>
 				<span><?php _e('Club Price', 'isrp-event-paygate')?>:</span>
 				<input id="<?php echo $clubInputId?>" name="paygate-price-matrix[<?php echo $periodId?>][<?php echo $ticketType?>][club]" type="number" value="<?php echo $clubCost?>" min="0"><?php _e('¤', 'isrp-event-paygate')?>
 				</label>
-				<button type="button" onclick="document.getElementById('<?php echo $clubInputId?>').value = '';"><i class="far fa-times-circle"></i></button>
+				<button type="button" title="<?php _e('Clear', 'isrp-event-paygate')?>" onclick="document.getElementById('<?php echo $clubInputId?>').value = '';"><i class="far fa-times-circle"></i></button>
 				</p>
 			</td>
 			<?php endforeach;?>
