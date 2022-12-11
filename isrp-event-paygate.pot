@@ -1,5 +1,5 @@
 # Copyright (C) 2022 Oded Arbel
-# This file is distributed under the GPL2.
+# This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
 "Project-Id-Version: ISRP Event PayGate 1.4.2\n"
@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-11-05T01:10:01+00:00\n"
+"POT-Creation-Date: 2022-12-11T14:02:17+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: isrp-event-paygate\n"
@@ -34,288 +34,304 @@ msgstr ""
 msgid "https://github.com/isrp/isrp-event-paygate"
 msgstr ""
 
-#: inc/options.php:35
-#: inc/options.php:73
+#: inc/options.php:36
+#: inc/options.php:74
 msgid "Event Paygate Settings"
 msgstr ""
 
-#: inc/options.php:36
-#: inc/options.php:40
+#: inc/options.php:37
+#: inc/options.php:41
 msgid "Event Paygate"
 msgstr ""
 
-#: inc/options.php:39
+#: inc/options.php:40
 msgid "Manage Paygate Events"
 msgstr ""
 
-#: inc/options.php:43
 #: inc/options.php:44
-#: inc/options.php:221
+#: inc/options.php:45
+#: inc/options.php:222
 msgid "Prices"
 msgstr ""
 
-#: inc/options.php:47
 #: inc/options.php:48
+#: inc/options.php:49
 msgid "Reports"
 msgstr ""
 
-#: inc/options.php:56
+#: inc/options.php:57
 msgid "General Settings"
 msgstr ""
 
-#: inc/options.php:57
+#: inc/options.php:58
 msgid "Global Event Paygate configuration options"
 msgstr ""
 
-#: inc/options.php:58
+#: inc/options.php:59
 msgid "Payment Processor Settings"
 msgstr ""
 
-#: inc/options.php:59
+#: inc/options.php:60
 msgid "Configuration of the Pelepay payment processor account"
 msgstr ""
 
-#: inc/options.php:148
+#: inc/options.php:149
 msgid "Event List"
 msgstr ""
 
-#: inc/options.php:153
-#: inc/options.php:485
-#: inc/options.php:561
+#: inc/options.php:154
+#: inc/options.php:486
+#: inc/options.php:562
 msgid "Name"
 msgstr ""
 
-#: inc/options.php:154
-#: inc/options.php:244
+#: inc/options.php:155
+#: inc/options.php:245
 msgid "Purchase completion page"
 msgstr ""
 
-#: inc/options.php:155
+#: inc/options.php:156
 msgid "Ticket sale periods"
 msgstr ""
 
-#: inc/options.php:172
+#: inc/options.php:173
 msgid "Tickets"
 msgstr ""
 
-#: inc/options.php:174
+#: inc/options.php:175
 msgid "of"
 msgstr ""
 
-#: inc/options.php:192
+#: inc/options.php:193
 msgid "Remove period"
 msgstr ""
 
-#: inc/options.php:196
+#: inc/options.php:197
 msgid "Today"
 msgstr ""
 
-#: inc/options.php:203
+#: inc/options.php:204
 msgid "No ticket sale periods are defined for this event yet."
 msgstr ""
 
-#: inc/options.php:204
+#: inc/options.php:205
 msgid "Create a new period by setting a period name and period end date."
 msgstr ""
 
-#: inc/options.php:212
+#: inc/options.php:213
 msgid "End date for the new sale period"
 msgstr ""
 
-#: inc/options.php:213
+#: inc/options.php:214
 msgid "Add period"
 msgstr ""
 
-#: inc/options.php:220
+#: inc/options.php:221
 msgid "Edit event"
 msgstr ""
 
-#: inc/options.php:222
+#: inc/options.php:223
 msgid "ּReports"
 msgstr ""
 
-#: inc/options.php:223
+#: inc/options.php:224
 msgid "Delete event"
 msgstr ""
 
-#: inc/options.php:235
+#: inc/options.php:236
 msgid "Edit Event"
 msgstr ""
 
-#: inc/options.php:238
+#: inc/options.php:239
 msgid "Create a new event"
 msgstr ""
 
-#: inc/options.php:241
+#: inc/options.php:242
 msgid "Event name"
 msgstr ""
 
-#: inc/options.php:253
+#: inc/options.php:254
 msgid "Limit amount of tickets available"
 msgstr ""
 
-#: inc/options.php:258
+#: inc/options.php:259
 msgid "No. of tickets"
 msgstr ""
 
-#: inc/options.php:277
+#: inc/options.php:278
 msgid "Update"
 msgstr ""
 
-#: inc/options.php:279
+#: inc/options.php:280
 msgid "Create new event"
 msgstr ""
 
-#: inc/options.php:318
+#: inc/options.php:319
 msgid "Edit Ticket Prices"
 msgstr ""
 
-#: inc/options.php:322
-#: inc/options.php:455
+#: inc/options.php:323
+#: inc/options.php:456
 msgid "Event"
 msgstr ""
 
-#: inc/options.php:324
-#: inc/options.php:457
+#: inc/options.php:325
+#: inc/options.php:458
 msgid "Choose Event"
 msgstr ""
 
-#: inc/options.php:351
+#: inc/options.php:352
 msgid "Ticket Type"
 msgstr ""
 
-#: inc/options.php:371
+#: inc/options.php:372
 msgid "Remove ticket of type"
 msgstr ""
 
-#: inc/options.php:392
+#: inc/options.php:393
 msgid "Standard Price"
 msgstr ""
 
-#: inc/options.php:393
-#: inc/options.php:400
-#: inc/options.php:527
+#: inc/options.php:394
+#: inc/options.php:401
+#: inc/options.php:528
 msgid "¤"
 msgstr ""
 
-#: inc/options.php:399
+#: inc/options.php:400
 msgid "Club Price"
 msgstr ""
 
-#: inc/options.php:411
+#: inc/options.php:412
 msgid "No ticket sale periods are set for event."
 msgstr ""
 
-#: inc/options.php:412
+#: inc/options.php:413
 msgid "Please create at least one ticket sale periods in the event configuration."
 msgstr ""
 
-#: inc/options.php:415
+#: inc/options.php:416
 msgid "Update Prices"
 msgstr ""
 
-#: inc/options.php:420
+#: inc/options.php:421
 msgid "Add New Ticket Type"
 msgstr ""
 
-#: inc/options.php:422
+#: inc/options.php:423
 msgid "Ticket Type Name"
 msgstr ""
 
-#: inc/options.php:426
+#: inc/options.php:427
 msgid "Create Ticket Type"
 msgstr ""
 
-#: inc/options.php:480
+#: inc/options.php:437
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: inc/options.php:481
 msgid "Ticket Registrations"
 msgstr ""
 
-#: inc/options.php:486
+#: inc/options.php:487
 msgid "Kind"
 msgstr ""
 
-#: inc/options.php:487
-#: inc/options.php:563
+#: inc/options.php:488
+#: inc/options.php:564
 msgid "Cost"
 msgstr ""
 
-#: inc/options.php:488
-msgid "Order Date"
-msgstr ""
-
 #: inc/options.php:489
-#: inc/options.php:565
-msgid "Club ID"
+msgid "Order Date"
 msgstr ""
 
 #: inc/options.php:490
 #: inc/options.php:566
-msgid "Transaction ID"
+msgid "Club ID"
 msgstr ""
 
 #: inc/options.php:491
 #: inc/options.php:567
+msgid "Transaction ID"
+msgstr ""
+
+#: inc/options.php:492
+#: inc/options.php:568
 msgid "Code"
 msgstr ""
 
-#: inc/options.php:516
+#: inc/options.php:517
 msgid "‎Test!"
 msgstr ""
 
-#: inc/options.php:518
-msgid "Remove test registration of %s?"
+#: inc/options.php:519
+msgid "Remove test registration of %1$s?"
 msgstr ""
 
-#: inc/options.php:524
+#: inc/options.php:525
 msgid "Payer Details"
 msgstr ""
 
-#: inc/options.php:526
-#: inc/options.php:570
+#: inc/options.php:527
+#: inc/options.php:571
 msgid "Phone"
 msgstr ""
 
-#: inc/options.php:527
+#: inc/options.php:528
 msgid "Paid"
 msgstr ""
 
-#: inc/options.php:560
+#: inc/options.php:561
 msgid "Ticket no."
 msgstr ""
 
-#: inc/options.php:562
+#: inc/options.php:563
 msgid "Type"
 msgstr ""
 
-#: inc/options.php:564
+#: inc/options.php:565
 msgid "Order Time"
 msgstr ""
 
-#: inc/options.php:568
+#: inc/options.php:569
 msgid "Total Cost"
 msgstr ""
 
-#: inc/options.php:569
+#: inc/options.php:570
 msgid "Payer"
 msgstr ""
 
-#: inc/options.php:571
+#: inc/options.php:572
 msgid "E-Mail"
 msgstr ""
 
-#: inc/paygate.php:158
+#: inc/paygate.php:56
+msgid "An error occured while processing the payment - try again and if it reoccures, let the site manager know that you got this error:\\n\\n[%2$s] %2$s"
+msgstr ""
+
+#: inc/paygate.php:64
+msgid "PayGate invalid operation!"
+msgstr ""
+
+#: inc/paygate.php:124
+msgid "Invalid request, please try again"
+msgstr ""
+
+#: inc/paygate.php:160
 msgid "Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again."
 msgstr ""
 
-#: inc/paygate.php:192
+#: inc/paygate.php:194
 msgid "Error processing payment - \"%1$s\". Please contact the site administrator"
 msgstr ""
 
-#: inc/paygate.php:200
+#: inc/paygate.php:202
 msgid "Invalid payment confirmation!"
 msgstr ""
 
-#: inc/paygate.php:204
+#: inc/paygate.php:206
 msgid "A payment test account is not valid on this site!"
 msgstr ""
 
@@ -331,7 +347,7 @@ msgstr ""
 msgid "Display interface to allow purchases of multiple tickets at once."
 msgstr ""
 
-#: inc/settings/dragon_members_url.php:6
+#: inc/settings/club_members_url.php:6
 msgid "ֹURL for club membership API"
 msgstr ""
 
@@ -339,15 +355,35 @@ msgstr ""
 msgid "Pelepay account identifier"
 msgstr ""
 
-#: inc/shortcodes.php:45
+#: inc/shortcodes.php:46
 msgid "No More Tickets Available"
 msgstr ""
 
-#: inc/shortcodes.php:47
+#: inc/shortcodes.php:48
 msgid "Unfortunately, the event is now full and no more tickets are available for purchase."
 msgstr ""
 
-#: inc/shortcodes.php:57
-#: inc/shortcodes.php:161
+#: inc/shortcodes.php:58
+#: inc/shortcodes.php:162
 msgid "Sold out"
+msgstr ""
+
+#: inc/shortcodes.php:196
+msgid "Invalid club ID!"
+msgstr ""
+
+#: inc/shortcodes.php:206
+msgid "Club members are elgible for only 1 discounted ticket"
+msgstr ""
+
+#: inc/shortcodes.php:208
+msgid "Click here to go back to registration form"
+msgstr ""
+
+#: inc/shortcodes.php:242
+msgid "Send"
+msgstr ""
+
+#: inc/shortcodes.php:258
+msgid "Unrecognized e-mail address, please try again"
 msgstr ""
