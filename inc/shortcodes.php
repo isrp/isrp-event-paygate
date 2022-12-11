@@ -66,16 +66,18 @@ class PayGateShortcodes {
 				if ($this->pg->settings()->allowMultipleTickets()):?>auto<?php else:?>none<?php endif;?>">
 		<thead>
 			<tr>
-			<th>סוג כרטיס</th><th>מחיר</th><th>שם</th>
+			<th><?php _e('Ticket Type', 'isrp-event-paygate')?></th>
+			<th><?php _e('Price', 'isrp-event-paygate')?></th>
+			<th><?php _e('Name', 'isrtp-event-paygate')?></th>
 			</tr>
 		</thead>
 		<tbody>
 		</tbody>
 		<tbody class="total">
 			<tr>
-			<th>סה"כ:</th>
+			<th><?php _e('Total:', 'isrp-event-paygate')?></th>
 			<th>₪<span id="paygate-total">0</span></th>
-			<th><button id="paygate-checkout" type="button" onclick="this.form.submit()">לתשלום</button></th>
+			<th><button id="paygate-checkout" type="button" onclick="this.form.submit()"><?php _e('Pay','isrp-event-paygate')?></button></th>
 			</tr>
 		</tbody>
 		

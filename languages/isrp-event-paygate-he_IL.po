@@ -5,8 +5,8 @@ msgstr ""
 "Project-Id-Version: ISRP Event PayGate 1.3.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/isrp-event-"
 "paygate\n"
-"POT-Creation-Date: 2022-12-11T16:42:48+00:00\n"
-"PO-Revision-Date: 2022-12-11 18:45+0200\n"
+"POT-Creation-Date: 2022-12-11T17:18:11+00:00\n"
+"PO-Revision-Date: 2022-12-11 19:18+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: he_IL\n"
@@ -55,7 +55,7 @@ msgstr "שער תשלום"
 msgid "Manage Paygate Events"
 msgstr "ניהול אירועי שער תשלום"
 
-#: inc/options.php:45 inc/options.php:46 inc/options.php:229
+#: inc/options.php:45 inc/options.php:46 inc/options.php:233
 msgid "Prices"
 msgstr "מחירים"
 
@@ -79,244 +79,244 @@ msgstr "הגדרות ספק סליקה"
 msgid "Configuration of the Pelepay payment processor account"
 msgstr "הגדרות חשבון סליקה פלאפיי"
 
-#: inc/options.php:128
+#: inc/options.php:132
 msgid "Error deleting event"
 msgstr "ארעה שגיאה במהלך מחיקת הכנס"
 
-#: inc/options.php:132
+#: inc/options.php:136
 msgid "Please set period name"
 msgstr "יש להגדיר שם לתקופה"
 
-#: inc/options.php:139
+#: inc/options.php:143
 msgid "Failed to add period!"
 msgstr "הוספת תקופה נכשלה!"
 
-#: inc/options.php:156
+#: inc/options.php:160
 msgid "Event List"
 msgstr "רשימת כנסים"
 
-#: inc/options.php:161 inc/options.php:494 inc/options.php:570
+#: inc/options.php:165 inc/options.php:498 inc/options.php:574
 msgid "Name"
 msgstr "שם"
 
-#: inc/options.php:162 inc/options.php:252
+#: inc/options.php:166 inc/options.php:256
 msgid "Purchase completion page"
 msgstr "עמוד סיום תשלום"
 
-#: inc/options.php:163
+#: inc/options.php:167
 msgid "Ticket sale periods"
 msgstr "תקופות מכירת כרטיסים"
 
-#: inc/options.php:180
+#: inc/options.php:184
 msgid "Tickets"
 msgstr "כרטיסים"
 
-#: inc/options.php:182
+#: inc/options.php:186
 msgid "of"
 msgstr "מתוך"
 
-#: inc/options.php:200
+#: inc/options.php:204
 msgid "Remove period"
 msgstr "הסרת תקופה"
 
-#: inc/options.php:204
+#: inc/options.php:208
 msgid "Today"
 msgstr "היום"
 
-#: inc/options.php:211
+#: inc/options.php:215
 msgid "No ticket sale periods are defined for this event yet."
 msgstr "עדיין לא מוגדרות תקופות מכירת כרטיסים בארוע."
 
-#: inc/options.php:212
+#: inc/options.php:216
 msgid "Create a new period by setting a period name and period end date."
 msgstr "יש ליצור תקופה חדשה על ידי הכנסת שם ותאריך סיום תקופת המכירה."
 
-#: inc/options.php:220
+#: inc/options.php:224
 msgid "End date for the new sale period"
 msgstr "תאריך סיום תקופת מכירה"
 
-#: inc/options.php:221
+#: inc/options.php:225
 msgid "Add period"
 msgstr "הוספת תקופה"
 
-#: inc/options.php:228
+#: inc/options.php:232
 msgid "Edit event"
 msgstr "עריכת כנס"
 
-#: inc/options.php:230
+#: inc/options.php:234
 msgid "ּReports"
 msgstr "דוחות"
 
-#: inc/options.php:231
+#: inc/options.php:235
 msgid "Delete event"
 msgstr "מחיקת ארוע"
 
-#: inc/options.php:243
+#: inc/options.php:247
 msgid "Edit Event"
 msgstr "עריכת ארוע"
 
-#: inc/options.php:246
+#: inc/options.php:250
 msgid "Create a new event"
 msgstr "יצירת כנס חדש"
 
-#: inc/options.php:249
+#: inc/options.php:253
 msgid "Event name"
 msgstr "שם כנס"
 
-#: inc/options.php:261
+#: inc/options.php:265
 msgid "Limit amount of tickets available"
 msgstr "הגבלת מספר הכרטיסים"
 
-#: inc/options.php:266
+#: inc/options.php:270
 msgid "No. of tickets"
 msgstr "מס. כרטיסים"
 
-#: inc/options.php:285
+#: inc/options.php:289
 msgid "Update"
 msgstr "עדכון"
 
-#: inc/options.php:287
+#: inc/options.php:291
 msgid "Create new event"
 msgstr "יצירת כנס חדש"
 
-#: inc/options.php:308
+#: inc/options.php:312
 msgid "No price matrix provided!"
 msgstr "יש להגדיר מטריצת מחירים!"
 
-#: inc/options.php:327
+#: inc/options.php:331
 msgid "Edit Ticket Prices"
 msgstr "עריכת מחירי כרטיסים"
 
-#: inc/options.php:331 inc/options.php:464
+#: inc/options.php:335 inc/options.php:468
 msgid "Event"
 msgstr "כנס"
 
-#: inc/options.php:333 inc/options.php:466
+#: inc/options.php:337 inc/options.php:470
 msgid "Choose Event"
 msgstr "בחירת כנס"
 
-#: inc/options.php:360
+#: inc/options.php:364 inc/shortcodes.php:69
 msgid "Ticket Type"
 msgstr "סוג כרטיס"
 
-#: inc/options.php:380
+#: inc/options.php:384
 msgid "Remove ticket of type"
 msgstr "הסרת סוג כרטיס"
 
-#: inc/options.php:401
+#: inc/options.php:405
 msgid "Standard Price"
 msgstr "מחיר רגיל"
 
-#: inc/options.php:402 inc/options.php:409 inc/options.php:536
+#: inc/options.php:406 inc/options.php:413 inc/options.php:540
 msgid "¤"
 msgstr "₪"
 
-#: inc/options.php:404 inc/options.php:411
+#: inc/options.php:408 inc/options.php:415
 msgid "Clear"
 msgstr "נקה"
 
-#: inc/options.php:408
+#: inc/options.php:412
 msgid "Club Price"
 msgstr "מחיר מועדון"
 
-#: inc/options.php:420
+#: inc/options.php:424
 msgid "No ticket sale periods are set for event."
 msgstr "בארוע לא הוגדרו תקופות מכירת כרטיסים."
 
-#: inc/options.php:421
+#: inc/options.php:425
 msgid ""
 "Please create at least one ticket sale periods in the event configuration."
 msgstr "יש ליצור לפחות תקופת מכירת כרטיסים אחת בהגדרות הארוע."
 
-#: inc/options.php:424
+#: inc/options.php:428
 msgid "Update Prices"
 msgstr "עדכון מחירים"
 
-#: inc/options.php:429
+#: inc/options.php:433
 msgid "Add New Ticket Type"
 msgstr "הוספת סוג כרטיס"
 
-#: inc/options.php:431
+#: inc/options.php:435
 msgid "Ticket Type Name"
 msgstr "שם סוג כרטיס"
 
-#: inc/options.php:435
+#: inc/options.php:439
 msgid "Create Ticket Type"
 msgstr "יצירת סוג כרטיס"
 
-#: inc/options.php:445
+#: inc/options.php:449
 msgid "You do not have sufficient permissions to access this page."
 msgstr "איך לך מספיק הרשאות כדי לגשת לעמוד זה."
 
-#: inc/options.php:489
+#: inc/options.php:493
 msgid "Ticket Registrations"
 msgstr "כרטיסים"
 
-#: inc/options.php:495
+#: inc/options.php:499
 msgid "Kind"
 msgstr "סוג"
 
-#: inc/options.php:496 inc/options.php:572
+#: inc/options.php:500 inc/options.php:576
 msgid "Cost"
 msgstr "עלות"
 
-#: inc/options.php:497
+#: inc/options.php:501
 msgid "Order Date"
 msgstr "זמן הזמנה"
 
-#: inc/options.php:498 inc/options.php:574
+#: inc/options.php:502 inc/options.php:578
 msgid "Club ID"
 msgstr "כרטיס דרקון"
 
-#: inc/options.php:499 inc/options.php:575
+#: inc/options.php:503 inc/options.php:579
 msgid "Transaction ID"
 msgstr "אישור הזמנה"
 
-#: inc/options.php:500 inc/options.php:576
+#: inc/options.php:504 inc/options.php:580
 msgid "Code"
 msgstr "קוד"
 
-#: inc/options.php:525
+#: inc/options.php:529
 msgid "‎Test!"
 msgstr "בדיקה!"
 
-#: inc/options.php:527
+#: inc/options.php:531
 msgid "Remove test registration of %1$s?"
 msgstr "הסרת רישום בדיקה של %1$s?"
 
-#: inc/options.php:533
+#: inc/options.php:537
 msgid "Payer Details"
 msgstr "שם הרוכש"
 
-#: inc/options.php:535 inc/options.php:579
+#: inc/options.php:539 inc/options.php:583
 msgid "Phone"
 msgstr "מספר טלפון"
 
-#: inc/options.php:536
+#: inc/options.php:540
 msgid "Paid"
 msgstr "שולם"
 
-#: inc/options.php:569
+#: inc/options.php:573
 msgid "Ticket no."
 msgstr "מספר כרטיס"
 
-#: inc/options.php:571
+#: inc/options.php:575
 msgid "Type"
 msgstr "סוג"
 
-#: inc/options.php:573
+#: inc/options.php:577
 msgid "Order Time"
 msgstr "זמן הזמנה"
 
-#: inc/options.php:577
+#: inc/options.php:581
 msgid "Total Cost"
 msgstr "עלות הזמנה"
 
-#: inc/options.php:578
+#: inc/options.php:582
 msgid "Payer"
 msgstr "שם הרוכש"
 
-#: inc/options.php:580
+#: inc/options.php:584
 msgid "E-Mail"
 msgstr "דואר אלקטרוני"
 
@@ -331,27 +331,27 @@ msgstr "חלה שגיאה במהלך התשלום - אנא נסו שנית:\\n\\
 msgid "PayGate invalid operation!"
 msgstr "פעולת שער תשלום לא חוקית!"
 
-#: inc/paygate.php:124
+#: inc/paygate.php:133
 msgid "Invalid request, please try again"
 msgstr "בקשה לא חוקית - אנא נסה שנית"
 
-#: inc/paygate.php:160
+#: inc/paygate.php:169
 msgid ""
 "Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try "
 "again."
 msgstr ""
 "נשארו רק %1$s כרטיסים, אבל נסיתם לרכוש %2$s. אנא חזרו לעמוד הקודם ונסו שוב."
 
-#: inc/paygate.php:194
+#: inc/paygate.php:203
 msgid ""
 "Error processing payment - \"%1$s\". Please contact the site administrator"
 msgstr "חלה שגיאה בעיבוד התשלום: \"%1$s\". אנא פנו למנהל האתר"
 
-#: inc/paygate.php:202
+#: inc/paygate.php:211
 msgid "Invalid payment confirmation!"
 msgstr "אישור תשלום לא חוקי!"
 
-#: inc/paygate.php:206
+#: inc/paygate.php:215
 msgid "A payment test account is not valid on this site!"
 msgstr "אין אפשרות לרכוש כרטיסים עם חשבון בדיקה!"
 
@@ -394,27 +394,39 @@ msgid ""
 "purchase."
 msgstr "לצערנו, אזלו כל הכרטיסים לכנס."
 
-#: inc/shortcodes.php:58 inc/shortcodes.php:162
+#: inc/shortcodes.php:58 inc/shortcodes.php:164
 msgid "Sold out"
 msgstr "אזלו הכרטיסים"
 
-#: inc/shortcodes.php:196
+#: inc/shortcodes.php:70
+msgid "Price"
+msgstr "מחיר"
+
+#: inc/shortcodes.php:78
+msgid "Total:"
+msgstr "סה\"כ:"
+
+#: inc/shortcodes.php:80
+msgid "Pay"
+msgstr "לתשלום"
+
+#: inc/shortcodes.php:198
 msgid "Invalid club ID!"
 msgstr "מספר מועדון לא חוקי!"
 
-#: inc/shortcodes.php:206
+#: inc/shortcodes.php:208
 msgid "Club members are elgible for only 1 discounted ticket"
 msgstr "כרטיס דרקון זכאי להנחה בקנית כרטיס אחד בלבד"
 
-#: inc/shortcodes.php:208
+#: inc/shortcodes.php:210
 msgid "Click here to go back to registration form"
 msgstr "לחץ כאן לחזור לטופס הרכישה"
 
-#: inc/shortcodes.php:242
+#: inc/shortcodes.php:244
 msgid "Send"
 msgstr "שליחה"
 
-#: inc/shortcodes.php:258
+#: inc/shortcodes.php:260
 msgid "Unrecognized e-mail address, please try again"
 msgstr "כתובת דואר לא מוכרת, אנא נסו שנית"
 
