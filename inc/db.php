@@ -185,7 +185,7 @@ class PayGateDatabase {
 	}
 	
 	public function listPrices($periodId) {
-		return $this->db->get_results("SELECT * FROM $this->prices_table_name ".
+		return $this->db->get_results("SELECT id, period_id, ticket_type, full_price, dragon_price as club_price FROM $this->prices_table_name ".
 			"WHERE period_id = " . ((int)$periodId));
 	}
 	
