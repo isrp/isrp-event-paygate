@@ -302,7 +302,8 @@ class PayGateSettingsPage {
 				break;
 			case 'update-prices':
 				$priceMatrix = @$_REQUEST['paygate-price-matrix'];
-				if (!$priceMatrix) return;
+				if (!$priceMatrix)
+					wp_die( __('No price matrix provided!', 'isrp-event-paygate'));
 				foreach ($priceMatrix as $periodId => $prices) {
 					foreach ($prices as $ticketType => $ticketPrice) {
 						$fullCost = $ticketPrice['full'];
