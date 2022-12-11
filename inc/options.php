@@ -526,19 +526,27 @@ class PayGateSettingsPage {
 				<?php if ($details->index[0] == 'T'):?>
 				<form method="post" action="">
 				<input type="hidden" name="id" value="<?php echo $row->id?>">
-				<?php _e('‎Test!', 'isrp-event-paygate')?>
+				<?php _e('Test!', 'isrp-event-paygate')?>
 				<button title="Delete <?php echo $row->name?>" type="submit" onclick="return confirm('<?php
 					printf(__('Remove test registration of %1$s?', 'isrp-event-paygate'), $row->name)?>')"
 					name="paygate-action" value="delete"><i class="fas fa-minus-circle"></i></button>
 				</form>
 			<?php endif;?></td>
 		</tr>
-		<tr style="height:0"><td colspan="9"><div class="payer-details" id="reg-<?php echo $row->id?>">
+		<tr style="height:0"><td colspan="9" style="padding:0"><div class="payer-details" id="reg-<?php echo $row->id?>">
 			<strong><?php _e('Payer Details', 'isrp-event-paygate')?></strong>:
 			<p><?php echo urldecode($details->firstname)?> <?php echo urldecode($details->lastname)?></p>
 			<p><?php _e('Phone', 'isrp-event-paygate')?>: <?php echo $details->phone?></p>
 			<p><?php _e('Paid', 'isrp-event-paygate')?>: <?php _e('¤', 'isrp-event-paygate')?><?php echo $details->amount?></p>
 		</div></td></tr>
+		<?php if (@$details->data): ?>
+		<tr><td colspan="9" style="padding: 0"><div class="custom-fields"><table><tr>
+		<?php $customKeys = array_keys((array)$details->data);?>
+		<?php foreach ($customKeys as $field):?>
+			<td style="padding: 4px 1em;"><?php echo $field?>: <?php echo $details->data->$field?></td>
+		<?php endforeach ?>
+		</tr></table></div></td></tr>
+		<?php endif ?>
 		<?php endforeach; ?>
 		</tbody>
 		</table>
@@ -556,7 +564,7 @@ class PayGateSettingsPage {
 		</form>
 		<?php endif; ?>
 		
-		<form method="post" action="/paygate-handler">
+		<form method="post" action="/?paygate-handler">
 		<p>
 		<button type="submit" name="action" value="export">
 		<i class="fas fa-archive"></i> Export
@@ -568,8 +576,7 @@ class PayGateSettingsPage {
 	}
 	
 	public function handleExport() {
-		$f = fopen('php://memory', 'w');
-		fputcsv($f, [
+		$basefields = [
 			__('Ticket no.', 'isrp-event-paygate'),
 			__('Name', 'isrp-event-paygate'),
 			__('Type', 'isrp-event-paygate'),
@@ -582,15 +589,24 @@ class PayGateSettingsPage {
 			__('Payer', 'isrp-event-paygate'),
 			__('Phone', 'isrp-event-paygate'),
 			__('E-Mail', 'isrp-event-paygate'),
-		]);
+		];
+		// locate all custom fields:
+		$customfields = [];
+		foreach ($this->pg->database()->getRegistrations() as $row) {
+			$details = json_decode($row->details, true);
+			if (is_array($details['data']))
+				$customfields = array_unique(array_merge($customfields, @array_keys(@$details['data'])));
+		}
+		$f = fopen('php://memory', 'w');
+		fputcsv($f,array_merge($basefields, $customfields));
 		$dt = new DateTime("now", $paygate_default_tz);
 		foreach ($this->pg->database()->getRegistrations() as $row) {
 			$details = json_decode($row->details);
-			if ($details->index[0] == 'T') // don't export test purchases
-				continue;
+			// if ($details->index[0] == 'T') // don't export test purchases
+			// 	continue;
 			$ticketType = $this->pg->database()->getPrice($row->price_id);
 			$dt->setTimestamp($row->order_time);
-			fputcsv($f, [
+			$csvrow = [
 				$row->id,
 				stripslashes($row->name),
 				$ticketType->ticket_type,
@@ -602,7 +618,12 @@ class PayGateSettingsPage {
 				$details->amount,
 				urldecode($details->firstname) . ' ' . urldecode($details->lastname),
 				"'".$details->phone,
-			]);
+				$details->email,
+			];
+			foreach ($customfields as $field) {
+				$csvrow[] = $details->data->$field;
+			}
+			fputcsv($f, $csvrow);
 		}
 		fseek($f, 0);
 		header('Content-Type: application/csv');

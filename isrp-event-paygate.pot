@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-12-11T17:18:11+00:00\n"
+"POT-Creation-Date: 2022-12-11T22:41:16+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: isrp-event-paygate\n"
@@ -98,7 +98,8 @@ msgstr ""
 
 #: inc/options.php:165
 #: inc/options.php:498
-#: inc/options.php:574
+#: inc/options.php:573
+#: inc/shortcodes.php:74
 msgid "Name"
 msgstr ""
 
@@ -202,7 +203,7 @@ msgid "Choose Event"
 msgstr ""
 
 #: inc/options.php:364
-#: inc/shortcodes.php:69
+#: inc/shortcodes.php:72
 msgid "Ticket Type"
 msgstr ""
 
@@ -217,6 +218,7 @@ msgstr ""
 #: inc/options.php:406
 #: inc/options.php:413
 #: inc/options.php:540
+#: inc/shortcodes.php:82
 msgid "¤"
 msgstr ""
 
@@ -266,7 +268,7 @@ msgid "Kind"
 msgstr ""
 
 #: inc/options.php:500
-#: inc/options.php:576
+#: inc/options.php:575
 msgid "Cost"
 msgstr ""
 
@@ -275,22 +277,22 @@ msgid "Order Date"
 msgstr ""
 
 #: inc/options.php:502
-#: inc/options.php:578
+#: inc/options.php:577
 msgid "Club ID"
 msgstr ""
 
 #: inc/options.php:503
-#: inc/options.php:579
+#: inc/options.php:578
 msgid "Transaction ID"
 msgstr ""
 
 #: inc/options.php:504
-#: inc/options.php:580
+#: inc/options.php:579
 msgid "Code"
 msgstr ""
 
 #: inc/options.php:529
-msgid "‎Test!"
+msgid "Test!"
 msgstr ""
 
 #: inc/options.php:531
@@ -302,7 +304,7 @@ msgid "Payer Details"
 msgstr ""
 
 #: inc/options.php:539
-#: inc/options.php:583
+#: inc/options.php:582
 msgid "Phone"
 msgstr ""
 
@@ -310,55 +312,63 @@ msgstr ""
 msgid "Paid"
 msgstr ""
 
-#: inc/options.php:573
+#: inc/options.php:572
 msgid "Ticket no."
 msgstr ""
 
-#: inc/options.php:575
+#: inc/options.php:574
 msgid "Type"
 msgstr ""
 
-#: inc/options.php:577
+#: inc/options.php:576
 msgid "Order Time"
 msgstr ""
 
-#: inc/options.php:581
+#: inc/options.php:580
 msgid "Total Cost"
 msgstr ""
 
-#: inc/options.php:582
+#: inc/options.php:581
 msgid "Payer"
 msgstr ""
 
-#: inc/options.php:584
+#: inc/options.php:583
 msgid "E-Mail"
 msgstr ""
 
-#: inc/paygate.php:56
+#: inc/paygate.php:61
 msgid "An error occured while processing the payment - try again and if it reoccures, let the site manager know that you got this error:\\n\\n[%2$s] %2$s"
 msgstr ""
 
-#: inc/paygate.php:64
+#: inc/paygate.php:69
 msgid "PayGate invalid operation!"
 msgstr ""
 
-#: inc/paygate.php:133
+#: inc/paygate.php:152
 msgid "Invalid request, please try again"
 msgstr ""
 
-#: inc/paygate.php:169
+#: inc/paygate.php:190
 msgid "Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again."
 msgstr ""
 
 #: inc/paygate.php:203
+msgid "Payment processing"
+msgstr ""
+
+#: inc/paygate.php:204
+msgid "%1$s tickets for %2$s"
+msgstr ""
+
+#: inc/paygate.php:227
 msgid "Error processing payment - \"%1$s\". Please contact the site administrator"
 msgstr ""
 
-#: inc/paygate.php:211
+#: inc/paygate.php:235
 msgid "Invalid payment confirmation!"
 msgstr ""
 
-#: inc/paygate.php:215
+#: inc/paygate.php:239
 msgid "A payment test account is not valid on this site!"
 msgstr ""
 
@@ -386,47 +396,47 @@ msgstr ""
 msgid "Pelepay account identifier"
 msgstr ""
 
-#: inc/shortcodes.php:46
+#: inc/shortcodes.php:49
 msgid "No More Tickets Available"
 msgstr ""
 
-#: inc/shortcodes.php:48
+#: inc/shortcodes.php:51
 msgid "Unfortunately, the event is now full and no more tickets are available for purchase."
 msgstr ""
 
-#: inc/shortcodes.php:58
-#: inc/shortcodes.php:164
+#: inc/shortcodes.php:61
+#: inc/shortcodes.php:219
 msgid "Sold out"
 msgstr ""
 
-#: inc/shortcodes.php:70
+#: inc/shortcodes.php:73
 msgid "Price"
 msgstr ""
 
-#: inc/shortcodes.php:78
+#: inc/shortcodes.php:81
 msgid "Total:"
 msgstr ""
 
-#: inc/shortcodes.php:80
+#: inc/shortcodes.php:83
 msgid "Pay"
 msgstr ""
 
-#: inc/shortcodes.php:198
+#: inc/shortcodes.php:253
 msgid "Invalid club ID!"
 msgstr ""
 
-#: inc/shortcodes.php:208
+#: inc/shortcodes.php:263
 msgid "Club members are elgible for only 1 discounted ticket"
 msgstr ""
 
-#: inc/shortcodes.php:210
+#: inc/shortcodes.php:265
 msgid "Click here to go back to registration form"
 msgstr ""
 
-#: inc/shortcodes.php:244
+#: inc/shortcodes.php:302
 msgid "Send"
 msgstr ""
 
-#: inc/shortcodes.php:260
+#: inc/shortcodes.php:323
 msgid "Unrecognized e-mail address, please try again"
 msgstr ""

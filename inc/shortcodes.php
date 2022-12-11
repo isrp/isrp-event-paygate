@@ -27,9 +27,12 @@ class PayGateShortcodes {
 		add_shortcode('paygate-checkout', [ $this, 'payCheckout' ]);
 		add_shortcode('paygate-name', [ $this, 'nameField' ]);
 		add_shortcode('paygate-button', [ $this, 'payButton' ]);
+		add_shortcode('paygate-submit', [ $this, 'payButton' ]);
 		add_shortcode('paygate-price', [ $this, 'showPrice' ]);
 		add_shortcode('paygate-club-form', [ $this, 'clubForm']);
 		add_shortcode('paygate-dragon-form', [ $this, 'clubForm']);
+		add_shortcode('paygate-input', [ $this, 'customField' ]);
+		add_shortcode('paygate-select', [ $this, 'customField' ]);
 	}
 		
 	public function payCheckout($atts, $content = null) {
@@ -59,7 +62,7 @@ class PayGateShortcodes {
 		});
 		</script>
 		<div class="paygate-tickets">
-		<form method="post" action="/paygate-handler" id="paygate-form">
+		<form method="post" action="/?paygate-handler" id="paygate-form">
 		<input type="hidden" name="action" value="pay">
 		<input type="hidden" name="paygate-club-id" value="<?php echo $this->currentClubId?>">
 		<table id="paygate-cart" style="display: <?php
@@ -68,7 +71,7 @@ class PayGateShortcodes {
 			<tr>
 			<th><?php _e('Ticket Type', 'isrp-event-paygate')?></th>
 			<th><?php _e('Price', 'isrp-event-paygate')?></th>
-			<th><?php _e('Name', 'isrtp-event-paygate')?></th>
+			<th><?php _e('Name', 'isrp-event-paygate')?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -76,7 +79,7 @@ class PayGateShortcodes {
 		<tbody class="total">
 			<tr>
 			<th><?php _e('Total:', 'isrp-event-paygate')?></th>
-			<th>₪<span id="paygate-total">0</span></th>
+			<th><?php _e('¤', 'isrp-event-paygate')?><span id="paygate-total">0</span></th>
 			<th><button id="paygate-checkout" type="button" onclick="this.form.submit()"><?php _e('Pay','isrp-event-paygate')?></button></th>
 			</tr>
 		</tbody>
@@ -110,6 +113,58 @@ class PayGateShortcodes {
 		<?php
 		return ob_get_clean();
 	}
+
+	public function customField($atts = [], $content = null, $tag = '') {
+		$atts = shortcode_atts([
+			'type' => $tag === 'paygate-select' ? 'select' : 'text',
+			'name' => 'data',
+			'width' => '',
+			'value' => '',
+			'style' => 'vertical-align: top;',
+			'cols' => 40,
+			'rows' => 10,
+		], $atts, 'paygate-input');
+		ob_start();
+
+		switch ($atts['type']) {
+			case 'select':
+				$items = explode(';', trim($content));
+				?>
+				<select name="paygate-field-<?php echo $atts['name']?>"
+					<?php if ($atts['width']):?> width="<?php echo $atts['width']; ?>" <?php endif ?>
+					<?php if ($atts['style']):?> style="<?php echo $atts['style']; ?>" <?php endif ?> >
+					<?php if (!$value) echo '<option></option>' ?>
+					<?php foreach ($items as $item) {
+						$item = trim($item);
+						$selected = $item == trim($value) ? 'selected="selected"' : '';
+						echo '<option value="'.$item.'" '.$selected.'>'.$item.'</option>';
+					} ?>
+				</select>
+				<?php
+				break;
+			case 'textarea':
+			case 'textbox':
+				?>
+				<textarea name="paygate-field-<?php echo $atts['name']?>" cols="<?php echo $atts['cols']?>" rows="<?php echo $atts['rows']?>"
+					<?php if ($atts['width']):?> width="<?php echo $atts['width']; ?>" <?php endif ?>
+					<?php if ($atts['style']):?> style="<?php echo $atts['style']; ?>" <?php endif ?>
+					><?php echo $value?></textarea>
+				<?php
+				break;
+			default:
+			?>
+			<input type="<?php echo $atts['type']?>" name="paygate-field-<?php echo $atts['name']?>"
+				<?php if ($atts['width']):?> width="<?php echo $atts['width']; ?>" <?php endif ?>
+				<?php if ($atts['style']):?> style="<?php echo $atts['style']; ?>" <?php endif ?>
+				<?php if ($atts['type'] == 'checkbox'):?> value="1" checked="<?php echo $atts['value'] ? "checked" : ""?>"
+				<?php else:?> value="<?php echo $atts['value']; ?>"
+				<?php endif?> >
+			<?php
+			break;
+		}
+
+		return ob_get_clean();
+	}
 	
 	public function showPrice($atts) {
 		$atts = shortcode_atts([
@@ -140,10 +195,10 @@ class PayGateShortcodes {
 		return ob_get_clean();
 	}
 	
-	public function payButton($atts, $content = null) {
+	public function payButton($atts, $content = null, $tag = '') {
 		$atts = shortcode_atts([
 			'type' => ''
-		], $atts, 'paygate-button');
+		], $atts, $tag);
 		$this->verifyClubCode();
 		
 		$ticketType = $atts['type'];
@@ -192,7 +247,7 @@ class PayGateShortcodes {
 	private function verifyClubCode() {
 		if ($this->currentClubId)
 			return;
-		$clubid = $_REQUEST['club-id'];
+		$clubid = @$_REQUEST['club-id'];
 		if (!empty($clubid)) {
 			if (!$this->pg->verifyClubId($clubid)) {
 				wp_die(esc_html__('Invalid club ID!', 'isrp-event-paygate'));
@@ -216,31 +271,34 @@ class PayGateShortcodes {
 		}
 	}
 	
-	public function clubForm($atts, $content = null) {
+	public function clubForm($atts, $content = null, $tag = '') {
+		global $wp;
 		$atts = shortcode_atts([
 			'success' => '',
 			'width' => '',
 			'style' => '',
-		], $atts, 'paygate-club-form');
+		], $atts, $tag);
 		
 		// if there is already a club code, don't show
 		if (@$_REQUEST['club-id'])
 			return '';
 		
 		if (empty($atts['success']))
-			$atts['success'] = $_SERVER['HTTP_REFERER'];
-		
+			$atts['success'] = add_query_arg($wp->query_vars, home_url($wp->request));
+		if (filter_var($atts['success'], FILTER_VALIDATE_URL) === false)
+			$atts['success'] = home_url($atts['success']);
+
 		ob_start();
 		?>
 		<div class="paygate-club-club">
-		<form method="post" action="/paygate-handler">
+		<form method="post" action="/?paygate-handler">
 		<input type="hidden" name="action" value="club-verify">
-		<input type="hidden" name="success-page" value="<?php echo home_url($atts['success'])?>">
+		<input type="hidden" name="success-page" value="<?php echo $atts['success']?>">
 		<?php echo do_shortcode($content); ?>
 		<input type="text" name="club-email"
-			width="<?php echo $atts['width']; ?>"
-			value="<?php echo $atts['value']; ?>"
-			style="<?php echo $atts['style']; ?>">
+			width="<?php echo @$atts['width']; ?>"
+			value="<?php echo @$atts['value']; ?>"
+			style="<?php echo @$atts['style']; ?>">
 		<button type="submit"><?php _e('Send', 'isrp-event-paygate')?></button>
 		</form>
 		</div>
@@ -251,9 +309,14 @@ class PayGateShortcodes {
 	public function clubVerify() {
 		$email = @$_REQUEST['club-email'];
 		$success = @$_REQUEST['success-page'];
+		error_log("Paygate: checking club membership of $email, will return to $success");
 		$id = $this->pg->getClubId($email);
+		if (strpos($success, '?') === false)
+			$success .= '?';
+		else
+			$success .= '&';
 		if ($id !== false) {
-			header('Location: ' . $success . '?club-id=' . $id);
+			header('Location: ' . $success . 'club-id=' . $id);
 			exit();
 		}
 		
