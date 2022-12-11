@@ -79,6 +79,15 @@ class PayGate {
 	public function settings() : PayGateSettingsPage {
 		return $this->settings;
 	}
+
+	private function clubURL($action) {
+		if (empty($action))
+			$action = "";
+		else if ($action[0] != '/')
+			$action = '/'.$action;
+		$url = $this->settings()->clubMembershipAPI() . $action;
+		return preg_replace('//', '/', $url);
+	}
 	
 	/**
 	 * Generate a unique ID for each club member
@@ -86,7 +95,7 @@ class PayGate {
 	 * @return string|boolean
 	 */
 	public function getClubId($email) {
-		$res = @file_get_contents("http://api.roleplay.org.il/club/email/$email");
+		$res = @file_get_contents($this->clubURL("/email/$email"));
 		if (!$res)
 			return false;
 		return json_decode($res)->token;
@@ -98,7 +107,7 @@ class PayGate {
 	 * @return boolean
 	 */
 	public function verifyClubId($id) {
-		$res = @file_get_contents("http://api.roleplay.org.il/club/token/$id");
+		$res = @file_get_contents($this->clubURL("/token/$id"));
 		if (!$res)
 			return false;
 		return true;
@@ -110,7 +119,7 @@ class PayGate {
 	 * @return array|boolean
 	 */
 	public function getClubCard($id) {
-		$res = @file_get_contents("http://api.roleplay.org.il/club/token/$id");
+		$res = @file_get_contents($this->clubURL("/token/$id"));
 		if (!$res)
 			return false;
 		return json_decode($res);
