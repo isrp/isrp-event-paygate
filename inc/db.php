@@ -1,7 +1,7 @@
 <?php
 
 class PayGateDatabase {
-	var $db_version = '9';
+	var $db_version = '10';
 	var $reg_table_name;
 	var $events_table_name;
 	var $periods_table_name;
@@ -35,15 +35,23 @@ class PayGateDatabase {
 		$version = get_option( 'paygate_db_version', 0);
 		if (version_compare($version, $this->db_version) < 0) {
 			error_log("PayGate: Updating database tables in $this->site_prefix to version $this->db_version");
-			$this->createTable();
+			$this->createTable($version);
 			update_option( 'paygate_db_version', $this->db_version );
 		}
 	}
 	
-	private function createTable() {
+	private function createTable($oldVersion = 0) {
 		$charset_collate = $this->db->get_charset_collate();
 		
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+		// special column renaming logic for upgrades through v10, as dbDelta() can't handle that
+		if ($oldVersion > 0 && $oldVersion < 10) {
+			$this->db->query("ALTER TABLE $this->prices_table_name ".
+				"CHANGE dragon_price club_price decimal(5,2) DEFAULT NULL NULL");
+			$this->db->query("ALTER TABLE $this->reg_table_name ".
+				"CHANGE dragon_id club_id varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci DEFAULT NULL NULL");
+		}
 		
 		dbDelta("CREATE TABLE $this->events_table_name (
 			id int NOT NULL AUTO_INCREMENT,
@@ -67,7 +75,7 @@ class PayGateDatabase {
 			period_id INT NOT NULL,
 			ticket_type VARCHAR(255) NOT NULL,
 			full_price DECIMAL(5,2) NOT NULL,
-			dragon_price DECIMAL(5,2) DEFAULT NULL,
+			club_price DECIMAL(5,2) DEFAULT NULL,
 			PRIMARY KEY (id)
 		) $charset_collate;");
 		
@@ -80,7 +88,7 @@ class PayGateDatabase {
 			price decimal(5,2) NOT NULL DEFAULT 0,
 			order_time int DEFAULT NULL,
 			order_id varchar(255) DEFAULT NULL,
-			dragon_id varchar(10) DEFAULT NULL,
+			club_id varchar(10) DEFAULT NULL,
 			details TEXT DEFAULT '',
 			PRIMARY KEY (id)
 		) $charset_collate;");
@@ -185,7 +193,7 @@ class PayGateDatabase {
 	}
 	
 	public function listPrices($periodId) {
-		return $this->db->get_results("SELECT id, period_id, ticket_type, full_price, dragon_price as club_price FROM $this->prices_table_name ".
+		return $this->db->get_results("SELECT * FROM $this->prices_table_name ".
 			"WHERE period_id = " . ((int)$periodId));
 	}
 	
@@ -214,7 +222,7 @@ class PayGateDatabase {
 			'period_id' => (int)$periodId,
 			'ticket_type' => $type,
 			'full_price' => 0,
-			'dragon_price' => 0,
+			'club_price' => 0,
 		]);
 	}
 	
@@ -223,7 +231,7 @@ class PayGateDatabase {
 			return null;
 		$this->db->update($this->prices_table_name, [
 			'full_price' => $fullCost,
-			'dragon_price' => $clubCost,
+			'club_price' => $clubCost,
 		], [
 			'period_id' => $periodId,
 			'ticket_type' => $type,
@@ -297,11 +305,11 @@ class PayGateDatabase {
 		$activeEventId = $this->getActiveEventId();
 		return $this->db->get_var("SELECT COUNT(*) FROM $this->reg_table_name ".
 			"WHERE event_id = ".((int)$activeEventId) . " " .
-			"AND dragon_id = '" . esc_sql($clubId) . "'") > 0;
+			"AND club_id = '" . esc_sql($clubId) . "'") > 0;
 	}
 	
 	public function getCurrentTicketPrice($ticketType, $isClub) {
-		$column = $isClub ? 'dragon_price' : 'full_price';
+		$column = $isClub ? 'club_price' : 'full_price';
 		$activeEventId = $this->getActiveEventId();
 		$price = $this->db->get_var($this->db->prepare(		
 			"SELECT $column as price FROM $this->prices_table_name as prices ".
@@ -336,7 +344,7 @@ class PayGateDatabase {
 			'price' => $price,
 			'order_time' => $time,
 			'order_id' => $orderid,
-			'dragon_id' => $club_id,
+			'club_id' => $club_id,
 			'details' => $details,
 		]);
 	}
@@ -351,8 +359,7 @@ class PayGateDatabase {
 	}
 	
 	public function getRegistrationsPage($eventId, $page, $pageSize) {
-		return $this->db->get_results("SELECT *, dragon_id as club_id ".
-			"FROM $this->reg_table_name ".
+		return $this->db->get_results("SELECT * FROM $this->reg_table_name ".
 			"WHERE event_id = " . ((int)$eventId) . " " .
 			"ORDER BY order_time DESC LIMIT $pageSize OFFSET " . (($page-1) * $pageSize));
 	}
