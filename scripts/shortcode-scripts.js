@@ -49,10 +49,12 @@ EventPayGate = function(allowCart, maxTickets, soldOutText) {
 	};
 	
 	this.addTicketField = function(type, price, name) {
+		let customFields = {};
+		document.querySelectorAll('[name^=paygate-field-]').forEach(el => customFields[el.name.replace(/paygate-field-/,'')] = el.value);
 		var input = document.createElement('input');
 		input.setAttribute('type','hidden');
 		input.setAttribute('name','tickets[' + type + '][]');
-		input.setAttribute('value', price + ':' + name)
+		input.setAttribute('value', price + ';' + name + ';' + btoa(encodeURIComponent(JSON.stringify(customFields))));
 		this.form.appendChild(input);
 		this.checkoutButton.removeAttribute('disabled');
 	};

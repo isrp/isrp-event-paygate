@@ -7,7 +7,7 @@
 }
 
 .paygate table {
-	direction: rtl;
+	direction: var(--paygate-admin-direction, ltr);
 	width: 80%;
 	border-collapse: collapse;
 }
@@ -35,11 +35,11 @@
 }
 
 .paygate table th, .paygate table td {
-	text-align: right;
+	text-align: start;
 	border: solid gray;
 	border-width: 0 1px 0 0;
 	padding: .2em;
-	padding-right: .5em;
+	padding-inline-start: .5em;
 	vertical-align: text-top;
 }
 

@@ -27,7 +27,7 @@ class PayGateSettingsBase {
 	
 	public function register() {
 		register_setting('paygate_setting_group', 'paygate-' . $this->name);
-		add_settings_field($this->name, $this->title,
+		add_settings_field($this->name, __($this->title, 'isrp-event-paygate'),
 			[ $this, 'display' ], 'paygate-settings', $this->section);
 	}
 	
@@ -66,7 +66,7 @@ class PayGateSettingsBase {
 			'title' => $this->description,
 		]);
 		if ($this->description)
-			echo " <label for='{$this->name}'>$this->description</label>";
+			echo " <label for='{$this->name}'>".__($this->description, 'isrp-event-paygate')."</label>";
 	}
 	
 	protected function print_tag($name, $attr) {

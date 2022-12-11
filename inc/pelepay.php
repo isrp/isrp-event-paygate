@@ -9,7 +9,7 @@ class PayGatePelepayProcessor {
 		$this->account = $account;
 	}
 	
-	public function get_form($buttontext, $amount, $description, $order, $okurl, $failurl) {
+	public function get_form($buttontext, $amount, $description, $order, $okurl, $failurl, $cancelurl) {
 		$paymentURL = 'https://www.pelepay.co.il/pay/paypage.aspx';
 		ob_start();
 		?>
@@ -21,7 +21,7 @@ class PayGatePelepayProcessor {
 		<input type="hidden" name="success_return" value="<?php echo $okurl?>">
 		<input type="hidden" name="notify_url" value="<?php echo $okurl?>">
 		<input type="hidden" name="fail_return" value="<?php echo $failurl?>">
-		<input type="hidden" name="cancel_return" value="<?php echo $failurl?>">
+		<input type="hidden" name="cancel_return" value="<?php echo $cancelurl?>">
 		<input type="hidden" name="active_notify_url" value="1">
 		
 		<!--  input type="image" src="http://www.pelepay.co.il/btn_images/pay_button_1.gif" name="submit" alt="Make payments with pelepay" -->

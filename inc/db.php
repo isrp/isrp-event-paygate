@@ -1,7 +1,7 @@
 <?php
 
 class PayGateDatabase {
-	var $db_version = '9';
+	var $db_version = '10';
 	var $reg_table_name;
 	var $events_table_name;
 	var $periods_table_name;
@@ -35,15 +35,23 @@ class PayGateDatabase {
 		$version = get_option( 'paygate_db_version', 0);
 		if (version_compare($version, $this->db_version) < 0) {
 			error_log("PayGate: Updating database tables in $this->site_prefix to version $this->db_version");
-			$this->createTable();
+			$this->createTable($version);
 			update_option( 'paygate_db_version', $this->db_version );
 		}
 	}
 	
-	private function createTable() {
+	private function createTable($oldVersion = 0) {
 		$charset_collate = $this->db->get_charset_collate();
 		
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+		// special column renaming logic for upgrades through v10, as dbDelta() can't handle that
+		if ($oldVersion > 0 && $oldVersion < 10) {
+			$this->db->query("ALTER TABLE $this->prices_table_name ".
+				"CHANGE dragon_price club_price decimal(5,2) DEFAULT NULL NULL");
+			$this->db->query("ALTER TABLE $this->reg_table_name ".
+				"CHANGE dragon_id club_id varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci DEFAULT NULL NULL");
+		}
 		
 		dbDelta("CREATE TABLE $this->events_table_name (
 			id int NOT NULL AUTO_INCREMENT,
@@ -67,7 +75,7 @@ class PayGateDatabase {
 			period_id INT NOT NULL,
 			ticket_type VARCHAR(255) NOT NULL,
 			full_price DECIMAL(5,2) NOT NULL,
-			dragon_price DECIMAL(5,2) DEFAULT NULL,
+			club_price DECIMAL(5,2) DEFAULT NULL,
 			PRIMARY KEY (id)
 		) $charset_collate;");
 		
@@ -80,7 +88,7 @@ class PayGateDatabase {
 			price decimal(5,2) NOT NULL DEFAULT 0,
 			order_time int DEFAULT NULL,
 			order_id varchar(255) DEFAULT NULL,
-			dragon_id varchar(10) DEFAULT NULL,
+			club_id varchar(10) DEFAULT NULL,
 			details TEXT DEFAULT '',
 			PRIMARY KEY (id)
 		) $charset_collate;");
@@ -161,7 +169,7 @@ class PayGateDatabase {
 	private function verifyCanDeletePeriod($periodId) {
 		if ($this->db->get_var("SELECT COUNT(*) FROM $this->reg_table_name ".
 			"WHERE period_id = " . ((int)$periodId)) > 0) {
-			add_settings_error('paygate', 'registrations', 'Cannot delete period as there are ticket sold!');
+			add_settings_error('paygate', 'registrations', __('Cannot delete period as there are ticket sold!', 'isrp-event-paygate'));
 			return false;
 		}
 		return true;
@@ -214,16 +222,16 @@ class PayGateDatabase {
 			'period_id' => (int)$periodId,
 			'ticket_type' => $type,
 			'full_price' => 0,
-			'dragon_price' => 0,
+			'club_price' => 0,
 		]);
 	}
 	
-	public function updatePrice($periodId, $type, $fullCost, $dragonCost) {
+	public function updatePrice($periodId, $type, $fullCost, $clubCost) {
 		if (empty($type) or !is_numeric($periodId) or $periodId <= 0)
 			return null;
 		$this->db->update($this->prices_table_name, [
 			'full_price' => $fullCost,
-			'dragon_price' => $dragonCost,
+			'club_price' => $clubCost,
 		], [
 			'period_id' => $periodId,
 			'ticket_type' => $type,
@@ -235,7 +243,7 @@ class PayGateDatabase {
 			"INNER JOIN $this->prices_table_name AS prices ON regs.price_id = prices.id ".
 			"WHERE prices.period_id = %d AND prices.ticket_type = %s", $periodId, $type);
 		if ($this->db->get_var($sql) > 0) {
-			add_settings_error('paygate', 'registrations', 'Cannot delete period as there are ticket sold!');
+			add_settings_error('paygate', 'registrations', __('Cannot delete period as there are ticket sold!', 'isrp-event-paygate'));
 			return false;
 		}
 		return true;
@@ -289,19 +297,19 @@ class PayGateDatabase {
 	}
 	
 	/**
-	 * check if the specified dragon ID was already used to purchase a ticket
+	 * check if the specified club ID was already used to purchase a ticket
 	 * in the event of the currently active period.
-	 * @param string $dragonId
+	 * @param string $clubId
 	 */
-	public function checkUsedDragonId($dragonId) {
+	public function checkUsedClubId($clubId) {
 		$activeEventId = $this->getActiveEventId();
 		return $this->db->get_var("SELECT COUNT(*) FROM $this->reg_table_name ".
 			"WHERE event_id = ".((int)$activeEventId) . " " .
-			"AND dragon_id = '" . esc_sql($dragonId) . "'") > 0;
+			"AND club_id = '" . esc_sql($clubId) . "'") > 0;
 	}
 	
-	public function getCurrentTicketPrice($ticketType, $isDragon) {
-		$column = $isDragon ? 'dragon_price' : 'full_price';
+	public function getCurrentTicketPrice($ticketType, $isClub) {
+		$column = $isClub ? 'club_price' : 'full_price';
 		$activeEventId = $this->getActiveEventId();
 		$price = $this->db->get_var($this->db->prepare(		
 			"SELECT $column as price FROM $this->prices_table_name as prices ".
@@ -311,10 +319,10 @@ class PayGateDatabase {
 			"AND ticket_type = %s ".
 			"ORDER BY period_end ASC ".
 			"LIMIT 1", $activeEventId, $ticketType));
-		error_log("PayGate: Calculated price for $ticketType, $isDragon in event $activeEventId: $price");
-		if ($price == 0 and $isDragon) {
+		error_log("PayGate: Calculated price for $ticketType, $isClub in event $activeEventId: $price");
+		if ($price == 0 and $isClub) {
 			$price = $this->getCurrentTicketPrice($ticketType, false);
-			error_log("PayGate: No dragon price, getting full price: $price");
+			error_log("PayGate: No club price, getting full price: $price");
 		}
 		if ($price == 0)
 			return null;
@@ -327,7 +335,7 @@ class PayGateDatabase {
 		return $this->getEvent($this->getPeriod($periodId)->event_id)->success_page;
 	}
 	
-	public function storeRegistration($name, $type, $period, $price, $time, $orderid, $dragon_id, $details) {
+	public function storeRegistration($name, $type, $period, $price, $time, $orderid, $club_id, $details) {
 		$this->db->insert($this->reg_table_name, [
 			'event_id' => $this->getPeriod($period)->event_id,
 			'period_id' => $period,
@@ -336,7 +344,7 @@ class PayGateDatabase {
 			'price' => $price,
 			'order_time' => $time,
 			'order_id' => $orderid,
-			'dragon_id' => $dragon_id,
+			'club_id' => $club_id,
 			'details' => $details,
 		]);
 	}

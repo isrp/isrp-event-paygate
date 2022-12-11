@@ -6,7 +6,7 @@
  Version:     1.4.2
  Author:      Oded Arbel
  Author URI:  https://github.com/isrp/isrp-event-paygate
- License:     GPL2
+ License:     GPLv2
  License URI: https://www.gnu.org/licenses/gpl-2.0.html
  Domain Path: /languages
  Text Domain: isrp-event-paygate
