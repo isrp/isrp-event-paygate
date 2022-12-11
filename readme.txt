@@ -3,7 +3,7 @@ Contributors: guss77
 Tags: events, payment, pelepay
 Requires at least: 5.0
 Tested up to: 6.1
-Stable tag: 1.4.2
+Stable tag: 1.5.0
 Requires PHP: 7.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -109,6 +109,29 @@ Name field for specifying names for named tickets.
 * `value` (optional) name to pre-set in the field. Default: empty
 * `style` (optional) CSS style rule to apply to the name field. Default: none
 
+### `[paygate-input]`
+
+A custom input field that the user can fill in and its value will be recorded in the registration database as a custom data element.
+
+### Attributes
+
+* `name` (optional) name of the custom data field. Default: `custom`.
+* `type` (optional) input type to draw. Can be one of `text` (the default), `checkbox`, `select`, `textarea` or any type value supported by the HTML INPUT tag.
+* `value` (optional) value to pre-fill or pre-select
+* `width` (optional) width of the input field. Default: automatic.
+* `style` (optional) CSS style rule to apply to the name field. Default: none.
+* `cols` (optional) for `textarea` type, the width of text box.
+* `rows` (optional) for `textarea` type, the height of the text box.
+
+When using the `select` type, the shortcode will draw a pull-down menu. The tag should have content that will be the elements in the pull-down menu, separated
+by a semi-colon. For example: `[paygate-input type=select name=colors]red;blue;greed[/paygate-input]`.
+
+### `[paygate-select]`
+
+A custom drop-down menu - this shortcode is the same as the `[paygate-input]` shortcode above, except its default `type` is set to `select`, for convenience.
+
+Example: `[paygate-select name=colors]red;blue;green[/paygate-select]`
+
 ### `[paygate-button]`
 
 Paygate ticket purchase button.
@@ -138,6 +161,10 @@ Login form for club members. Use this in a standalone page to allow club members
 * `style` (optional) CSS style rule to apply to the login field. Default: none.
 
 == Changelog ==
+
+= 1.5.0 =
+
+* Add support for custom data fields in payment form.
 
 = 1.4.2 =
 
