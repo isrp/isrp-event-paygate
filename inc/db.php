@@ -351,7 +351,8 @@ class PayGateDatabase {
 	}
 	
 	public function getRegistrationsPage($eventId, $page, $pageSize) {
-		return $this->db->get_results("SELECT * FROM $this->reg_table_name ".
+		return $this->db->get_results("SELECT *, dragon_id as club_id ".
+			"FROM $this->reg_table_name ".
 			"WHERE event_id = " . ((int)$eventId) . " " .
 			"ORDER BY order_time DESC LIMIT $pageSize OFFSET " . (($page-1) * $pageSize));
 	}
