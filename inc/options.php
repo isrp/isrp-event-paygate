@@ -25,6 +25,7 @@ class PayGateSettingsPage {
 		$this->pelepay_account = new PayGatePelePayAccountSetting('paygate_section_processor');
 		$this->accept_test_transaction = new PayGateAcceptTestSetting('paygate_section_global');
 		$this->allowMultiple = new PayGateAllowMultipleSetting('paygate_section_global');
+		$this->clubMembersAPI = new PayGateClubMembersURLSetting('paygate_section_global');
 	}
 	
 	/**
@@ -300,8 +301,8 @@ class PayGateSettingsPage {
 				foreach ($priceMatrix as $periodId => $prices) {
 					foreach ($prices as $ticketType => $ticketPrice) {
 						$fullCost = $ticketPrice['full'];
-						$dragonCost = $ticketPrice['dragon'];
-						$this->pg->database()->updatePrice($periodId, $ticketType, $fullCost, $dragonCost);
+						$clubCost = $ticketPrice['club'];
+						$this->pg->database()->updatePrice($periodId, $ticketType, $fullCost, $clubCost);
 					}
 				}
 				break;
@@ -378,13 +379,13 @@ class PayGateSettingsPage {
 			$ticket = @$ticketPeriods[$periodId];
 			if ($ticket) {
 				$regularCost = $ticket->full_price > 0 ? $ticket->full_price : '';
-				$dragonCost = $ticket->dragon_price >0 ? $ticket->dragon_price : '';
+				$clubCost = $ticket->club_price >0 ? $ticket->club_price : '';
 			} else {
 				$regularCost = '';
-				$dragonCost = '';
+				$clubCost = '';
 			}
 			$regularInputId = "$periodId-$ticketType-full";
-			$dragonInputId = "$periodId-$ticketType-dragon";
+			$clubInputId = "$periodId-$ticketType-club";
 			?>
 			<td>
 				<p>
@@ -397,9 +398,9 @@ class PayGateSettingsPage {
 				<p>
 				<label>
 				<span><?php _e('Club Price', 'isrp-event-paygate')?>:</span>
-				<input id="<?php echo $dragonInputId?>" name="paygate-price-matrix[<?php echo $periodId?>][<?php echo $ticketType?>][dragon]" type="number" value="<?php echo $dragonCost?>" min="0"><?php _e('¤', 'isrp-event-paygate')?>
+				<input id="<?php echo $clubInputId?>" name="paygate-price-matrix[<?php echo $periodId?>][<?php echo $ticketType?>][club]" type="number" value="<?php echo $clubCost?>" min="0"><?php _e('¤', 'isrp-event-paygate')?>
 				</label>
-				<button type="button" onclick="document.getElementById('<?php echo $dragonInputId?>').value = '';"><i class="far fa-times-circle"></i></button>
+				<button type="button" onclick="document.getElementById('<?php echo $clubInputId?>').value = '';"><i class="far fa-times-circle"></i></button>
 				</p>
 			</td>
 			<?php endforeach;?>
@@ -433,7 +434,7 @@ class PayGateSettingsPage {
 	public function reportsPage() {
 		//must check that the user has the required capability
 		if (!current_user_can('manage_options'))
-			wp_die( __('You do not have sufficient permissions to access this page.') );
+			wp_die( __('You do not have sufficient permissions to access this page.', 'isrp-event-paygate') );
 		
 		$eventId = @$_REQUEST['event-id'];
 		switch ($_POST['paygate-action']) {
@@ -506,7 +507,7 @@ class PayGateSettingsPage {
 			<td><?php echo $ticketType->ticket_type?></td>
 			<td>₪<?php echo $row->price?></td>
 			<td style="direction: ltr; text-align: right;"><?php echo $dt->format('d.m.Y, H:i')?></td>
-			<td><?php echo $row->dragon_id?></td>
+			<td><?php echo $row->club_id?></td>
 			<td><?php echo $details->ConfirmationCode?></td>
 			<td><?php echo $row->order_id?></td>
 			<td>
@@ -515,7 +516,7 @@ class PayGateSettingsPage {
 				<input type="hidden" name="id" value="<?php echo $row->id?>">
 				<?php _e('‎Test!', 'isrp-event-paygate')?>
 				<button title="Delete <?php echo $row->name?>" type="submit" onclick="return confirm('<?php
-					printf(__('Remove test registration of %s?', 'isrp-event-paygate'), $row->name)?>')"
+					printf(__('Remove test registration of %1$s?', 'isrp-event-paygate'), $row->name)?>')"
 					name="paygate-action" value="delete"><i class="fas fa-minus-circle"></i></button>
 				</form>
 			<?php endif;?></td>
@@ -583,7 +584,7 @@ class PayGateSettingsPage {
 				$ticketType->ticket_type,
 				$row->price,
 				$dt->format('d.m.Y, H:i'),
-				$row->dragon_id,
+				$row->club_id,
 				$details->ConfirmationCode,
 				$row->order_id,
 				$details->amount,

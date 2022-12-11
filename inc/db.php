@@ -218,12 +218,12 @@ class PayGateDatabase {
 		]);
 	}
 	
-	public function updatePrice($periodId, $type, $fullCost, $dragonCost) {
+	public function updatePrice($periodId, $type, $fullCost, $clubCost) {
 		if (empty($type) or !is_numeric($periodId) or $periodId <= 0)
 			return null;
 		$this->db->update($this->prices_table_name, [
 			'full_price' => $fullCost,
-			'dragon_price' => $dragonCost,
+			'dragon_price' => $clubCost,
 		], [
 			'period_id' => $periodId,
 			'ticket_type' => $type,
@@ -289,19 +289,19 @@ class PayGateDatabase {
 	}
 	
 	/**
-	 * check if the specified dragon ID was already used to purchase a ticket
+	 * check if the specified club ID was already used to purchase a ticket
 	 * in the event of the currently active period.
-	 * @param string $dragonId
+	 * @param string $clubId
 	 */
-	public function checkUsedDragonId($dragonId) {
+	public function checkUsedClubId($clubId) {
 		$activeEventId = $this->getActiveEventId();
 		return $this->db->get_var("SELECT COUNT(*) FROM $this->reg_table_name ".
 			"WHERE event_id = ".((int)$activeEventId) . " " .
-			"AND dragon_id = '" . esc_sql($dragonId) . "'") > 0;
+			"AND dragon_id = '" . esc_sql($clubId) . "'") > 0;
 	}
 	
-	public function getCurrentTicketPrice($ticketType, $isDragon) {
-		$column = $isDragon ? 'dragon_price' : 'full_price';
+	public function getCurrentTicketPrice($ticketType, $isClub) {
+		$column = $isClub ? 'dragon_price' : 'full_price';
 		$activeEventId = $this->getActiveEventId();
 		$price = $this->db->get_var($this->db->prepare(		
 			"SELECT $column as price FROM $this->prices_table_name as prices ".
@@ -311,10 +311,10 @@ class PayGateDatabase {
 			"AND ticket_type = %s ".
 			"ORDER BY period_end ASC ".
 			"LIMIT 1", $activeEventId, $ticketType));
-		error_log("PayGate: Calculated price for $ticketType, $isDragon in event $activeEventId: $price");
-		if ($price == 0 and $isDragon) {
+		error_log("PayGate: Calculated price for $ticketType, $isClub in event $activeEventId: $price");
+		if ($price == 0 and $isClub) {
 			$price = $this->getCurrentTicketPrice($ticketType, false);
-			error_log("PayGate: No dragon price, getting full price: $price");
+			error_log("PayGate: No club price, getting full price: $price");
 		}
 		if ($price == 0)
 			return null;
@@ -327,7 +327,7 @@ class PayGateDatabase {
 		return $this->getEvent($this->getPeriod($periodId)->event_id)->success_page;
 	}
 	
-	public function storeRegistration($name, $type, $period, $price, $time, $orderid, $dragon_id, $details) {
+	public function storeRegistration($name, $type, $period, $price, $time, $orderid, $club_id, $details) {
 		$this->db->insert($this->reg_table_name, [
 			'event_id' => $this->getPeriod($period)->event_id,
 			'period_id' => $period,
@@ -336,7 +336,7 @@ class PayGateDatabase {
 			'price' => $price,
 			'order_time' => $time,
 			'order_id' => $orderid,
-			'dragon_id' => $dragon_id,
+			'dragon_id' => $club_id,
 			'details' => $details,
 		]);
 	}

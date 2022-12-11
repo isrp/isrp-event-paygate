@@ -44,8 +44,8 @@ class PayGate {
 					return $this->createPayment();
 				case 'export':
 					return $this->settings()->handleExport();
-				case 'dragon-verify':
-					return $this->shortcodes->dragonVerify();
+				case 'club-verify':
+					return $this->shortcodes->clubVerify();
 			}
 		}
 		
@@ -53,13 +53,15 @@ class PayGate {
 		if ($res == 'failure') {
 			$rescode = @$_GET['Response'];
 			$resmessage = PayGatePelepayConstants::RESPONSE_CODES[$rescode];
-			wp_die("חלה שגיאה במהלך התשלום - אנא נסו שנית:\n\n$resmessage [$rescode]");
+			wp_die(sprintf(esc_html__(
+				'An error occured while processing the payment - try again and if it reoccures, let the site manager know that you got this error:\n\n[%2$s] %2$s',
+				'isrp-event-paygate'), $rescode, $resmessage));
 		}
 		
 		if ($res == 'success')
 			return $this->paymentSuccess($query, $code);
 		
-		wp_die("PayGate invalid operation!");
+		wp_die(sprintf(esc_html__('PayGate invalid operation!', 'isrp-event-paygate'), $var));
 	}
 	
 	public function custom_wp_admin_style($hook) {
@@ -79,11 +81,11 @@ class PayGate {
 	}
 	
 	/**
-	 * Generate a unique ID for each dragon member
+	 * Generate a unique ID for each club member
 	 * @param string $email
 	 * @return string|boolean
 	 */
-	public function getDragonId($email) {
+	public function getClubId($email) {
 		$res = @file_get_contents("http://api.roleplay.org.il/club/email/$email");
 		if (!$res)
 			return false;
@@ -91,11 +93,11 @@ class PayGate {
 	}
 	
 	/**
-	 * Call to verify the unique dragon ID received from a browser
+	 * Call to verify the unique club ID received from a browser
 	 * @param string $id
 	 * @return boolean
 	 */
-	public function verifyDragonId($id) {
+	public function verifyClubId($id) {
 		$res = @file_get_contents("http://api.roleplay.org.il/club/token/$id");
 		if (!$res)
 			return false;
@@ -103,11 +105,11 @@ class PayGate {
 	}
 	
 	/**
-	 * Retrieve the dragon card for an authenticated dragon memeber
-	 * @param string $id unique dragon id code
+	 * Retrieve the club card for an authenticated club memeber
+	 * @param string $id unique club id code
 	 * @return array|boolean
 	 */
-	public function getDragonCard($id) {
+	public function getClubCard($id) {
 		$res = @file_get_contents("http://api.roleplay.org.il/club/token/$id");
 		if (!$res)
 			return false;
@@ -116,27 +118,27 @@ class PayGate {
 	
 	private function createPayment() {
 		error_log("PayGate: Starting to process payment request: " . print_r($_POST, true));
-		$dragon_id = @$_REQUEST['paygate-dragon-id'];
+		$club_id = @$_REQUEST['paygate-club-id'];
 		$tickets = @$_REQUEST['tickets'];
 		if (!$tickets)
-			wp_die('בקשה לא חוקית - אנא נסה שנית');
+			wp_die(esc_html__('Invalid request, please try again', 'isrp-event-paygate'));
 		
 		// replay the transactions, just to be sure:
-		if ($dragon_id) {
-			$member = $this->getDragonCard($dragon_id);
+		if ($club_id) {
+			$member = $this->getClubCard($club_id);
 			if (!$member) {
-				error_log("PayGate: Invalid dragon ID submitted, ignoring");
-				$dragon_id = null;
+				error_log("PayGate: Invalid club ID submitted, ignoring");
+				$club_id = null;
 			} else {
-				if ($this->database()->checkUsedDragonId($member->member_number)) {
-					error_log("PayGate: Dragon ID used before in current event, ignoring");
-					$dragon_id = null;
+				if ($this->database()->checkUsedClubId($member->member_number)) {
+					error_log("PayGate: Club ID used before in current event, ignoring");
+					$club_id = null;
 				}
 			}
 		} else
-			$dragon_id = null;
+			$club_id = null;
 		
-		$has_dragon_id = is_null($dragon_id) ? false : true;
+		$has_club_id = is_null($club_id) ? false : true;
 		$ticketdata = [];
 		$period = $this->database()->getActivePeriod();
 		$event = $this->database()->getEvent($period->event_id);
@@ -145,11 +147,11 @@ class PayGate {
 		foreach ($tickets as $ticketType => $ticketList) {
 			foreach ($ticketList as $ticket) {
 				list($price, $name) = explode(":", $ticket);
-				$dbprice = $this->database()->getCurrentTicketPrice($ticketType, $has_dragon_id);
+				$dbprice = $this->database()->getCurrentTicketPrice($ticketType, $has_club_id);
 				if ($price != $dbprice)
 					error_log("PayGate: User submitted price $price is different from database: $dbprice, ignoring");
-				$ticketdata[] = [ $name, $ticketType, $dbprice, $has_dragon_id ];
-				$has_dragon_id = false;
+				$ticketdata[] = [ $name, $ticketType, $dbprice, $has_club_id ];
+				$has_club_id = false;
 				$total += $dbprice;
 			}
 		}
@@ -159,7 +161,7 @@ class PayGate {
 		}
 		$calldata = json_encode([
 			'time' => time(),
-			'dragon_id' => $dragon_id,
+			'club_id' => $club_id,
 			'order_id' => $orderid,
 			'period' => $period->id,
 			'tickets' => $ticketdata,
@@ -205,7 +207,7 @@ class PayGate {
 		}
 		
 		$tickets = json_decode($calldata, true);
-		$dragoncard = $this->getDragonCard($tickets['dragon_id']);
+		$clubcard = $this->getClubCard($tickets['club_id']);
 		
 		$payer = $result['email'];
 		$payerName = urldecode($result['firstname'] . ' ' . $result['lastname']);
@@ -240,7 +242,7 @@ class PayGate {
 				$name = $payerName;
 			$orderid = $tickets['order_id'] . ':' . bin2hex(openssl_random_pseudo_bytes(2));
 			$this->database()->storeRegistration($name, $ticket[1], $tickets['period'],
-				$ticket[2], $tickets['time'], $orderid, $ticket[3] ? $dragoncard->member_number : null,
+				$ticket[2], $tickets['time'], $orderid, $ticket[3] ? $clubcard->member_number : null,
 				json_encode($result, JSON_UNESCAPED_UNICODE));
 			?>
 			<tr>

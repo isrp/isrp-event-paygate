@@ -60,6 +60,7 @@ The ticket table should already list the default "standard ticket", and you can 
 For each ticket type you can enter prices for each of the ticket sell periods you've set up for your event - both a regular prices and a club discount price.
 
 Notes:
+
 * If you don't want to offer club discount for a ticket type at a ticket sell period, just clear the price (by clicking the X icon near the price box) and it can
   only be bought for the regular prices.
 * If you clear the regular price box for a ticket in a period, that ticket type cannot be sold at all during the specific period.
@@ -86,7 +87,7 @@ Name on ticket: [paygate-name]
 
  * Standard ticket: [paygate-button]Entry and access to all free-for-all activities, $[paygate-price][/paygate-button]
  * VIP ticket: [paygate-button type="vip"]All activities as well as access to the green room, $[paygate-price][/paygate-button]
- 
+
 [paygate-checkout]
 ```
 
@@ -124,11 +125,11 @@ will show the price for the ticket of its containing pay button.
 #### Atrributes
 
 * `type` (optional) ticket type to display price for. If this shortcode is contained inside a `[paygate-button]` shortcode, the `type` attribute may be omitted and the ticket type will be taken from
-the `[paygate-button]` shortcode. The `type` attribute may also be omitted if there is only one ticket type.
+  the `[paygate-button]` shortcode. The `type` attribute may also be omitted if there is only one ticket type.
 
-### `[paygate-dragon-form]`
+### `[paygate-club-form]`
 
-Login form for dragon club members. Use this in a standalone page to allow club members to log in to receive the club discount.
+Login form for club members. Use this in a standalone page to allow club members to log in to receive the club discount.
 
 #### Attributes
 
@@ -139,4 +140,5 @@ Login form for dragon club members. Use this in a standalone page to allow club 
 == Changelog ==
 
 = 1.4.2 =
+
 * First public Wordperss Plugin Directory release

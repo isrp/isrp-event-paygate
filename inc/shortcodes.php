@@ -9,8 +9,8 @@ class PayGateShortcodes {
 	private $currentEvent;
 	private $prices = [];
 	private $currentTicketType = null;
-	private $currentDragonId = null;
-	private $currentDragonIdWasUsed = false;
+	private $currentClubId = null;
+	private $currentClubIdWasUsed = false;
 	private $availableTickets = -1;
 	
 	public function __construct(PayGate $paygate) {
@@ -21,14 +21,15 @@ class PayGateShortcodes {
 		$evData = $this->pg->database()->getEvent($this->currentEvent);
 		$this->availableTickets = $evData->max_tickets > 0 ? max(0, $evData->max_tickets - $evData->sold) : -1;
 		foreach ($this->pg->database()->listEventCurrentPrices($this->currentEvent) as $ticket) {
-			$this->prices[$ticket->ticket_type] = [ $ticket->full_price, $ticket->dragon_price ];
+			$this->prices[$ticket->ticket_type] = [ $ticket->full_price, $ticket->club_price ];
 		}
 		
 		add_shortcode('paygate-checkout', [ $this, 'payCheckout' ]);
 		add_shortcode('paygate-name', [ $this, 'nameField' ]);
 		add_shortcode('paygate-button', [ $this, 'payButton' ]);
 		add_shortcode('paygate-price', [ $this, 'showPrice' ]);
-		add_shortcode('paygate-dragon-form', [ $this, 'dragonForm']);
+		add_shortcode('paygate-club-form', [ $this, 'clubForm']);
+		add_shortcode('paygate-dragon-form', [ $this, 'clubForm']);
 	}
 		
 	public function payCheckout($atts, $content = null) {
@@ -36,7 +37,7 @@ class PayGateShortcodes {
 		$atts = shortcode_atts([
 		], $atts, 'paygate-checkout');
 		
-		$this->verifyDragonCode();
+		$this->verifyClubCode();
 		$jsAllowCart = $this->pg->settings()->allowMultipleTickets() ? 'true' : 'false';
 		
 		ob_start();
@@ -60,7 +61,7 @@ class PayGateShortcodes {
 		<div class="paygate-tickets">
 		<form method="post" action="/paygate-handler" id="paygate-form">
 		<input type="hidden" name="action" value="pay">
-		<input type="hidden" name="paygate-dragon-id" value="<?php echo $this->currentDragonId?>">
+		<input type="hidden" name="paygate-club-id" value="<?php echo $this->currentClubId?>">
 		<table id="paygate-cart" style="display: <?php
 				if ($this->pg->settings()->allowMultipleTickets()):?>auto<?php else:?>none<?php endif;?>">
 		<thead>
@@ -93,9 +94,9 @@ class PayGateShortcodes {
 		], $atts, 'paygate-name');
 		ob_start();
 		
-		$this->verifyDragonCode();
-		if (empty($atts['value']) and $this->currentDragonId) {
-			$member = $this->pg->getDragonCard($this->currentDragonId);
+		$this->verifyClubCode();
+		if (empty($atts['value']) and $this->currentClubId) {
+			$member = $this->pg->getClubCard($this->currentClubId);
 			$atts['value'] = $member->firstname . ' ' . $member->lastname;
 		}
 			
@@ -141,7 +142,7 @@ class PayGateShortcodes {
 		$atts = shortcode_atts([
 			'type' => ''
 		], $atts, 'paygate-button');
-		$this->verifyDragonCode();
+		$this->verifyClubCode();
 		
 		$ticketType = $atts['type'];
 		if (empty($ticketType)) {
@@ -179,33 +180,32 @@ class PayGateShortcodes {
 		return ob_get_clean();
 	}
 	
-	private function getTicketPrice($forDragon, $ticketType) {
-		$isDragon = !is_null($this->currentDragonId) && !($this->currentDragonIdWasUsed) && $forDragon;
-		if ($isDragon)
-			error_log("PayGate: Calculating price for dragon ticket");
-		return $this->prices[$ticketType][$isDragon ? 1 : 0];
+	private function getTicketPrice($forClub, $ticketType) {
+		$isClub = !is_null($this->currentClubId) && !($this->currentClubIdWasUsed) && $forClub;
+		if ($isClub)
+			error_log("PayGate: Calculating price for club ticket");
+		return $this->prices[$ticketType][$isClub ? 1 : 0];
 	}
 	
-	private function verifyDragonCode() {
-		if ($this->currentDragonId)
+	private function verifyClubCode() {
+		if ($this->currentClubId)
 			return;
-		$dragonid = $_REQUEST['dragon-id'];
-		if (!empty($dragonid)) {
-			if (!$this->pg->verifyDragonId($dragonid)) {
-				print 'כרטיס דרקון לא חוקי!';
-				return;
+		$clubid = $_REQUEST['club-id'];
+		if (!empty($clubid)) {
+			if (!$this->pg->verifyClubId($clubid)) {
+				wp_die(esc_html__('Invalid club ID!', 'isrp-event-paygate'));
 			}
 			
-			$this->currentDragonId = $dragonid;
-			$mid = $this->pg->getDragonCard($dragonid)->member_number;
-			if ($this->pg->database()->checkUsedDragonId($mid)) {
-				$this->currentDragonIdWasUsed = true;
+			$this->currentClubId = $clubid;
+			$mid = $this->pg->getClubCard($clubid)->member_number;
+			if ($this->pg->database()->checkUsedClubId($mid)) {
+				$this->currentClubIdWasUsed = true;
 				ob_start()
 				?>
-				<div class="paygate-no-dragon">
-				<h3>כרטיס דרקון זכאי להנחה בקנית כרטיס אחד בלבד</h3>
+				<div class="paygate-no-club">
+				<h3><?php _e('Club members are elgible for only 1 discounted ticket', 'isrp-event-paygate')?></h3>
 				<form method="get" action="">
-				<button type="submit">לחץ כאן לחזור לטופס הרכישה</button>
+				<button type="submit"><?php _e('Click here to go back to registration form', 'isrp-event-paygate')?></button>
 				</form>
 				</div>
 				<?php
@@ -214,15 +214,15 @@ class PayGateShortcodes {
 		}
 	}
 	
-	public function dragonForm($atts, $content = null) {
+	public function clubForm($atts, $content = null) {
 		$atts = shortcode_atts([
 			'success' => '',
 			'width' => '',
 			'style' => '',
-		], $atts, 'paygate-dragon-form');
+		], $atts, 'paygate-club-form');
 		
-		// if there is already a dragon code, don't show
-		if (@$_REQUEST['dragon-id'])
+		// if there is already a club code, don't show
+		if (@$_REQUEST['club-id'])
 			return '';
 		
 		if (empty($atts['success']))
@@ -230,31 +230,31 @@ class PayGateShortcodes {
 		
 		ob_start();
 		?>
-		<div class="paygate-dragon-club">
+		<div class="paygate-club-club">
 		<form method="post" action="/paygate-handler">
-		<input type="hidden" name="action" value="dragon-verify">
+		<input type="hidden" name="action" value="club-verify">
 		<input type="hidden" name="success-page" value="<?php echo home_url($atts['success'])?>">
 		<?php echo do_shortcode($content); ?>
-		<input type="text" name="dragon-email"
+		<input type="text" name="club-email"
 			width="<?php echo $atts['width']; ?>"
 			value="<?php echo $atts['value']; ?>"
 			style="<?php echo $atts['style']; ?>">
-		<button type="submit">שליחה</button>
+		<button type="submit"><?php _e('Send', 'isrp-event-paygate')?></button>
 		</form>
 		</div>
 		<?php
 		return ob_get_clean();
 	}
 	
-	public function dragonVerify() {
-		$email = @$_REQUEST['dragon-email'];
+	public function clubVerify() {
+		$email = @$_REQUEST['club-email'];
 		$success = @$_REQUEST['success-page'];
-		$id = $this->pg->getDragonId($email);
+		$id = $this->pg->getClubId($email);
 		if ($id !== false) {
-			header('Location: ' . $success . '?dragon-id=' . $id);
+			header('Location: ' . $success . '?club-id=' . $id);
 			exit();
 		}
-		print "כתובת דואר לא מוכרת, אנא נסה שנית";
-		exit();
+		
+		wp_die( __('Unrecognized e-mail address, please try again', 'isrp-event-paygate') );
 	}
 }
