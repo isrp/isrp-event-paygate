@@ -123,13 +123,18 @@ class PayGateSettingsPage {
 				return $this->showEvents($this->pg->database()->getEvent(@$_REQUEST['event-id']));
 			case 'delete':
 				if (!$this->pg->database()->deleteEvent(@$_REQUEST['event-id']))
-					add_settings_error('paygate', 'events', 'Error deleting event');
+					add_settings_error('paygate', 'events', __('Error deleting event', 'isrp-event-paygate'));
 				break;
 			case 'add-period':
+				if (empty(@$_REQUEST['name'])) {
+					add_settings_error('paygate', 'events', __('Please set period name', 'isrp-event-paygate'));
+					break;
+				}
 				$evid = (int)@$_REQUEST['event-id'];
 				$dt = new DateTime(@$_REQUEST['end-period'], $paygate_default_tz);
-				$this->pg->database()->addPeriod($evid, @$_REQUEST['name'],
-					$dt->getTimestamp()+86399); // getTimestamp gets time for the beginning of the day
+				if (!$this->pg->database()->addPeriod($evid, @$_REQUEST['name'],
+					$dt->getTimestamp()+86399)) // getTimestamp gets time for the beginning of the day
+					add_settings_error('paygate', 'events', __('Failed to add period!', 'isrp-event-paygate'));
 				break;
 			case 'delete-period':
 				$evid = (int)@$_REQUEST['event-id'];
