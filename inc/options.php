@@ -99,7 +99,7 @@ class PayGateSettingsPage {
 	}
 
 	public function clubMembershipAPI() {
-		return $this->clubMembersAPI->getValue();
+		return $this->clubMembersAPI->getValue() ?: 'http://api.roleplay.org.il/club';
 	}
 	
 	public function setStyleDirection() {
