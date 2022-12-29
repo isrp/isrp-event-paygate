@@ -3,7 +3,7 @@
  Plugin Name: ISRP Event PayGate
  Plugin URI:  http://github.com/isrp/isrp-event-paygate
  Description: Plugin for the Israeli Society of Roleplayers' day-event payments system
- Version:     1.4.2
+ Version:     1.5.1
  Author:      Oded Arbel
  Author URI:  https://github.com/isrp/isrp-event-paygate
  License:     GPLv2

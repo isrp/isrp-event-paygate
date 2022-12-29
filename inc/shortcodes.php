@@ -170,18 +170,20 @@ class PayGateShortcodes {
 		$atts = shortcode_atts([
 			'type' => ''
 		], $atts, 'paygate-price');
+		$this->verifyClubCode();
 		$ticketType = $atts['type'] ?: $this->currentTicketType;
 		if (empty($ticketType)) {
 			if (count($this->prices) == 1)
 				$ticketType = key($this->prices);
 			else
-				return 'TYPE ERROR';
+				return 'TYPE ERROR: available types: ' . join("; ", array_keys($this->prices));
 		}
 		if (!isset($this->prices[$ticketType]))
 			return 'Invalid type: '.$ticketType;
 		
 		ob_start();
 		$fieldid = bin2hex(openssl_random_pseudo_bytes(8));
+		if ($this->pg->settings()->allowMultipleTickets()) {
 		?>
 		<span id="<?php echo $fieldid ?>"></span>
 		<script>
@@ -192,12 +194,20 @@ class PayGateShortcodes {
 		});
 		</script>
 		<?php
+		} else {
+		?>
+		<span id="<?php echo $fieldid ?>"><!-- static price for <?php $ticketType ?> -->
+			<?php echo $this->getTicketPrice((boolean)$this->currentClubId, $ticketType);?>
+		</span>
+		<?php
+		}
 		return ob_get_clean();
 	}
 	
 	public function payButton($atts, $content = null, $tag = '') {
 		$atts = shortcode_atts([
-			'type' => ''
+			'type' => '',
+			'class' => '',
 		], $atts, $tag);
 		$this->verifyClubCode();
 		
@@ -212,11 +222,12 @@ class PayGateShortcodes {
 			return 'Invalid type: '.$ticketType;
 
 		$this->currentTicketType = $ticketType;
+		$class = $atts['class'] ? "class=\"{$atts['class']}\"" : '';
 		ob_start();
 		
 		if ($this->availableTickets == 0) {
 			?>
-			<button type="button" disabled><?php _e('Sold out', 'isrp-event-paygate')?></button>
+			<button <?php echo $class?> type="button" disabled><?php _e('Sold out', 'isrp-event-paygate')?></button>
 			<?php
 			return ob_get_clean();
 		}
@@ -229,7 +240,7 @@ class PayGateShortcodes {
 		'<?php echo $this->getTicketPrice(false, $this->currentTicketType);?>'
 		];
 		</script>
-		<button type="button" onclick="PayGateCheckout.addTicket(this, '<?php echo $this->currentTicketType?>')">
+		<button <?php echo $class?> type="button" onclick="PayGateCheckout.addTicket(this, '<?php echo $this->currentTicketType?>')">
 		<?php echo do_shortcode(trim($content)) ?>
 		</button>
 		<?php
@@ -290,7 +301,7 @@ class PayGateShortcodes {
 
 		ob_start();
 		?>
-		<div class="paygate-club-club">
+		<div class="paygate-club">
 		<form method="post" action="/?paygate-handler">
 		<input type="hidden" name="action" value="club-verify">
 		<input type="hidden" name="success-page" value="<?php echo $atts['success']?>">
