@@ -59,7 +59,7 @@ class PayGate {
 				$rescode = @$_GET['Response'];
 				$resmessage = PayGatePelepayConstants::RESPONSE_CODES[$rescode];
 				wp_die(sprintf(esc_html__(
-					'An error occured while processing the payment - try again and if it reoccures, let the site manager know that you got this error:\n\n[%2$s] %2$s',
+					'An error occured while processing the payment - try again and if it reoccures, let the site manager know that you got this error:\n\n[%1$s] %2$s' /*translators: result code, result message*/,
 					'isrp-event-paygate'), $rescode, $resmessage));
 				return;
 			case 'pay-success':
@@ -77,7 +77,8 @@ class PayGate {
 		$total = $calldata['total'];
 		$name = explode(' ',$calldata['tickets'][0][0],2);
 		$event = $this->database()->getEvent($this->database()->getActiveEventId());
-		return "Response=000&ConfirmationCode=$code&index=$index&amount=$total&firstname={$name[0]}&lastname={$name[1]}&email=test@roleplay.org.il&phone=5551234&".
+		$testEmail = $this->settings()->adminBCCMail() ?: "test@roleplay.org.il";
+		return "Response=000&ConfirmationCode=$code&index=$index&amount=$total&firstname={$name[0]}&lastname={$name[1]}&email={$testEmail}&phone=5551234&".
 				"payfor=".urlencode($event->name)."&orderid=paygate:" . base64_decode($tid);
 	}
 
@@ -187,7 +188,8 @@ class PayGate {
 		}
 
 		if ($event->max_tickets > 0 && $event->sold  + count($ticketdata) > $event->max_tickets) {
-				wp_die(sprintf(esc_html__('Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again.', 'isrp-event-paygate'), $event->max_tickets - $event->sold, count($ticketdata)));
+				wp_die(sprintf(esc_html__('Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again.' /*translators: tickets left, tickets ordered */, 'isrp-event-paygate'),
+							   $event->max_tickets - $event->sold, count($ticketdata)));
 		}
 		$calldata = json_encode([
 			'time' => time(),
@@ -201,7 +203,7 @@ class PayGate {
 		$transaction_id = md5($calldata . "secret");
 		$event = $this->database()->getEvent($this->database()->getActiveEventId());
 		print $this->processor->get_form(esc_html__('Payment processing', 'isrp-event-paygate'), $total,
-			sprintf(esc_html__('%1$s tickets for %2$s', 'isrp-event-paygate'), count($ticketdata), $event->name), $transaction_id,
+			sprintf(esc_html__('%1$s tickets for %2$s' /*translators: ticket count, event*/, 'isrp-event-paygate'), count($ticketdata), $event->name), $transaction_id,
 			home_url('/index.php/paygate-handler/pay-success/'. base64_encode($transaction_id)),
 			home_url('/index.php/paygate-handler/pay-failure/'. base64_encode($transaction_id)),
 			home_url('/index.php/paygate-handler/pay-cancel/'. base64_encode($transaction_id)));
@@ -224,7 +226,7 @@ class PayGate {
 		if ($result['Response'] != '000') {
 			error_log("PayGate: PayGate transaction failed: ". print_r($result, true));
 			wp_die(sprintf(
-				esc_html__('Error processing payment - "%1$s". Please contact the site administrator','isrp-event-paygate'),
+				esc_html__('Error processing payment - "%1$s". Please contact the site administrator' /*translators: error text*/,'isrp-event-paygate'),
 				$resmessage));
 		}
 
@@ -245,30 +247,8 @@ class PayGate {
 		$payer = $result['email'];
 		$payerName = urldecode($result['firstname'] . ' ' . $result['lastname']);
 		$event = $this->database()->getEvent($this->database()->getActiveEventId());
-		ob_start();
-		?>
-		<div dir="rtl">
-		<h1>אישור תשלום עבור כרטיסים ל<?php echo $event->name?></h1>
-		<h2>פרטים:</h2>
-		<table>
-		<tr><td>שם המשלם:</td><td><?php echo $payerName?></td></tr>
-		<tr><td>דואר אלקטרוני:<td><td><?php echo $result['email']?></td></tr>
-		<tr><td>מס טלפון לאישור:<td><td><?php echo $result['phone']?></td></tr>
-		<tr><td>קוד אישור הזמנה:</td><td><?php echo $result['ConfirmationCode']?></td></tr>
-		</table>
-
-		<h2>כרטיסים:</h2>
-		<table style="width: 80%; border-collapse: collapse; border: solid gray 1px;">
-		<thead>
-		<tr>
-			<th style="border: solid gray 1px;">שם</th>
-			<th style="border: solid gray 1px;">סוג הכרטיס</th>
-			<th style="border: solid gray 1px;">מחיר</th>
-			<th style="border: solid gray 1px;">קוד</th></tr>
-		</thead>
-		<tbody>
-		<?php
-
+		$orderid = $tickets['order_id'] . ':' . bin2hex(openssl_random_pseudo_bytes(2));
+		
 		foreach ($tickets['tickets'] as $ticket) {
 			$name = urldecode($ticket[0]);
 			if (empty($name))
@@ -276,38 +256,84 @@ class PayGate {
 			$details = [ 'data' => $ticket[4] ];
 			$details = array_merge($details, $result);
 			$details = json_encode($details, JSON_UNESCAPED_UNICODE);
-			$orderid = $tickets['order_id'] . ':' . bin2hex(openssl_random_pseudo_bytes(2));
 			$this->database()->storeRegistration($name, $ticket[1], $tickets['period'],
-				$ticket[2], $tickets['time'], $orderid, $ticket[3] ? $clubcard->member_number : null, $details);
-			?>
-			<tr>
-			<td><?php echo $name?></td>
-			<td><?php echo $ticket[1]?> <?php if ($ticket[3]):?> (הנחת מועדון דרקון) <?php endif;?></td>
-			<td style="text-align:center;">₪<?php echo $ticket[2]?></td>
-			<td style="text-align:center;"><?php echo $orderid?></td>
-			</tr>
-			<?php
+												 $ticket[2], $tickets['time'], $orderid, $ticket[3] ? $clubcard->member_number : null, $details);
 		}
-		?>
-		</tbody>
-		<tbody>
-		<tr>
-		<th style="border: solid gray 1px;">סה"כ:</th>
-		<td style="border: solid gray 1px;" colspan="3">₪<?php echo $result['amount']?></td>
-		</tbody>
-		</table>
-		</div>
-		<?php
-
-		// send confirmation email
-		add_filter( 'wp_mail_content_type', [ $this, 'wpdocs_set_html_mail_content_type' ]);
-		wp_mail($payer, 'אישור הזמנה של כרטיסים ל'.$event->name, ob_get_clean());
-		remove_filter( 'wp_mail_content_type', [ $this, 'wpdocs_set_html_mail_content_type' ]);
+		
+		$this->emailInvoice($payer, $event, $payerName, $tickets, $result, $orderid, false);
+		$bccAdmin = $this->settings()->adminBCCMail();
+		if ($bccAdmin)
+			$this->emailInvoice($bccAdmin, $event, $payerName, $tickets, $result, $orderid, true);
 
 		$successpage = '/' . $this->database()->getSuccessLandingPage($tickets['period']);
 		header('Location: ' . $successpage);
 		error_log("PayGate: Send redirect - Location: $successpage");
 		exit();
+	}
+
+	private function emailInvoice($to, $event, $payerName, $tickets, $result, $orderid, $admin = false) {
+		ob_start();
+		?>
+		<div dir="rtl">
+		<h1><?php printf(esc_html__('Payment confirmation for tickets to %1$s' /*translators: event*/, 'isrp-event-paygate'), $event->name)?></h1>
+		<h2><?php _e('Details', 'isrp-event-paygate')?>:</h2>
+		<table>
+		<tr><th><?php _e('Payee', 'isrp-event-paygate')?>:</td><td><?php echo $payerName?></td></tr>
+		<tr><th><?php _e('E-Mail', 'isrp-event-paygate')?>:<td><td><?php echo $result['email']?></td></tr>
+		<tr><th><?php _e('Confirmation Phone', 'isrp-event-paygate')?>:<td><td><?php echo $result['phone']?></td></tr>
+		<tr><th><?php _e('Confirmation Code', 'isrp-event-paygate')?>:</td><td><?php echo $result['ConfirmationCode']?></td></tr>
+		</table>
+		
+		<h2><?php _e('Tickets', 'isrp-event-paygate')?>:</h2>
+		<table style="width: 80%; border-collapse: collapse; border: solid gray 1px;">
+		<thead>
+		<tr>
+		<th style="border: solid gray 1px;"><?php _e('Name', 'isrp-event-paygate')?></th>
+		<th style="border: solid gray 1px;"><?php _e('Ticket Type', 'isrp-event-paygate')?></th>
+		<th style="border: solid gray 1px;"><?php _e('Price', 'isrp-event-paygate')?></th>
+		<th style="border: solid gray 1px;"><?php _e('Code', 'isrp-event-paygate')?></th></tr>
+		</thead>
+		<tbody>
+		<?php
+		
+		foreach ($tickets['tickets'] as $ticket) {
+			$name = urldecode($ticket[0]);
+			if (empty($name))
+				$name = $payerName;	
+			?>
+			<tr>
+			<td><?php echo $name?></td>
+			<td><?php echo $ticket[1]?> <?php if ($ticket[3]):?> (<?php _e('Club discount', 'isrp-event-paygate')?>) <?php endif;?></td>
+			<td style="text-align:center;">₪<?php echo $ticket[2]?></td>
+			<td style="text-align:center;"><?php echo $orderid?></td>
+			</tr>
+			<?php
+			if ($admin) {
+				?>
+				<tr>
+				<th style="vertical-align: top; background-color: #e0e0e0;"><?php _e('Form details:', 'isrp-event-paygate')?></th>
+				<td colspan="3" style="background-color: #e0e0e0;"><?php foreach ($ticket[4] as $field => $val):?><?php echo $field?>: <?php echo $val?><br/><?php endforeach?></td>
+				</tr>
+				<?php
+			}
+		}
+		?>
+		</tbody>
+		<tbody>
+		<tr>
+		<th style="border: solid gray 1px;"><?php _e('Total', 'isrp-event-paygate')?>:</th>
+		<td style="border: solid gray 1px;" colspan="3">₪<?php echo $result['amount']?></td>
+		</tbody>
+		</table>
+		</div>
+		<?php
+		
+		// send confirmation email
+		$body = ob_get_clean();
+		$subject = sprintf(esc_html__('‎Ticket order confirmation for %1$s' /*translators: event name*/, 'isrp-event-paygate'), $event->name);
+		add_filter( 'wp_mail_content_type', [ $this, 'wpdocs_set_html_mail_content_type' ]);
+		wp_mail($to, $subject, $body);
+		remove_filter( 'wp_mail_content_type', [ $this, 'wpdocs_set_html_mail_content_type' ]);
 	}
 
 	public function wpdocs_set_html_mail_content_type() {
