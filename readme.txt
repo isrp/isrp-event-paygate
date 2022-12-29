@@ -3,7 +3,7 @@ Contributors: guss77
 Tags: events, payment, pelepay
 Requires at least: 5.0
 Tested up to: 6.1
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 Requires PHP: 7.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -139,6 +139,7 @@ Paygate ticket purchase button.
 #### Atrributes
 
 * `type` (optional/required) ticket type of purchase. This attribute is optional if there is only one ticket type, otherwise the ticket type must be specified exactly.
+* `class` (optional) CSS class to apply to the generated button. 
 
 ### `[paygate-price]`
 
