@@ -128,7 +128,7 @@ class PayGateShortcodes {
 
 		switch ($atts['type']) {
 			case 'select':
-				$items = explode(';', trim($content));
+				$items = explode(';', preg_replace('/(?:^\s+|\s+$)/u', '', $content));
 				?>
 				<select name="paygate-field-<?php echo $atts['name']?>"
 					<?php if ($atts['width']):?> width="<?php echo $atts['width']; ?>" <?php endif ?>
