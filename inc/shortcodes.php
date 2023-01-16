@@ -37,6 +37,7 @@ class PayGateShortcodes {
 		
 	public function payCheckout($atts, $content = null) {
 		wp_enqueue_script('paygate-shortcodes', ISRP_EVENT_PAYGATE_URL . '/scripts/shortcode-scripts.js', [ 'jquery' ], null, true);
+		wp_enqueue_style('paygate-user-style', ISRP_EVENT_PAYGATE_URL . '/assets/style.css', [], null);
 		$atts = shortcode_atts([
 		], $atts, 'paygate-checkout');
 		
@@ -59,6 +60,10 @@ class PayGateShortcodes {
 		jQuery(document).ready(function() {
 			window.PayGateCheckout = new EventPayGate(<?php echo $jsAllowCart?>, <?php echo $this->availableTickets?>,
 											 '<?php _e('Sold out', 'isrp-event-paygate')?>');
+			let btn = document.getElementById('paygate-button');
+			if (btn) {
+				btn.disabled = false;
+			}
 		});
 		</script>
 		<div class="paygate-tickets">
@@ -128,7 +133,7 @@ class PayGateShortcodes {
 
 		switch ($atts['type']) {
 			case 'select':
-				$items = explode(';', trim($content));
+				$items = explode(';', preg_replace('/(?:^\s+|\s+$)/u', '', $content));
 				?>
 				<select name="paygate-field-<?php echo $atts['name']?>"
 					<?php if ($atts['width']):?> width="<?php echo $atts['width']; ?>" <?php endif ?>
@@ -240,7 +245,7 @@ class PayGateShortcodes {
 		'<?php echo $this->getTicketPrice(false, $this->currentTicketType);?>'
 		];
 		</script>
-		<button <?php echo $class?> type="button" onclick="PayGateCheckout.addTicket(this, '<?php echo $this->currentTicketType?>')">
+		<button <?php echo $class?> type="button" id="paygate-button" disabled="disabled" onclick="PayGateCheckout.addTicket(this, '<?php echo $this->currentTicketType?>')">
 		<?php echo do_shortcode(trim($content)) ?>
 		</button>
 		<?php
