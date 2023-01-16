@@ -36,7 +36,7 @@ class PayGateShortcodes {
 	}
 		
 	public function payCheckout($atts, $content = null) {
-		wp_enqueue_script('paygate-shortcodes', ISRP_EVENT_PAYGATE_URL . '/scripts/shortcode-scripts.js', [ 'jquery' ], null, true);
+		wp_enqueue_script('paygate-shortcodes', ISRP_EVENT_PAYGATE_URL . '/scripts/shortcode-scripts.js', [], null, true);
 		wp_enqueue_style('paygate-user-style', ISRP_EVENT_PAYGATE_URL . '/assets/style.css', [], null);
 		$atts = shortcode_atts([
 		], $atts, 'paygate-checkout');
@@ -56,15 +56,20 @@ class PayGateShortcodes {
 		}
 		
 		?>
-		<script>
-		jQuery(document).ready(function() {
+		<script defer>
+		var setupPaygate = function() {
+			if (!window.EventPayGate) {
+				window.setTimeout(setupPaygate, 500);
+				return;
+			}
 			window.PayGateCheckout = new EventPayGate(<?php echo $jsAllowCart?>, <?php echo $this->availableTickets?>,
 											 '<?php _e('Sold out', 'isrp-event-paygate')?>');
 			let btn = document.getElementById('paygate-button');
 			if (btn) {
 				btn.disabled = false;
 			}
-		});
+		};
+		setupPaygate();
 		</script>
 		<div class="paygate-tickets">
 		<form method="post" action="/?paygate-handler" id="paygate-form">
