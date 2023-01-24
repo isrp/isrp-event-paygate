@@ -64,8 +64,7 @@ class PayGateShortcodes {
 			}
 			window.PayGateCheckout = new EventPayGate(<?php echo $jsAllowCart?>, <?php echo $this->availableTickets?>,
 											 '<?php _e('Sold out', 'isrp-event-paygate')?>');
-			let btn = document.getElementById('paygate-button');
-			if (btn) {
+			for (let btn of document.getElementsByName('paygate-button')) {
 				btn.disabled = false;
 			}
 		};
@@ -250,7 +249,7 @@ class PayGateShortcodes {
 		'<?php echo $this->getTicketPrice(false, $this->currentTicketType);?>'
 		];
 		</script>
-		<button <?php echo $class?> type="button" id="paygate-button" disabled="disabled" onclick="PayGateCheckout.addTicket(this, '<?php echo $this->currentTicketType?>')">
+		<button <?php echo $class?> type="button" name="paygate-button" disabled="disabled" onclick="PayGateCheckout.addTicket(this, '<?php echo $this->currentTicketType?>')">
 		<?php echo do_shortcode(trim($content)) ?>
 		</button>
 		<?php
