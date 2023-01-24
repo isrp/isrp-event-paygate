@@ -3,7 +3,7 @@ Contributors: guss77
 Tags: events, payment, pelepay
 Requires at least: 5.0
 Tested up to: 6.1
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 Requires PHP: 7.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
