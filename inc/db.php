@@ -6,6 +6,7 @@ class PayGateDatabase {
 	var $events_table_name;
 	var $periods_table_name;
 	var $prices_table_name;
+	var $rooms_table_name;
 	var $db;
 	var $site_prefix;
 	
@@ -17,6 +18,7 @@ class PayGateDatabase {
 		$this->events_table_name = $this->db->prefix . "paygate_events";
 		$this->periods_table_name = $this->db->prefix . "paygate_periods";
 		$this->prices_table_name = $this->db->prefix . "paygate_prices";
+		$this->rooms_table_name = $this->db->prefix . "paygate_rooms";
 		
 		register_activation_hook( $mainfile, [ $this, 'install' ]);
 		add_action( 'plugins_loaded', [ $this, 'updateDB']);
@@ -77,6 +79,13 @@ class PayGateDatabase {
 			full_price DECIMAL(5,2) NOT NULL,
 			club_price DECIMAL(5,2) DEFAULT NULL,
 			PRIMARY KEY (id)
+		) $charset_collate;");
+
+		dbDelta("CREATE TABLE $this->rooms_table_name (
+  			id INT NOT NULL AUTO_INCREMENT,
+     			ticket_type_id INT NOT NULL,
+			room_name VARCHAR(255) NOT NULL,
+   			max_tickets INT NOT NULL DEFAULT 0
 		) $charset_collate;");
 		
 		dbDelta("CREATE TABLE $this->reg_table_name (
