@@ -1,7 +1,7 @@
 <?php
 
 class PayGateDatabase {
-	var $db_version = '10';
+	var $db_version = '17';
 	var $reg_table_name;
 	var $events_table_name;
 	var $periods_table_name;
@@ -18,7 +18,9 @@ class PayGateDatabase {
 		$this->events_table_name = $this->db->prefix . "paygate_events";
 		$this->periods_table_name = $this->db->prefix . "paygate_periods";
 		$this->prices_table_name = $this->db->prefix . "paygate_prices";
+		$this->roomlists_table_name = $this->db->prefix . "paygate_roomlists";
 		$this->rooms_table_name = $this->db->prefix . "paygate_rooms";
+		$this->ticket_room_list_name = $this->db->prefix . "paygate_ticketroomlist";
 		
 		register_activation_hook( $mainfile, [ $this, 'install' ]);
 		add_action( 'plugins_loaded', [ $this, 'updateDB']);
@@ -61,7 +63,7 @@ class PayGateDatabase {
 			created INT NOT NULL DEFAULT 0,
 			max_tickets INT NOT NULL DEFAULT 0,
 			success_page varchar(255) NOT NULL DEFAULT 'paygate-success',
-			PRIMARY KEY (id)
+			PRIMARY KEY  (id)
 		) $charset_collate;");
 		
 		dbDelta("CREATE TABLE $this->periods_table_name (
@@ -69,7 +71,7 @@ class PayGateDatabase {
 			event_id INT NOT NULL,
 			name varchar(255) NOT NULL,
 			period_end INT NOT NULL,
-			PRIMARY KEY (id)
+			PRIMARY KEY  (id)
 		) $charset_collate;");
 		
 		dbDelta("CREATE TABLE $this->prices_table_name (
@@ -78,16 +80,31 @@ class PayGateDatabase {
 			ticket_type VARCHAR(255) NOT NULL,
 			full_price DECIMAL(5,2) NOT NULL,
 			club_price DECIMAL(5,2) DEFAULT NULL,
-			PRIMARY KEY (id)
+			PRIMARY KEY  (id)
+		) $charset_collate;");
+
+		dbDelta("CREATE TABLE $this->roomlists_table_name (
+			id INT NOT NULL AUTO_INCREMENT,
+			event_id INT NOT NULL,
+			room_list_name VARCHAR(255) NOT NULL,
+			PRIMARY KEY  (id)
 		) $charset_collate;");
 
 		dbDelta("CREATE TABLE $this->rooms_table_name (
   			id INT NOT NULL AUTO_INCREMENT,
-     			ticket_type_id INT NOT NULL,
+     		room_list_id INT NOT NULL,
 			room_name VARCHAR(255) NOT NULL,
-   			max_tickets INT NOT NULL DEFAULT 0
+   			max_tickets INT NOT NULL DEFAULT 0,
+			PRIMARY KEY  (id)
 		) $charset_collate;");
 		
+		dbDelta("CREATE TABLE $this->ticket_room_list_name (
+			id int NOT NULL AUTO_INCREMENT,
+			ticket_type_id INT NOT NULL,
+			room_list_id INT NOT NULL,
+			PRIMARY KEY  (id)
+			) $charset_collate;");
+
 		dbDelta("CREATE TABLE $this->reg_table_name (
 			id int NOT NULL AUTO_INCREMENT,
 			event_id INT NOT NULL,
@@ -99,7 +116,8 @@ class PayGateDatabase {
 			order_id varchar(255) DEFAULT NULL,
 			club_id varchar(10) DEFAULT NULL,
 			details TEXT DEFAULT '',
-			PRIMARY KEY (id)
+			room_id INT DEFAULT NULL,
+			PRIMARY KEY  (id)
 		) $charset_collate;");
 	}
 	
@@ -375,6 +393,110 @@ class PayGateDatabase {
 	
 	public function deleteRegistration($regId) {
 		return $this->db->delete($this->reg_table_name, [ 'id' => $regId ]);
+	}
+
+
+
+	public function getRoom($room_id){
+		return $this->db->get_row(
+			"SELECT * FROM $this->rooms_table_name WHERE id = " . ((int)$room_id)
+		);
+	}
+
+	public function getAllRooms($room_list_id){
+		return this->db->get_results(
+			"SELECT * FROM $this->rooms_table_name WHERE room_list_id = ". ((int)$room_list_id)
+		);
+	}
+
+	public function addRoom($room_list_id , $room_name, $max_tickets){
+		if($room_list_id <= 0 || $max_tickets <= 0 || !is_numeric(max_tickets) || !is_numeric(room_list_id) ){
+			return null;
+		}
+
+		$this->db->insert($this->rooms_table_name, ['room_list_id' => (int)$room_list_id , 'room_name' => $room_name , 'max_tickets' => (int)$max_tickets]);
+
+	}
+
+	public function updateRoom($room_id, $room_name, $max_tickets){
+		if(!is_numeric($room_list_id) || !is_numeric($max_tickets)){
+			return null;
+		}
+
+		this->db->update($this->rooms_table_name, [
+				'room_name' =>  $room_name,
+				'max_tickets' => $max_tickets
+		] ,
+		[
+			'id' => $room_id
+		]);
+	}
+
+	public function deleteRoom($roomId){
+		if(!$this->verifyCanDeleteRoom($roomId)){
+			return false;
+		}
+
+		$this->db->delete($this->rooms_table_name, ['id' => $roomId]);
+		return true;
+	}
+
+	public function verifyCanDeleteRoom($roomId){
+		if($this->db->get_var(
+			"SELECT COUNT(*) FROM $this->reg_table_name WHERE id = " . ((int)$room_id)) > 0){
+				return false;
+			}
+		return true;
+	}
+
+
+
+
+	public function getRoomsList($listId){
+		return $this->db->get_row(
+			"SELECT * FROM $this->roomlists_table_name WHERE id = " . ((int)$listId)
+		);
+	}
+
+	public function getAllRoomsLists($eventId){
+		return $this->db->get_results(
+			"SELECT * FROM $this->roomlists_table_name WHERE event_id = ". ((int)$eventId)
+		);
+	}
+
+	public function addRoomList($roomlist_event_id, $room_list_name) {
+		if(!is_numeric($roomlist_event_id)){
+			return false;
+		}
+
+		return $this->db->insert($this->roomlists_table_name, ['room_list_name' => (int)$room_list_name , 'event_id' => $roomlist_event_id]);
+	}
+
+	public function deleteRoomsList($listId){
+		$rooms = $this->getAllRooms($listId);
+
+		foreach($rooms as $room){
+			if(!$this->verifyCanDeleteRoom($room->id)){
+				return false;
+			}
+		}
+
+		$thid->db->delete($this->rooms_table_name, ['room_list_id' => $listId]);
+
+		$this->db->delete($this->roomlist_table_name , ['id' => $listId]);
+	}
+
+	public function updateRoomsList($listId, $roomlist_name){
+		if(empty($roomlist_name)){
+			return null;
+		}
+
+		this->db->update($this->roomlist_table_name, [
+				'room_list_name' =>  $roomlist_name,
+		] ,
+		[
+			'id' => $listId
+		]);
 	}
 	
 }

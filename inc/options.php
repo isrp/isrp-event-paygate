@@ -48,6 +48,10 @@ class PayGateSettingsPage {
 						 __('Prices', 'isrp-event-paygate'),
 						 'manage_options', 'paygate-prices', [ $this, 'pricesPage' ]);
 		
+		add_submenu_page('paygate', __('Rooms', 'isrp-event-paygate'),
+						 __('Rooms', 'isrp-event-paygate'),
+						 'manage_options', 'paygate-rooms', [ $this, 'roomsPage' ]);
+		
 		add_submenu_page('paygate', __('Reports', 'isrp-event-paygate'),
 						 __('Reports', 'isrp-event-paygate'),
 						 'manage_options', 'paygate-reports', [ $this, 'reportsPage' ]);
@@ -239,6 +243,7 @@ class PayGateSettingsPage {
 						<button type="submit" name="events-action" title="<?php _e('Edit event','isrp-event-paygate')?>" value="edit"><i class="far fa-edit"></i></button>
 						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-prices&event-id=$ev->id")?>" title="<?php _e('Prices', 'isrp-event-paygate')?>"><i class="fas fa-hand-holding-usd"></i></a>
 						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-reports&event-id=$ev->id")?>" title="<?php _e('ּReports', 'isrp-event-paygate')?>"><i class="fas fa-clipboard-list"></i></a>
+						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-rooms&event-id=$ev->id")?>" title="<?php _e('ּRooms', 'isrp-event-paygate')?>"><i class="fas fa-people-roof"></i></a>
 						<button type="submit" name="events-action" title="<?php _e('Delete event','isrp-event-paygate')?>" value="delete"><i class="far fa-trash-alt"></i></button>
 					</form>
 				</td>
@@ -303,10 +308,37 @@ class PayGateSettingsPage {
 		</div>
 		<?php
 	}
+
+	public function showEventSelector($eventId, $pageId) {
+		?>
+		<form method="get" action="<?php echo admin_url("admin.php");?>">
+		<input type="hidden" name="page" value="<?php echo $pageId ?>">
+		<label>
+		<?php _e('Event', 'isrp-event-paygate')?>:
+		<select name="event-id" onchange="this.form.submit();">
+		<option><?php _e('Choose Event', 'isrp-event-paygate')?>:</option>
+		<?php foreach ($this->pg->database()->listEvents() as $ev):?>
+		<option value="<?php echo $ev->id?>" <?php
+			if ($ev->id == $eventId) echo "selected";
+		?>><?php echo $ev->name ?></option>
+		<?php endforeach;?>
+		</select>
+		</label>
+		</form>
+		<?php
+
+		if (!is_numeric($eventId))
+			return false;
+
+		$event = $this->pg->database()->getEvent($eventId);
+		if (!$event)
+			return false;
+		return $event;
+	}
 	
 	public function pricesPage() {
 		$eventId = @$_REQUEST['event-id'];
-		switch ($_REQUEST['prices-action']) {
+		switch (@$_REQUEST['prices-action']) {
 			case 'add-ticket-type':
 				$this->pg->database()->addPriceForAllPeriods($eventId, @$_REQUEST['ticket-type']);
 				break;
@@ -335,30 +367,13 @@ class PayGateSettingsPage {
 		$action_url = admin_url("admin.php?page=paygate-prices&event-id=$eventId");
 		?>
 		<div class="paygate">
-		<h1><?php _e('Edit Ticket Prices', 'isrp-event-paygate')?></h1>
-		<form method="get" action="<?php echo admin_url("admin.php");?>">
-		<input type="hidden" name="page" value="paygate-prices">
-		<label>
-		<?php _e('Event', 'isrp-event-paygate')?>:
-		<select name="event-id" onchange="this.form.submit();">
-		<option><?php _e('Choose Event', 'isrp-event-paygate')?>:</option>
-		<?php foreach ($this->pg->database()->listEvents() as $ev):?>
-		<option value="<?php echo $ev->id?>" <?php
-			if ($ev->id == $eventId) echo "selected";
-		?>><?php echo $ev->name ?></option>
-		<?php endforeach;?>
-		</select>
-		</label>
-		</form>
-		
+		<h1><?php _e('Edit Ticket Prices', 'isrp-event-paygate')?></h1>		
 		<?php
-		
-		if (!is_numeric($eventId))
+
+		$event = $this->showEventSelector($eventId, "paygate-prices");
+		if ($event === false)
 			return;
 		
-		$event = $this->pg->database()->getEvent($eventId);
-		if (!$event)
-			return;
 		$periods = $this->pg->database()->listPeriods($event->id);
 		$periodStart = date("j.n.Y",$event->created ?: 0);
 		$priceMatrix = [];
@@ -448,6 +463,85 @@ class PayGateSettingsPage {
 		</div>
 		<?php
 		endif;
+	}
+
+	public function roomsPage() {
+		$eventId = @$_REQUEST['event-id'];
+		switch (@$_REQUEST['rooms-action']) {
+			case 'add-room-list':
+				if (!$this->pg->database()->addRoomList($eventId, @$_REQUEST['room-name']))
+					add_settings_error('paygate', 'events', __('Error adding room list', 'isrp-event-paygate'));
+				break;
+			case 'add-room':
+				$this->pg->database()->deletePriceForAllPeriods($eventId, @$_REQUEST['ticket-type']);
+				break;
+		}
+		$this->showRoomsEditor($eventId);
+	}
+
+	public function showRoomsEditor($eventId) {
+		settings_errors();
+		$this->setStyleDirection();
+		$action_url = admin_url("admin.php?page=paygate-rooms&event-id=$eventId");
+		?>
+		<div class="paygate">
+		<h1><?php _e('Edit Room Lists', 'isrp-event-paygate')?></h1>		
+		<?php _e('<p>Creating rooms allow you to segregate a single ticket type into multiple partitions - each with its own independant ticket limit. '.
+			'For example a customer can buy "panel ticket" for a panel in the small room or the large hall.</p>'.
+			'<p>A room list are the collection of rooms that are associated with a ticket type, so you may have tickets for panel vs. tickets for screenings. '.
+			'If you assign the same room list to multiple ticket types, the room limit applies to all tickets sold for that room, regardless of type.</p>'.
+			'<p>This is an optional feature and you do not need to set up rooms and you need not assign room lists to ticket types. If you do use this feature though, '.
+			'it is recommended to use it instead of the even ticket limit as these two features may conflict.</p>', 'isrp-event-paygate')?>
+		<?php
+
+		$event = $this->showEventSelector($eventId, "paygate-rooms");
+		if ($event === false)
+			return;
+
+		?>
+		<form method="post" action="<?php echo $action_url?>">
+		<table>
+		<thead>
+			<tr>
+			<th><?php _e('Room List', 'isrp-event-paygate')?></th>
+			<th><?php _e('Rooms', 'isrp-event-paygate')?></th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach ($this->pg->database()->getAllRoomsLists($event->id) as $roomList):?>
+			<?php $roomListHeaderShown = false; ?>
+			<?php $rooms = $this->getAllRooms($roomList->id); ?>
+			<?php $span = 1 + count($rooms); /* add one for new room entry box */ ?>
+			<?php foreach ($rooms as $room):?>
+				<tr class="room>
+					<?php if(!$roomListHeaderShown): ?>
+						<th rowspan="<?php echo $span;?>"><?php echo $roomList->room_list_name?></th>
+						<?php $roomListHeaderShown = true; ?>
+					<?php endif; ?>
+					<td><?php echo $room->room_name; ?></td>
+				</tr>
+			<?php endforeach; /* rooms */ ?>
+			<tr>
+				<label>
+				<span><?php _e('Room Name', 'isrp-event-paygate')?>:</span>
+				<input name="paygate-add-room[<?php echo $roomList->id?>]" type="text">
+				</label>
+				<button type="submit" name="rooms-action" value="add-room"><?php _e('Add', 'isrp-event-paygate')?></button>
+			</tr>
+		<?php endforeach; /* lists */ ?>
+		</tbody>
+		</table>
+
+		<p>
+			<label>
+			<span><?php _e('Room List', 'isrp-event-paygate')?>:</span>
+			<input name="room-name" type="text">
+			</label>
+			<button type="submit" name="rooms-action" value="add-roomlist"><?php _e('Add', 'isrp-event-paygate')?></button>
+		</p>
+
+		</form>
+		<?php
 	}
 	
 	public function reportsPage() {

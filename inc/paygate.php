@@ -86,7 +86,7 @@ class PayGate {
 		// Load only on my settings page
 		if (preg_match('/(?:page_paygate-\w+|toplevel_page_paygate)$/', $hook)) {
 			wp_enqueue_style( 'paygate_wp_admin_css', plugins_url('admin-style.css', __FILE__), [], 6 );
-			wp_enqueue_style( 'paygate_wp_admin_fa', 'https://use.fontawesome.com/releases/v5.1.0/css/all.css' );
+			wp_enqueue_style( 'paygate_wp_admin_fa', 'https://use.fontawesome.com/releases/v6.5.2/css/all.css' );
 		}
 	}
 
