@@ -519,7 +519,7 @@ class PayGateSettingsPage {
 		<div class="info-explain">		
 		<?php _e('<p>Creating rooms allow you to segregate a single ticket type into multiple partitions - each with its own independant ticket limit. '.
 			'For example a customer can buy "panel ticket" for a panel in the small room or the large hall.</p>'.
-			'<p>A room list are the collection of rooms that are associated with a ticket type, so you may have tickets for panel vs. tickets for screenings. '.
+			'<p>A room list is a collection of rooms that are associated with a ticket type, so you may have tickets for panels vs. tickets for screenings. '.
 			'If you assign the same room list to multiple ticket types, the room limit applies to all tickets sold for that room, regardless of type.</p>'.
 			'<p>This is an optional feature and you do not need to set up rooms and you need not assign room lists to ticket types. If you do use this feature though, '.
 			'it is recommended to use it instead of the even ticket limit as these two features may conflict.</p>', 'isrp-event-paygate')?>
