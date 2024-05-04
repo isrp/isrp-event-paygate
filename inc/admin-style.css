@@ -1,15 +1,41 @@
+.paygate .info-explain {
+	font-size: 13pt;
+	border: solid lightgray 2px;
+	background-color: #f9f9f9;
+	padding: .5em;
+	margin: .5em 0;
+	width: 80%;
+}
+
+.paygate .info-explain p:first-child {
+	margin-top: 0;
+}
+.paygate .info-explain p:last-child {
+	margin-bottom: 0;;
+}
+
+.paygate .info-explain p {
+	font-size: 13pt;
+}
+
+.paygate form button {
+	font-size: 13pt;
+}
+
 .paygate table button, .paygate-registrations table button {
 	border: 0;
 	background: transparent;
 	margin: 0;
 	padding: .1em;
 	cursor: pointer;
+	border: solid lightgray 1px;
 }
 
 .paygate table {
 	direction: var(--paygate-admin-direction, ltr);
 	width: 80%;
 	border-collapse: collapse;
+	font-size: 13pt;
 }
 
 .paygate table.internal {
@@ -48,9 +74,34 @@
 	padding: 0 .3em;
 }
 
+.paygate .info-notice {
+	background-color: #ddd;
+	color: #333;
+	border: solid lightblue 1px;
+	border-radius: 2px;
+	padding: .3em;
+}
+
 .paygate form label span {
 	min-width: 8em;
 	display: inline-block;
+	margin-inline-start: 1em;
+	font-size: 13pt;
+}
+.paygate form label:first-child span {
+	margin-inline-start: 0em;
+}
+
+.paygate input.paygate-maxtickets {
+	width: 5em;
+}
+
+.paygate table tr.paygate-roomlist, tr.paygate table .paygate-roomlist td {
+	border-bottom: none;
+	border-top: none;
+}
+.paygate table .paygate-roomlist-final {
+	border-top: none;
 }
 
 .paygate table p, .paygate-registrations table p {

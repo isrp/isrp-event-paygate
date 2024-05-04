@@ -310,6 +310,9 @@ class PayGateSettingsPage {
 	}
 
 	public function showEventSelector($eventId, $pageId) {
+		if (!is_numeric($eventId) && is_numeric($_SESSION['paygate-event-selected']))
+			$eventId = $_SESSION['paygate-event-selected'];
+
 		?>
 		<form method="get" action="<?php echo admin_url("admin.php");?>">
 		<input type="hidden" name="page" value="<?php echo $pageId ?>">
@@ -330,6 +333,7 @@ class PayGateSettingsPage {
 		if (!is_numeric($eventId))
 			return false;
 
+		$_SESSION['paygate-event-selected'] = $eventId;
 		$event = $this->pg->database()->getEvent($eventId);
 		if (!$event)
 			return false;
@@ -364,7 +368,6 @@ class PayGateSettingsPage {
 	public function showPriceEditor($eventId) {
 		settings_errors();
 		$this->setStyleDirection();
-		$action_url = admin_url("admin.php?page=paygate-prices&event-id=$eventId");
 		?>
 		<div class="paygate">
 		<h1><?php _e('Edit Ticket Prices', 'isrp-event-paygate')?></h1>		
@@ -373,7 +376,10 @@ class PayGateSettingsPage {
 		$event = $this->showEventSelector($eventId, "paygate-prices");
 		if ($event === false)
 			return;
+		if (!$eventId)
+			$eventId = $event->id;
 		
+		$action_url = admin_url("admin.php?page=paygate-prices&event-id=$eventId");
 		$periods = $this->pg->database()->listPeriods($event->id);
 		$periodStart = date("j.n.Y",$event->created ?: 0);
 		$priceMatrix = [];
@@ -469,11 +475,26 @@ class PayGateSettingsPage {
 		$eventId = @$_REQUEST['event-id'];
 		switch (@$_REQUEST['rooms-action']) {
 			case 'add-room-list':
-				if (!$this->pg->database()->addRoomList($eventId, @$_REQUEST['room-name']))
-					add_settings_error('paygate', 'events', __('Error adding room list', 'isrp-event-paygate'));
+				if ($this->pg->database()->addRoomList($eventId, stripslashes(@$_REQUEST['room-list-name'])) === false)
+					add_settings_error('paygate', 'rooms', __('Error adding room list.', 'isrp-event-paygate'));
 				break;
 			case 'add-room':
-				$this->pg->database()->deletePriceForAllPeriods($eventId, @$_REQUEST['ticket-type']);
+				foreach (@$_REQUEST['paygate-add-room'] as $listId => $roomName) {
+					if (!$roomName) continue;
+					$max = @$_REQUEST['paygate-max-tickets'][$listId];
+					if (!$max)
+						add_settings_error('paygate', 'rooms', __('Max tickets per room must be set.', 'isrp-event-paygate'));
+					else if ($this->pg->database()->addRoom($listId, $roomName, $max) === false)
+						add_settings_error('paygate', 'rooms', __('Error adding room.', 'isrp-event-paygate'));
+				}
+				break;
+			case 'delete-room':
+				if ($this->pg->database()->deleteRoom(@$_REQUEST['room-id']) === false)
+					add_settings_error('paygate', 'rooms', __('Error deleting room', 'isrp-event-paygate'));
+				break;
+			case 'delete-room-list':
+				if ($this->pg->database()->deleteRoomList(@$_REQUEST['list-id']) === false)
+					add_settings_error('paygate', 'rooms', __('Error deleting room list', 'isrp-event-paygate'));
 				break;
 		}
 		$this->showRoomsEditor($eventId);
@@ -482,24 +503,27 @@ class PayGateSettingsPage {
 	public function showRoomsEditor($eventId) {
 		settings_errors();
 		$this->setStyleDirection();
-		$action_url = admin_url("admin.php?page=paygate-rooms&event-id=$eventId");
 		?>
 		<div class="paygate">
-		<h1><?php _e('Edit Room Lists', 'isrp-event-paygate')?></h1>		
+		<h1><?php _e('Edit Room Lists', 'isrp-event-paygate')?></h1>
+		<?php
+
+		$event = $this->showEventSelector($eventId, "paygate-rooms");
+		if ($event === false)
+			return;
+		if (!$eventId)
+			$eventId = $event->id;
+
+		$action_url = admin_url("admin.php?page=paygate-rooms&event-id=$eventId");
+		?>
+		<div class="info-explain">		
 		<?php _e('<p>Creating rooms allow you to segregate a single ticket type into multiple partitions - each with its own independant ticket limit. '.
 			'For example a customer can buy "panel ticket" for a panel in the small room or the large hall.</p>'.
 			'<p>A room list are the collection of rooms that are associated with a ticket type, so you may have tickets for panel vs. tickets for screenings. '.
 			'If you assign the same room list to multiple ticket types, the room limit applies to all tickets sold for that room, regardless of type.</p>'.
 			'<p>This is an optional feature and you do not need to set up rooms and you need not assign room lists to ticket types. If you do use this feature though, '.
 			'it is recommended to use it instead of the even ticket limit as these two features may conflict.</p>', 'isrp-event-paygate')?>
-		<?php
-
-		$event = $this->showEventSelector($eventId, "paygate-rooms");
-		if ($event === false)
-			return;
-
-		?>
-		<form method="post" action="<?php echo $action_url?>">
+		</div>
 		<table>
 		<thead>
 			<tr>
@@ -508,38 +532,79 @@ class PayGateSettingsPage {
 			</tr>
 		</thead>
 		<tbody>
-		<?php foreach ($this->pg->database()->getAllRoomsLists($event->id) as $roomList):?>
-			<?php $roomListHeaderShown = false; ?>
-			<?php $rooms = $this->getAllRooms($roomList->id); ?>
-			<?php $span = 1 + count($rooms); /* add one for new room entry box */ ?>
+		<?php $hasRoomLists = false; ?>
+		<?php foreach ($this->pg->database()->getRoomLists($event->id) as $roomList):?>
+			<?php
+				$hasRoomLists = true;
+				$roomListHeaderShown = false;
+				$rooms = $this->pg->database()->getRooms($roomList->id);
+				$span = count($rooms) + 1;
+				if ($span < 2) {
+					$rooms = [false];
+					$span = 2;
+				}
+			?>
 			<?php foreach ($rooms as $room):?>
-				<tr class="room>
+				<tr class="paygate-roomlist">
 					<?php if(!$roomListHeaderShown): ?>
-						<th rowspan="<?php echo $span;?>"><?php echo $roomList->room_list_name?></th>
+						<th rowspan="<?php echo $span;?>">
+							<a href="<?php echo $action_url?>&rooms-action=delete-room-list&list-id=<?php echo $roomList->id?>"
+								title="<?php _e('Delete room list', 'isrp-event-paygate')?>" style="color: inherit;"
+								onclick="return confirm('<?php printf(__('Really delete room list %s?', 'isrp-event-paygate'), addslashes($roomList->room_list_name));?>')">
+									<i class="fas fa-trash-alt"></i></a>
+
+							<?php echo $roomList->room_list_name?>
+						</th>
 						<?php $roomListHeaderShown = true; ?>
 					<?php endif; ?>
-					<td><?php echo $room->room_name; ?></td>
+					<?php if ($room):?>
+					<td>
+						<a href="<?php echo $action_url?>&rooms-action=delete-room&room-id=<?php echo $room->id?>"
+							title="<?php _e('Delete room', 'isrp-event-paygate')?>" style="color: inherit;"
+							onclick="return confirm('<?php printf(__('Really delete room %s?', 'isrp-event-paygate'), addslashes($room->room_name));?>')">
+								<i class="fas fa-trash-alt"></i></a>
+
+						<?php echo $room->room_name; ?>
+						(<?php printf( _n( '%s ticket', '%s tickets', $room->max_tickets, 'isrp-event-paygate'), number_format_i18n($room->max_tickets)); ?>)
+					</td>
+					<?php else: ?>
+					<td><div class="info-notice">
+						<?php _e('No rooms in room list yet.', 'isrp-event-paygate');?>
+					</div></td>
+					<?php endif; ?>
 				</tr>
 			<?php endforeach; /* rooms */ ?>
-			<tr>
-				<label>
-				<span><?php _e('Room Name', 'isrp-event-paygate')?>:</span>
-				<input name="paygate-add-room[<?php echo $roomList->id?>]" type="text">
-				</label>
-				<button type="submit" name="rooms-action" value="add-room"><?php _e('Add', 'isrp-event-paygate')?></button>
+			<tr class="paygate-roomlist-final">
+				<td>
+					<form method="post" action="<?php echo $action_url?>">
+					<label>
+					<span><?php _e('Room Name', 'isrp-event-paygate')?>:</span>
+					<input name="paygate-add-room[<?php echo $roomList->id?>]" type="text">
+					</label>
+					<label>
+					<span><?php _e('No. of tickets', 'isrp-event-paygate')?>:</span>
+					<input name="paygate-max-tickets[<?php echo $roomList->id?>]" type="number" min="1" value="0" class="paygate-maxtickets">
+					</label>
+					<button type="submit" name="rooms-action" value="add-room"><?php _e('Add', 'isrp-event-paygate')?></button>
+					</form>
+				</td>
 			</tr>
 		<?php endforeach; /* lists */ ?>
+		<?php if(!$hasRoomLists):?>
+		<tr><td colspan="2"><div class="info-notice"><?php _e('No room lists defined. Please create one below.', 'isrp-event-paygate');?></div></td></tr>
+		<?php endif; ?>
 		</tbody>
 		</table>
 
+		<h3><?php _e("Create a new room list");?></h3>
+		<form method="post" action="<?php echo $action_url?>">
 		<p>
 			<label>
-			<span><?php _e('Room List', 'isrp-event-paygate')?>:</span>
-			<input name="room-name" type="text">
+			<span><?php _e('Name', 'isrp-event-paygate')?>:</span>
+			<input name="room-list-name" type="text">
 			</label>
-			<button type="submit" name="rooms-action" value="add-roomlist"><?php _e('Add', 'isrp-event-paygate')?></button>
+			<button type="submit" name="rooms-action" value="add-room-list"><?php _e('Add', 'isrp-event-paygate')?></button>
 		</p>
-
 		</form>
 		<?php
 	}
@@ -550,7 +615,7 @@ class PayGateSettingsPage {
 			wp_die( __('You do not have sufficient permissions to access this page.', 'isrp-event-paygate') );
 		
 		$eventId = @$_REQUEST['event-id'];
-		switch ($_POST['paygate-action']) {
+		switch (@$_POST['paygate-action']) {
 			case 'delete':
 				$this->pg->database()->deleteRegistration($_POST['id']);
 				break;

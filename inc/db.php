@@ -386,6 +386,7 @@ class PayGateDatabase {
 	}
 	
 	public function getRegistrationsPage($eventId, $page, $pageSize) {
+		if ($page < 1) $page = 1;
 		return $this->db->get_results("SELECT * FROM $this->reg_table_name ".
 			"WHERE event_id = " . ((int)$eventId) . " " .
 			"ORDER BY order_time DESC LIMIT $pageSize OFFSET " . (($page-1) * $pageSize));
@@ -403,27 +404,26 @@ class PayGateDatabase {
 		);
 	}
 
-	public function getAllRooms($room_list_id){
-		return this->db->get_results(
-			"SELECT * FROM $this->rooms_table_name WHERE room_list_id = ". ((int)$room_list_id)
+	public function getRooms($room_list_id){
+		return $this->db->get_results(
+			"SELECT * FROM $this->rooms_table_name WHERE room_list_id = ". ((int)$room_list_id) . " ORDER BY room_name"
 		);
 	}
 
-	public function addRoom($room_list_id , $room_name, $max_tickets){
-		if($room_list_id <= 0 || $max_tickets <= 0 || !is_numeric(max_tickets) || !is_numeric(room_list_id) ){
-			return null;
+	public function addRoom($room_list_id, $room_name, $max_tickets){
+		if($room_list_id <= 0 || $max_tickets <= 0 || !is_numeric($max_tickets) || !is_numeric($room_list_id) ){
+			return false;
 		}
 
-		$this->db->insert($this->rooms_table_name, ['room_list_id' => (int)$room_list_id , 'room_name' => $room_name , 'max_tickets' => (int)$max_tickets]);
-
+		return $this->db->insert($this->rooms_table_name, ['room_list_id' => $room_list_id , 'room_name' => $room_name , 'max_tickets' => $max_tickets]);
 	}
 
 	public function updateRoom($room_id, $room_name, $max_tickets){
 		if(!is_numeric($room_list_id) || !is_numeric($max_tickets)){
-			return null;
+			return false;
 		}
 
-		this->db->update($this->rooms_table_name, [
+		return this->db->update($this->rooms_table_name, [
 				'room_name' =>  $room_name,
 				'max_tickets' => $max_tickets
 		] ,
@@ -437,20 +437,16 @@ class PayGateDatabase {
 			return false;
 		}
 
-		$this->db->delete($this->rooms_table_name, ['id' => $roomId]);
-		return true;
+		return $this->db->delete($this->rooms_table_name, ['id' => $roomId]);
 	}
 
 	public function verifyCanDeleteRoom($roomId){
 		if($this->db->get_var(
-			"SELECT COUNT(*) FROM $this->reg_table_name WHERE id = " . ((int)$room_id)) > 0){
+			"SELECT COUNT(*) FROM $this->reg_table_name WHERE id = " . ((int)$roomId)) > 0){
 				return false;
 			}
 		return true;
 	}
-
-
-
 
 	public function getRoomsList($listId){
 		return $this->db->get_row(
@@ -458,7 +454,7 @@ class PayGateDatabase {
 		);
 	}
 
-	public function getAllRoomsLists($eventId){
+	public function getRoomLists($eventId){
 		return $this->db->get_results(
 			"SELECT * FROM $this->roomlists_table_name WHERE event_id = ". ((int)$eventId)
 		);
@@ -466,32 +462,36 @@ class PayGateDatabase {
 
 	public function addRoomList($roomlist_event_id, $room_list_name) {
 		if(!is_numeric($roomlist_event_id)){
+			error_log("Paygate: invalid event for add room list ('$roomlist_event_id')");
 			return false;
 		}
 
-		return $this->db->insert($this->roomlists_table_name, ['room_list_name' => (int)$room_list_name , 'event_id' => $roomlist_event_id]);
+		if (!$room_list_name) {
+			error_log("Paygate: invalid empty room list name!");
+			return false;
+		}
+
+		return $this->db->insert($this->roomlists_table_name, ['room_list_name' => $room_list_name , 'event_id' => $roomlist_event_id]);
 	}
 
-	public function deleteRoomsList($listId){
-		$rooms = $this->getAllRooms($listId);
-
-		foreach($rooms as $room){
+	public function deleteRoomList($listId){
+		foreach($this->getRooms($listId) as $room){
 			if(!$this->verifyCanDeleteRoom($room->id)){
 				return false;
 			}
 		}
 
-		$thid->db->delete($this->rooms_table_name, ['room_list_id' => $listId]);
-
-		$this->db->delete($this->roomlist_table_name , ['id' => $listId]);
+		if ($this->db->delete($this->rooms_table_name, ['room_list_id' => $listId]) == false)
+			return false;
+		return $this->db->delete($this->roomlists_table_name , ['id' => $listId]);
 	}
 
 	public function updateRoomsList($listId, $roomlist_name){
 		if(empty($roomlist_name)){
-			return null;
+			return false;
 		}
 
-		this->db->update($this->roomlist_table_name, [
+		return $this->db->update($this->roomlists_table_name, [
 				'room_list_name' =>  $roomlist_name,
 		] ,
 		[
