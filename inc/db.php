@@ -1,7 +1,7 @@
 <?php
 
 class PayGateDatabase {
-	var $db_version = '17';
+	var $db_version = '19';
 	var $reg_table_name;
 	var $events_table_name;
 	var $periods_table_name;
@@ -20,7 +20,7 @@ class PayGateDatabase {
 		$this->prices_table_name = $this->db->prefix . "paygate_prices";
 		$this->roomlists_table_name = $this->db->prefix . "paygate_roomlists";
 		$this->rooms_table_name = $this->db->prefix . "paygate_rooms";
-		$this->ticket_room_list_name = $this->db->prefix . "paygate_ticketroomlist";
+		$this->ticket_roomlist_name = $this->db->prefix . "paygate_ticketroomlist";
 		
 		register_activation_hook( $mainfile, [ $this, 'install' ]);
 		add_action( 'plugins_loaded', [ $this, 'updateDB']);
@@ -98,9 +98,10 @@ class PayGateDatabase {
 			PRIMARY KEY  (id)
 		) $charset_collate;");
 		
-		dbDelta("CREATE TABLE $this->ticket_room_list_name (
+		dbDelta("CREATE TABLE $this->ticket_roomlist_name (
 			id int NOT NULL AUTO_INCREMENT,
-			ticket_type_id INT NOT NULL,
+			event_id INT NOT NULL,
+			ticket_type VARCHAR(255) NOT NULL,
 			room_list_id INT NOT NULL,
 			PRIMARY KEY  (id)
 			) $charset_collate;");
@@ -419,11 +420,11 @@ class PayGateDatabase {
 	}
 
 	public function updateRoom($room_id, $room_name, $max_tickets){
-		if(!is_numeric($room_list_id) || !is_numeric($max_tickets)){
+		if(!is_numeric($room_id) || !is_numeric($max_tickets)){
 			return false;
 		}
 
-		return this->db->update($this->rooms_table_name, [
+		return $this->db->update($this->rooms_table_name, [
 				'room_name' =>  $room_name,
 				'max_tickets' => $max_tickets
 		] ,
@@ -499,4 +500,13 @@ class PayGateDatabase {
 		]);
 	}
 	
+	public function roomListForTicket($eventId, $ticketType) {
+		return $this->db->get_row($this->db->prepare("
+			SELECT * FROM $this->roomlists_table_name AS rl
+			INNER JOIN $this->ticket_roomlist_name AS trl ON trl.room_list_id = rl.id
+			WHERE trl.event_id = %d AND trl.ticket_type = %s",
+			[
+				$eventId, $ticketType
+			]));
+	}
 }

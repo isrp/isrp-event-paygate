@@ -1,3 +1,36 @@
+/* allow Font-Awesome icons to be mirrored automatically in LTR mode by classing them with "fa fa-dir-flip" */
+[dir=ltr].fa-dir-flip .fa.fa-flip-horizontal,
+[dir=rtl].fa-dir-flip .fa,
+[dir=rtl] .fa.fa-dir-flip {
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1);
+  -webkit-transform: scale(-1, 1);
+      -ms-transform: scale(-1, 1);
+          transform: scale(-1, 1);
+}
+[dir=rtl].fa-dir-flip .fa-flip-horizontal,
+[dir=ltr].fa-dir-flip .fa,
+[dir=ltr] .fa.fa-dir-flip {
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=0);
+  -webkit-transform: scale(1, 1);
+      -ms-transform: scale(1, 1);
+          transform: scale(1, 1);
+}
+:not([dir=rtl]) [dir=ltr] .fa.fa-dir-flip {
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=0)!important;
+  -webkit-transform: scale(1, 1)!important;
+      -ms-transform: scale(1, 1)!important;
+          transform: scale(1, 1)!important;
+}
+
+:not([dir=ltr]) [dir=rtl] .fa.fa-dir-flip {
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1)!important;
+  -webkit-transform: scale(-1, 1)!important;
+      -ms-transform: scale(-1, 1)!important;
+          transform: scale(-1, 1)!important;
+}
+
+/* Paygate CSS */
+
 .paygate .info-explain {
 	font-size: 13pt;
 	border: solid lightgray 2px;
@@ -18,8 +51,19 @@
 	font-size: 13pt;
 }
 
+.paygate .icon-button {
+	color: inherit !important;
+	cursor: pointer;
+	text-decoration: none !important;
+	border: none;
+}
+
 .paygate form button {
 	font-size: 13pt;
+}
+
+.paygate i.fas {
+	font-size: 16pt;
 }
 
 .paygate table button, .paygate-registrations table button {
@@ -31,11 +75,25 @@
 	border: solid lightgray 1px;
 }
 
+.paygate dialog {
+	border: solid gray 1px;
+	border-radius: 5px;
+	filter: drop-shadow(3px 3px 7px #666);
+	padding: 1em;
+	min-width: 30%;
+	min-height: 5em;
+}
+
 .paygate table {
 	direction: var(--paygate-admin-direction, ltr);
 	width: 80%;
 	border-collapse: collapse;
 	font-size: 13pt;
+}
+
+.paygate table input[type="number"] {
+	width: 6em;
+	font-size: 10pt;
 }
 
 .paygate table.internal {
@@ -83,17 +141,13 @@
 }
 
 .paygate form label span {
-	min-width: 8em;
+	min-width: 6em;
 	display: inline-block;
 	margin-inline-start: 1em;
 	font-size: 13pt;
 }
 .paygate form label:first-child span {
 	margin-inline-start: 0em;
-}
-
-.paygate input.paygate-maxtickets {
-	width: 5em;
 }
 
 .paygate table tr.paygate-roomlist, tr.paygate table .paygate-roomlist td {

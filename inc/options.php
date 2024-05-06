@@ -212,7 +212,7 @@ class PayGateSettingsPage {
 					<form method="post" action="">
 					<input type="hidden" name="event-id" value="<?php echo $ev->id?>">
 					<input type="hidden" name="period-id" value="<?php echo $period->id?>">
-					<button type="submit" name="events-action" value="delete-period"><i title="<?php _e('Remove period', 'isrp-event-paygate')?>" class="far fa-calendar-minus"></i></button>
+					<button type="submit" name="events-action" value="delete-period" class="icon-button"><i title="<?php _e('Remove period', 'isrp-event-paygate')?>" class="fas fa-calendar-minus"></i></button>
 					</form>
 					</td>
 					<td><?php echo $period->name?>:</td>
@@ -233,18 +233,18 @@ class PayGateSettingsPage {
 				<p>
 					<input type="text" name="name">
 					<input type="date" name="end-period" value="<?php echo date("Y-m-d")?>" title="<?php _e('End date for the new sale period','isrp-event-paygate')?>">
-					<button type="submit" name="events-action" value="add-period"><i title="<?php _e('Add period', 'isrp-event-paygate')?>" class="far fa-calendar-plus"></i></button>
+					<button type="submit" name="events-action" value="add-period" class="icon-button"><i title="<?php _e('Add period', 'isrp-event-paygate')?>" class="fas fa-calendar-plus"></i></button>
 				</p>
 				</form>
 				</td>
 				<td style="font-size: 180%;">
 					<form method="post" action="">
 						<input type="hidden" name="event-id" value="<?php echo $ev->id?>">
-						<button type="submit" name="events-action" title="<?php _e('Edit event','isrp-event-paygate')?>" value="edit"><i class="far fa-edit"></i></button>
+						<button type="submit" name="events-action" title="<?php _e('Edit event','isrp-event-paygate')?>" value="edit" class="icon-button"><i class="fas fa-edit"></i></button>
 						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-prices&event-id=$ev->id")?>" title="<?php _e('Prices', 'isrp-event-paygate')?>"><i class="fas fa-hand-holding-usd"></i></a>
 						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-reports&event-id=$ev->id")?>" title="<?php _e('ּReports', 'isrp-event-paygate')?>"><i class="fas fa-clipboard-list"></i></a>
-						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-rooms&event-id=$ev->id")?>" title="<?php _e('ּRooms', 'isrp-event-paygate')?>"><i class="fas fa-people-roof"></i></a>
-						<button type="submit" name="events-action" title="<?php _e('Delete event','isrp-event-paygate')?>" value="delete"><i class="far fa-trash-alt"></i></button>
+						<a style="color: inherit;" href="<?php echo admin_url("admin.php?page=paygate-rooms&event-id=$ev->id")?>" title="<?php _e('ּRooms', 'isrp-event-paygate')?>"><i class="fas fa-house"></i></a>
+						<button type="submit" name="events-action" title="<?php _e('Delete event','isrp-event-paygate')?>" value="delete" class="icon-button"><i class="fas fa-trash-alt"></i></button>
 					</form>
 				</td>
 			</tr>
@@ -383,8 +383,20 @@ class PayGateSettingsPage {
 		$periods = $this->pg->database()->listPeriods($event->id);
 		$periodStart = date("j.n.Y",$event->created ?: 0);
 		$priceMatrix = [];
+		$roomLists = $this->pg->database()->getRoomLists($event->id);
 		?>
 		
+		<script>
+		function selectRoomList(dialogId) {
+			let dlg = document.getElementById(dialogId);
+			if (!dlg) {
+				alert('Error opening room list selector!');
+				return;
+			}
+			dlg.showModal();
+			return false;
+		}
+		</script>
 		<form method="post" action="<?php echo $action_url?>">
 		<table>
 		<thead>
@@ -393,6 +405,7 @@ class PayGateSettingsPage {
 			<?php foreach ($periods as $period):?>
 			<?php
 			foreach ($this->pg->database()->listPrices($period->id) as $ticket) {
+				$priceMatrix[$ticket->ticket_type][$period->id] = $ticket;
 				$priceMatrix[$ticket->ticket_type][$period->id] = $ticket;
 			}
 			?>
@@ -408,10 +421,28 @@ class PayGateSettingsPage {
 		<?php foreach ($priceMatrix as $ticketType => $ticketPeriods):?>
 		<tr>
 			<th>
-			<a href="<?php echo $action_url?>&prices-action=delete-type&ticket-type=<?php echo urlencode($ticketType)?>"
-				title="<?php _e('Remove ticket of type', 'isrp-event-paygate')?> <?php echo $ticketType?>" style="color: inherit;"
-				><i class="fas fa-trash-alt"></i></a>
-			<?php echo $ticketType?>
+			<span style="white-space: nowrap;"><?php echo $ticketType?></span>
+			<p>
+				<a href="<?php echo $action_url?>&prices-action=delete-type&ticket-type=<?php echo urlencode($ticketType)?>"
+					title="<?php _e('Remove ticket of type', 'isrp-event-paygate')?> <?php echo $ticketType?>" style="color: inherit;"
+					><i class="fa fa-trash-alt"></i></a>
+			<?php if (!empty($roomLists)):?>
+				<?php $dlgId = uniqid() ?>
+				<?php $roomList = $this->pg->database()->roomListForTicket($event->id, $ticketType);?>
+					<button class="icon-button" onclick="return selectRoomList('<?php echo $dlgId ?>')">
+					<?php if ($roomList):?>
+						<i class="fa fa-house-circle-check" title="<?php _e('Room list', 'isrp-event-paygate')?>: <?php echo $roomList->room_list_name;?>"></i>
+					<?php else: ?>
+						<i class="fa fa-house-circle-xmark" title="<?php _e('Choose room list', 'isrp-event-paygate');?>"></i>
+					<?php endif ?>
+					</button>
+				<dialog id="<?php echo $dlgId ?>">
+  					<button autofocus class="icon-button"><i class="fa fa-circle-xmark"></i></button>
+  					<form action="<?php echo $action_url?>">
+					</form>
+				</dialog>
+			<?php endif ?>
+				</p>
 			</th>
 			<?php foreach ($periods as $period):?>
 			<?php
@@ -428,19 +459,19 @@ class PayGateSettingsPage {
 			$clubInputId = "$periodId-$ticketType-club";
 			?>
 			<td>
-				<p>
+				<p style="white-space: nowrap;">
 				<label>
 				<span><?php _e('Standard Price', 'isrp-event-paygate')?>:</span>
 				<input id="<?php echo $regularInputId?>" name="paygate-price-matrix[<?php echo $periodId?>][<?php echo $ticketType?>][full]" type="number" value="<?php echo $regularCost?>" min="0"><?php _e('¤', 'isrp-event-paygate')?>
 				</label>
-				<button type="button" title="<?php _e('Clear', 'isrp-event-paygate')?>" onclick="document.getElementById('<?php echo $regularInputId?>').value = '';"><i class="far fa-times-circle"></i></button>
+				<button type="button" title="<?php _e('Clear', 'isrp-event-paygate')?>" class="icon-button" onclick="document.getElementById('<?php echo $regularInputId?>').value = '';"><i class="fa fa-dir-flip fa-delete-left"></i></button>
 				</p>
-				<p>
+				<p style="white-space: nowrap;">
 				<label>
 				<span><?php _e('Club Price', 'isrp-event-paygate')?>:</span>
 				<input id="<?php echo $clubInputId?>" name="paygate-price-matrix[<?php echo $periodId?>][<?php echo $ticketType?>][club]" type="number" value="<?php echo $clubCost?>" min="0"><?php _e('¤', 'isrp-event-paygate')?>
 				</label>
-				<button type="button" title="<?php _e('Clear', 'isrp-event-paygate')?>" onclick="document.getElementById('<?php echo $clubInputId?>').value = '';"><i class="far fa-times-circle"></i></button>
+				<button type="button" title="<?php _e('Clear', 'isrp-event-paygate')?>" class="icon-button" onclick="document.getElementById('<?php echo $clubInputId?>').value = '';"><i class="fa fa-dir-flip fa-delete-left"></i></button>
 				</p>
 			</td>
 			<?php endforeach;?>
@@ -479,17 +510,45 @@ class PayGateSettingsPage {
 					add_settings_error('paygate', 'rooms', __('Error adding room list.', 'isrp-event-paygate'));
 				break;
 			case 'add-room':
-				foreach (@$_REQUEST['paygate-add-room'] as $listId => $roomName) {
-					if (!$roomName) continue;
-					$max = @$_REQUEST['paygate-max-tickets'][$listId];
-					if (!$max)
-						add_settings_error('paygate', 'rooms', __('Max tickets per room must be set.', 'isrp-event-paygate'));
-					else if ($this->pg->database()->addRoom($listId, $roomName, $max) === false)
-						add_settings_error('paygate', 'rooms', __('Error adding room.', 'isrp-event-paygate'));
+				$listId = @$_REQUEST['room-list-id'];
+				$roomName = @$_REQUEST['name'];
+				$max = @$_REQUEST['max-tickets'];
+				if (!$listId) {
+					add_settings_error('paygate', 'rooms', __('Missing room list.', 'isrp-event-paygate'));
+					break;
 				}
+				if (!$roomName) {
+					add_settings_error('paygate', 'rooms', __('Invalid room name.', 'isrp-event-paygate'));
+					break;
+				}
+				if (!$max) {
+					add_settings_error('paygate', 'rooms', __('Max tickets per room must be set.', 'isrp-event-paygate'));
+					break;
+				}
+				if ($this->pg->database()->addRoom($listId, $roomName, $max) === false)
+					add_settings_error('paygate', 'rooms', __('Error adding room.', 'isrp-event-paygate'));
+				break;
+			case 'update-room':
+				$roomId = @$_REQUEST['room-id'];
+				$roomName = @$_REQUEST['name'];
+				$max = @$_REQUEST['max-tickets'];
+				if (!$roomId) {
+					add_settings_error('paygate', 'rooms', __('Missing room.', 'isrp-event-paygate'));
+					break;
+				}
+				if (!$roomName) {
+					add_settings_error('paygate', 'rooms', __('Invalid room name.', 'isrp-event-paygate'));
+					break;
+				}
+				if (!$max) {
+					add_settings_error('paygate', 'rooms', __('Max tickets per room must be set.', 'isrp-event-paygate'));
+					break;
+				}
+				if (!$this->pg->database()->updateRoom($roomId, $roomName, $max) === false)
+					add_settings_error('paygate', 'rooms', __('Error updating room.', 'isrp-event-paygate'));
 				break;
 			case 'delete-room':
-				if ($this->pg->database()->deleteRoom(@$_REQUEST['room-id']) === false)
+					if ($this->pg->database()->deleteRoom(@$_REQUEST['room-id']) === false)
 					add_settings_error('paygate', 'rooms', __('Error deleting room', 'isrp-event-paygate'));
 				break;
 			case 'delete-room-list':
@@ -549,7 +608,7 @@ class PayGateSettingsPage {
 					<?php if(!$roomListHeaderShown): ?>
 						<th rowspan="<?php echo $span;?>">
 							<a href="<?php echo $action_url?>&rooms-action=delete-room-list&list-id=<?php echo $roomList->id?>"
-								title="<?php _e('Delete room list', 'isrp-event-paygate')?>" style="color: inherit;"
+								title="<?php _e('Delete room list', 'isrp-event-paygate')?>" class="icon-button"
 								onclick="return confirm('<?php printf(__('Really delete room list %s?', 'isrp-event-paygate'), addslashes($roomList->room_list_name));?>')">
 									<i class="fas fa-trash-alt"></i></a>
 
@@ -560,12 +619,16 @@ class PayGateSettingsPage {
 					<?php if ($room):?>
 					<td>
 						<a href="<?php echo $action_url?>&rooms-action=delete-room&room-id=<?php echo $room->id?>"
-							title="<?php _e('Delete room', 'isrp-event-paygate')?>" style="color: inherit;"
+							title="<?php _e('Delete room', 'isrp-event-paygate')?>" class="icon-button"
 							onclick="return confirm('<?php printf(__('Really delete room %s?', 'isrp-event-paygate'), addslashes($room->room_name));?>')">
 								<i class="fas fa-trash-alt"></i></a>
 
 						<?php echo $room->room_name; ?>
 						(<?php printf( _n( '%s ticket', '%s tickets', $room->max_tickets, 'isrp-event-paygate'), number_format_i18n($room->max_tickets)); ?>)
+						<a href="<?php echo $action_url?>&rooms-action=edit-room&room-id=<?php echo $room->id?>&room-list-id=<?php echo $roomList->id?>"
+							title="<?php _e('Edit room', 'isrp-event-paygate')?>" class="icon-button">
+							<i class="fas fa-edit"></i>
+						</a>
 					</td>
 					<?php else: ?>
 					<td><div class="info-notice">
@@ -576,17 +639,39 @@ class PayGateSettingsPage {
 			<?php endforeach; /* rooms */ ?>
 			<tr class="paygate-roomlist-final">
 				<td>
+				<?php if (@$_REQUEST['rooms-action'] == 'edit-room' && $roomList->id == @$_REQUEST['room-list-id']):?>
+					<?php $room = $this->pg->database()->getRoom(@$_REQUEST['room-id']); ?>
 					<form method="post" action="<?php echo $action_url?>">
 					<label>
 					<span><?php _e('Room Name', 'isrp-event-paygate')?>:</span>
-					<input name="paygate-add-room[<?php echo $roomList->id?>]" type="text">
+					<input name="name" type="text" value="<?php echo $room->room_name?>" style="width: 10em;">
 					</label>
 					<label>
 					<span><?php _e('No. of tickets', 'isrp-event-paygate')?>:</span>
-					<input name="paygate-max-tickets[<?php echo $roomList->id?>]" type="number" min="1" value="0" class="paygate-maxtickets">
+					<input name="max-tickets" type="number" min="1" value="<?php echo $room->max_tickets ?>">
 					</label>
-					<button type="submit" name="rooms-action" value="add-room"><?php _e('Add', 'isrp-event-paygate')?></button>
+					<input type="hidden" name="room-id" value="<?php echo $room->id ?>">
+					<p>
+						<button type="submit" name="rooms-action" value="update-room"><?php _e('Update', 'isrp-event-paygate')?></button>
+						<button type="submit" name="rooms-action" value="view"><?php _e('Cancel', 'isrp-event-paygate')?></button>
+					</p>
 					</form>
+				<?php else:?>
+					<form method="post" action="<?php echo $action_url?>">
+					<label>
+					<span><?php _e('Room Name', 'isrp-event-paygate')?>:</span>
+					<input name="name" type="text" style="width: 10em;">
+					</label>
+					<label>
+					<span><?php _e('No. of tickets', 'isrp-event-paygate')?>:</span>
+					<input name="max-tickets" type="number" min="1" value="0">
+					</label>
+					<input type="hidden" name="room-list-id" value="<?php echo $roomList->id?>">
+					<p>
+						<button type="submit" name="rooms-action" value="add-room"><?php _e('Add', 'isrp-event-paygate')?></button>
+					</p>
+					</form>
+				<?php endif;?>
 				</td>
 			</tr>
 		<?php endforeach; /* lists */ ?>
