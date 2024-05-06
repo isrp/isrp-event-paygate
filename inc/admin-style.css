@@ -53,6 +53,9 @@
 
 .paygate .icon-button {
 	color: inherit !important;
+	background: transparent;
+	margin: 0;
+	padding: .1em;
 	cursor: pointer;
 	text-decoration: none !important;
 	border: none;
@@ -160,6 +163,10 @@
 
 .paygate table p, .paygate-registrations table p {
 	margin: 0;
+}
+
+.paygate table dialog p {
+	margin: revert;
 }
 
 div.paygate-registrations div.payer-details {

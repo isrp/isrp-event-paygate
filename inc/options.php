@@ -361,6 +361,16 @@ class PayGateSettingsPage {
 					}
 				}
 				break;
+			case 'cancel-roomlist-update': // do nothing - just render the page again
+				break;
+			case 'update-roomlist':
+				if ($this->pg->database()->setRoomListForTicket($eventId, @$_REQUEST['ticket-type'], @$_REQUEST['room-list-id']) === false)
+					add_settings_error('paygate', 'prices', __('Error setting room list for ticket.', 'isrp-event-paygate'));
+				break;
+			case 'clear-roomlist':
+				if ($this->pg->database()->setRoomListForTicket($eventId, @$_REQUEST['ticket-type'], null) === false)
+					add_settings_error('paygate', 'prices', __('Error clearing room list for ticket.', 'isrp-event-paygate'));
+				break;
 		}
 		$this->showPriceEditor($eventId);
 	}
@@ -384,6 +394,7 @@ class PayGateSettingsPage {
 		$periodStart = date("j.n.Y",$event->created ?: 0);
 		$priceMatrix = [];
 		$roomLists = $this->pg->database()->getRoomLists($event->id);
+		$ticketRoomListDialogs = [];
 		?>
 		
 		<script>
@@ -429,20 +440,16 @@ class PayGateSettingsPage {
 			<?php if (!empty($roomLists)):?>
 				<?php $dlgId = uniqid() ?>
 				<?php $roomList = $this->pg->database()->roomListForTicket($event->id, $ticketType);?>
-					<button class="icon-button" onclick="return selectRoomList('<?php echo $dlgId ?>')">
-					<?php if ($roomList):?>
-						<i class="fa fa-house-circle-check" title="<?php _e('Room list', 'isrp-event-paygate')?>: <?php echo $roomList->room_list_name;?>"></i>
-					<?php else: ?>
-						<i class="fa fa-house-circle-xmark" title="<?php _e('Choose room list', 'isrp-event-paygate');?>"></i>
-					<?php endif ?>
-					</button>
-				<dialog id="<?php echo $dlgId ?>">
-  					<button autofocus class="icon-button"><i class="fa fa-circle-xmark"></i></button>
-  					<form action="<?php echo $action_url?>">
-					</form>
-				</dialog>
+				<button class="icon-button" onclick="return selectRoomList('<?php echo $dlgId ?>')">
+				<?php if ($roomList):?>
+					<i class="fa fa-house-circle-check" title="<?php _e('Room list', 'isrp-event-paygate')?>: <?php echo $roomList->room_list_name;?>"></i>
+				<?php else: ?>
+					<i class="fa fa-house-medical" title="<?php _e('Choose room list', 'isrp-event-paygate');?>"></i>
+				<?php endif ?>
+				</button>
+				<?php $ticketRoomListDialogs[$ticketType] = [ 'dlgId' => $dlgId, 'current' => $roomList ]; ?>
 			<?php endif ?>
-				</p>
+			</p>
 			</th>
 			<?php foreach ($periods as $period):?>
 			<?php
@@ -496,10 +503,36 @@ class PayGateSettingsPage {
 		</label>
 		<p></p>
 		<button type="submit" name="prices-action" value="add-ticket-type"><?php _e('Create Ticket Type', 'isrp-event-paygate')?></button>
+		<?php endif ?>
 		</form>
+		
+		<?php foreach ($ticketRoomListDialogs as $ticketType => $ticketRoomListDlg): ?>
+			<dialog id="<?php echo $ticketRoomListDlg['dlgId'] ?>">
+				<button autofocus class="icon-button" type="button" onclick="this.parentElement.close();"><i class="fa fa-circle-xmark"></i></button>
+				<form action="<?php echo $action_url?>" method="POST">
+					<input type="hidden" name="ticket-type" value="<?php echo $ticketType ?>">
+					<label>
+						<span><?php _e('Choose room list', 'isrp-event-paygate')?>:</span>
+						<select name="room-list-id">
+							<?php foreach ($roomLists as $roomList): ?>
+							<option value="<?php echo $roomList->id ?>"
+								<?php if ($roomList->id == $ticketRoomListDlg['current']->id):?>
+									selected="selected"
+								<?php endif ?>
+								><?php echo $roomList->room_list_name ?></option>
+							<?php endforeach ?>
+						</select>
+					</label>
+					<p>
+						<button type="submit" name="prices-action" value="cancel-roomlist-update"><?php _e('Cancel', 'isrp-event-paygate') ?></button>
+						<button type="submit" name="prices-action" value="update-roomlist"><?php _e('Save room list', 'isrp-event-paygate') ?></button>
+						<button type="submit" name="prices-action" value="clear-roomlist"><?php _e('Clear room list', 'isrp-event-paygate') ?></button>
+					</p>
+				</form>
+			</dialog>
+		<?php endforeach ?>
 		</div>
 		<?php
-		endif;
 	}
 
 	public function roomsPage() {

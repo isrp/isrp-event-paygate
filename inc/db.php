@@ -502,11 +502,31 @@ class PayGateDatabase {
 	
 	public function roomListForTicket($eventId, $ticketType) {
 		return $this->db->get_row($this->db->prepare("
-			SELECT * FROM $this->roomlists_table_name AS rl
+			SELECT rl.* FROM $this->roomlists_table_name AS rl
 			INNER JOIN $this->ticket_roomlist_name AS trl ON trl.room_list_id = rl.id
 			WHERE trl.event_id = %d AND trl.ticket_type = %s",
 			[
 				$eventId, $ticketType
 			]));
+	}
+
+	public function setRoomListForTicket($eventId, $ticketType, $roomListId) {
+		if ($roomListId === null) // delete
+			return $this->db->delete($this->ticket_roomlist_name, [
+				'event_id' => $eventId,
+				'ticket_type' => $ticketType,
+			]);
+		if (empty($this->roomListForTicket($eventId, $ticketType)))
+			return $this->db->insert($this->ticket_roomlist_name, [
+				'event_id' => $eventId,
+				'ticket_type' => $ticketType,
+				'room_list_id' => $roomListId,
+			]);
+		return $this->db->update($this->ticket_roomlist_name, [
+			'room_list_id' => $roomListId,
+		], [
+			'event_id' => $eventId,
+			'ticket_type' => $ticketType,
+		]);
 	}
 }
