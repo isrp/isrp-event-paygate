@@ -19,6 +19,8 @@ class PayGateShortcodes {
 		$this->processor = new PayGatePelepayProcessor($this->pelepay_account);
 		$this->currentEvent = $this->pg->database()->getActiveEventId();
 		$evData = $this->pg->database()->getEvent($this->currentEvent);
+		if (!$evData)
+			return;
 		$this->availableTickets = $evData->max_tickets > 0 ? max(0, $evData->max_tickets - $evData->sold) : -1;
 		foreach ($this->pg->database()->listEventCurrentPrices($this->currentEvent) as $ticket) {
 			$this->prices[$ticket->ticket_type] = [ $ticket->full_price, $ticket->club_price ];

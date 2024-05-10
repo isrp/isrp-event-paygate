@@ -310,7 +310,7 @@ class PayGateSettingsPage {
 	}
 
 	public function showEventSelector($eventId, $pageId) {
-		if (!is_numeric($eventId) && is_numeric($_SESSION['paygate-event-selected']))
+		if (!is_numeric($eventId) && is_numeric(@$_SESSION['paygate-event-selected']))
 			$eventId = $_SESSION['paygate-event-selected'];
 
 		?>
