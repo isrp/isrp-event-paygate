@@ -1,7 +1,7 @@
 <?php
 
 class PayGateDatabase {
-	var $db_version = '19';
+	var $db_version = '22';
 	var $reg_table_name;
 	var $events_table_name;
 	var $periods_table_name;
@@ -80,7 +80,8 @@ class PayGateDatabase {
 			ticket_type VARCHAR(255) NOT NULL,
 			full_price DECIMAL(5,2) NOT NULL,
 			club_price DECIMAL(5,2) DEFAULT NULL,
-			PRIMARY KEY  (id)
+			PRIMARY KEY  (id),
+			UNIQUE KEY period_ticket_prices (period_id, ticket_type)
 		) $charset_collate;");
 
 		dbDelta("CREATE TABLE $this->roomlists_table_name (
@@ -236,17 +237,19 @@ class PayGateDatabase {
 	
 	public function addPriceForAllPeriods($eventId, $type) {
 		foreach ($this->listPeriods($eventId) as $period)
-			$this->addPrice($period->id, $type);
+			if (!$this->addPrice($period->id, $type))
+				return false;
+		return true;
 	}
 	
 	public function addPrice($periodId, $type) {
 		if (empty($type) or !is_numeric($periodId) or $periodId <= 0)
-			return null;
-		if ($this->db->get_var("SELECT COUNT(*) FROM $this->prices_table_name ".
-				"WHERE period_id = " . ((int)$periodId) .
-				"AND ticket_type = '".esc_sql($type)."'") > 0)
-			return;
-		$this->db->insert($this->prices_table_name, [
+			return false;
+		if ($this->db->get_var("SELECT COUNT(*) FROM $this->prices_table_name".
+				" WHERE period_id = " . ((int)$periodId) .
+				" AND ticket_type = '".esc_sql($type)."'") > 0)
+			return false;
+		return $this->db->insert($this->prices_table_name, [
 			'period_id' => (int)$periodId,
 			'ticket_type' => $type,
 			'full_price' => 0,
@@ -256,14 +259,14 @@ class PayGateDatabase {
 	
 	public function updatePrice($periodId, $type, $fullCost, $clubCost) {
 		if (empty($type) or !is_numeric($periodId) or $periodId <= 0)
-			return null;
-		$this->db->update($this->prices_table_name, [
-			'full_price' => $fullCost,
-			'club_price' => $clubCost,
-		], [
-			'period_id' => $periodId,
-			'ticket_type' => $type,
-		]);
+			return false;
+		return $this->db->query(
+			$this->db->prepare("INSERT INTO $this->prices_table_name ".
+			"(period_id, ticket_type, full_price, club_price) ".
+			"VALUES ('%d', '%s', '%s', '%s') ".
+			"ON DUPLICATE KEY UPDATE full_price = VALUES(full_price), club_price = VALUES(club_price)",
+			$periodId, $type, $fullCost, $clubCost)
+		);
 	}
 	
 	private function verifyCanDeletePrice($periodId, $type) {
@@ -279,19 +282,21 @@ class PayGateDatabase {
 	
 	public function deletePriceForAllPeriods($eventId, $type) {
 		$type = stripslashes($type);
+		$this->setRoomListForTicket($eventId, $type, null);
 		foreach ($this->listPeriods($eventId) as $period)
 			if (!$this->verifyCanDeletePrice($period->id, $type))
 				return false;
 		
 		foreach ($this->listPeriods($eventId) as $period)
 			$this->deletePrice($period->id, $type);
+		return true;
 	}
 	
 	public function deletePrice($periodId, $type) {
 		if (!$this->verifyCanDeletePrice($periodId, $type))
 			return false;
 		
-		$this->db->delete($this->prices_table_name, [
+		return $this->db->delete($this->prices_table_name, [
 			'period_id' => $periodId,
 			'ticket_type' => $type,
 		]);
@@ -331,9 +336,9 @@ class PayGateDatabase {
 	 */
 	public function checkUsedClubId($clubId) {
 		$activeEventId = $this->getActiveEventId();
-		return $this->db->get_var("SELECT COUNT(*) FROM $this->reg_table_name ".
-			"WHERE event_id = ".((int)$activeEventId) . " " .
-			"AND club_id = '" . esc_sql($clubId) . "'") > 0;
+		return $this->db->get_var("SELECT COUNT(*) FROM $this->reg_table_name".
+			" WHERE event_id = ".((int)$activeEventId) .
+			" AND club_id = '" . esc_sql($clubId) . "'") > 0;
 	}
 	
 	public function getCurrentTicketPrice($ticketType, $isClub) {
