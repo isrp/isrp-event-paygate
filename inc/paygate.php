@@ -28,7 +28,7 @@ class PayGate {
 
 	public function startSession() {
 		if (!session_id())
-			session_start();
+			@session_start();
 	}
 
 	public function handleCallbacks($wpquery) {
