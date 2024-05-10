@@ -361,7 +361,7 @@ class PayGateSettingsPage {
 						$fullCost = $ticketPrice['full'] ?: 0;
 						$clubCost = $ticketPrice['club'] ?: 0;
 						if ($this->pg->database()->updatePrice($periodId, $ticketType, $fullCost, $clubCost) === false)
-							add_settings_error('paygate', 'prices', sprintf(__('Error updating prices for ticket %s (%d)', 'isrp-event-paygate'), $ticketType, $periodId));
+							add_settings_error('paygate', 'prices', sprintf(__('Error updating prices for ticket %1$s (%2$d)', 'isrp-event-paygate'), $ticketType, $periodId));
 					}
 				}
 				break;
