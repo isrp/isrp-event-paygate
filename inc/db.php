@@ -1,7 +1,7 @@
 <?php
 
 class PayGateDatabase {
-	var $db_version = '22';
+	var $db_version = '23';
 	var $reg_table_name;
 	var $events_table_name;
 	var $periods_table_name;
@@ -112,6 +112,7 @@ class PayGateDatabase {
 			event_id INT NOT NULL,
 			period_id INT NOT NULL,
 			price_id INT NOT NULL,
+			status enum('pending', 'complete') DEFAULT 'pending',
 			name varchar(255) NOT NULL,
 			price decimal(5,2) NOT NULL DEFAULT 0,
 			order_time int DEFAULT NULL,
@@ -533,5 +534,16 @@ class PayGateDatabase {
 			'event_id' => $eventId,
 			'ticket_type' => $ticketType,
 		]);
+	}
+
+	public function listRoomsForTicket($eventId, $ticketType) {
+		$rooms = [];
+		foreach ($this->db->get_results("
+			SELECT r.room_name, r.max_tickets FROM $this->rooms_table_name AS r
+			INNER JOIN $this->roomlists_table_name AS rl ON r.room_list_id = rl.id
+			INNER JOIN $this->ticket_roomlist_name AS trl ON trl.room_list_id = rl.id
+				AND trl.ticket_type = '" . esc_sql($ticketType) . "'") as $room)
+			$rooms[$room->room_name] = (int)$room->max_tickets;
+		return $rooms;
 	}
 }
