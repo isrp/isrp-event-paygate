@@ -173,17 +173,17 @@ class PayGate {
 		$event = $this->database()->getEvent($period->event_id);
 		$orderid = bin2hex(openssl_random_pseudo_bytes(4));
 		$total = 0;
+		$roomReservations = [];
 		foreach ($tickets as $ticketType => $ticketList) {
 			foreach ($ticketList as $ticket) {
-				list($price, $name, $customData) = explode(";", $ticket, 3);
-				if ($customData)
-					$customData = json_decode(urldecode(base64_decode($customData)), true);
+				$data = json_decode($ticket);
 				$dbprice = $this->database()->getCurrentTicketPrice($ticketType, $has_club_id);
-				if ($price != $dbprice)
-					error_log("PayGate: User submitted price $price is different from database: $dbprice, ignoring");
-				$ticketdata[] = [ $name, $ticketType, $dbprice, $has_club_id, $customData ];
+				if ($data->price != $dbprice)
+					error_log("PayGate: User submitted price $data->price is different from database: $dbprice, ignoring");
+				$ticketdata[] = [ uniqid(), $data->name, $ticketType, $dbprice, $has_club_id, $data->fields, $data->roomId ];
 				$has_club_id = false;
 				$total += $dbprice;
+				$roomReservations[$data->roomId]++;
 			}
 		}
 
@@ -191,6 +191,16 @@ class PayGate {
 				wp_die(sprintf(esc_html__('Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again.' /*translators: tickets left, tickets ordered */, 'isrp-event-paygate'),
 							   $event->max_tickets - $event->sold, count($ticketdata)));
 		}
+		// verify room reservations
+		foreach ($roomReservations as $roomId => $count) {
+			if (!$roomId) // ignore non-rooms
+				continue;
+			$avail = $this->database()->getRoomAvailableTickets($roomId);
+			if ($avail < $count)
+				wp_die(sprintf(esc_html__('Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again.' /*translators: tickets left, tickets ordered */, 'isrp-event-paygate'),
+					$avail, $count));
+		}
+
 		$calldata = json_encode([
 			'time' => time(),
 			'club_id' => $club_id,
@@ -210,7 +220,7 @@ class PayGate {
 		?>
 		<script>
 		document.forms[0].getElementsByTagName('button')[0].disabled = true;
-		document.forms['pelepayform'].submit();
+		//document.forms['pelepayform'].submit();
 		</script>
 		<?php
 		exit();

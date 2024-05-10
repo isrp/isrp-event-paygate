@@ -8,6 +8,7 @@ class PayGateShortcodes {
 	private $settings;
 	private $currentEvent;
 	private $prices = [];
+	private $rooms = [];
 	private $currentTicketType = null;
 	private $currentClubId = null;
 	private $currentClubIdWasUsed = false;
@@ -24,6 +25,7 @@ class PayGateShortcodes {
 		$this->availableTickets = $evData->max_tickets > 0 ? max(0, $evData->max_tickets - $evData->sold) : -1;
 		foreach ($this->pg->database()->listEventCurrentPrices($this->currentEvent) as $ticket) {
 			$this->prices[$ticket->ticket_type] = [ $ticket->full_price, $ticket->club_price ];
+			$this->rooms[$ticket->ticket_type] = $this->pg->database()->listRoomsForTicket($this->currentEvent, $ticket->ticket_type);
 		}
 		
 		add_shortcode('paygate-checkout', [ $this, 'payCheckout' ]);
@@ -35,6 +37,9 @@ class PayGateShortcodes {
 		add_shortcode('paygate-dragon-form', [ $this, 'clubForm']);
 		add_shortcode('paygate-input', [ $this, 'customField' ]);
 		add_shortcode('paygate-select', [ $this, 'customField' ]);
+		add_shortcode('paygate-available-tickets', [ $this, 'paygateAvailableTickets' ]);
+
+	
 	}
 		
 	public function payCheckout($atts, $content = null) {
@@ -64,11 +69,15 @@ class PayGateShortcodes {
 				window.setTimeout(setupPaygate, 500);
 				return;
 			}
-			window.PayGateCheckout = new EventPayGate(<?php echo $jsAllowCart?>, <?php echo $this->availableTickets?>,
-											 '<?php _e('Sold out', 'isrp-event-paygate')?>');
+			window.PayGateCheckout = new EventPayGate(<?php echo $jsAllowCart?>, <?php echo $this->availableTickets?>, <?php echo $this->hasRooms() ? 'true' : 'false'?>);
 			for (let btn of document.getElementsByName('paygate-button')) {
 				btn.disabled = false;
 			}
+			window.PayGateCheckout.messages = {
+				'sold-out': "<?php _e('Sold out', 'isrp-event-paygate')?>",
+				'missing-name': "<?php _e("Please enter ticket holder's name", 'isrp-event-paygate')?>",
+				'missing-room': "<?php _e("Please select ticket category", 'isrp-event-paygate')?>"
+			};
 		};
 		setupPaygate();
 		</script>
@@ -81,6 +90,9 @@ class PayGateShortcodes {
 		<thead>
 			<tr>
 			<th><?php _e('Ticket Type', 'isrp-event-paygate')?></th>
+			<?php if ($this->hasRooms()):?>
+			<th></th>	
+			<?php endif ?>
 			<th><?php _e('Price', 'isrp-event-paygate')?></th>
 			<th><?php _e('Name', 'isrp-event-paygate')?></th>
 			</tr>
@@ -187,20 +199,20 @@ class PayGateShortcodes {
 			if (count($this->prices) == 1)
 				$ticketType = key($this->prices);
 			else
-				return 'TYPE ERROR: available types: ' . join("; ", array_keys($this->prices));
+				return sprintf(__('TYPE ERROR: available types: %s', 'isrp-event-paygate'), join("; ", array_keys($this->prices)));
 		}
 		if (!isset($this->prices[$ticketType]))
-			return 'Invalid type: '.$ticketType;
+			return sprintf(__('Invalid type: %s', 'isrp-event-paygate'), $ticketType);
 		
 		ob_start();
-		$fieldid = bin2hex(openssl_random_pseudo_bytes(8));
+		$fieldid = uniqId();
 		if ($this->pg->settings()->allowMultipleTickets()) {
 		?>
 		<span id="<?php echo $fieldid ?>"></span>
 		<script>
 		window.paygate_price_handlers  = window.paygate_price_handlers || {};
-		window.paygate_price_handlers['<?php echo $ticketType?>'] = window.paygate_price_handlers['<?php echo $ticketType?>'] || [];
-		window.paygate_price_handlers['<?php echo $ticketType?>'].push(function(price) {
+		window.paygate_price_handlers['<?php echo addslashes($ticketType)?>'] = window.paygate_price_handlers['<?php echo addslashes($ticketType)?>'] || [];
+		window.paygate_price_handlers['<?php echo addslashes($ticketType)?>'].push(function(price) {
 			document.getElementById('<?php echo $fieldid?>').innerHTML = price;
 		});
 		</script>
@@ -219,6 +231,7 @@ class PayGateShortcodes {
 		$atts = shortcode_atts([
 			'type' => '',
 			'class' => '',
+			'rooms' => 'yes'
 		], $atts, $tag);
 		$this->verifyClubCode();
 		
@@ -243,15 +256,27 @@ class PayGateShortcodes {
 			return ob_get_clean();
 		}
 		
+		$rooms = $this->rooms[$ticketType];
+		$ticketRoomSelect = ((count($rooms) > 0) && (strtolower($atts['rooms']) != 'no')) ? uniqid() : false;
 		?>
 		<script>
 		window.paygate_ticket_types = window.paygate_ticket_types || {};
-		window.paygate_ticket_types['<?php echo $this->currentTicketType?>'] = [
+		window.paygate_ticket_types['<?php echo addslashes($this->currentTicketType)?>'] = [
 		'<?php echo $this->getTicketPrice(true, $this->currentTicketType);?>',
 		'<?php echo $this->getTicketPrice(false, $this->currentTicketType);?>'
 		];
 		</script>
-		<button <?php echo $class?> type="button" name="paygate-button" disabled="disabled" onclick="PayGateCheckout.addTicket(this, '<?php echo $this->currentTicketType?>')">
+
+		<?php if ($ticketRoomSelect):?>
+		<select id="<?php echo $ticketRoomSelect ?>">
+			<option value=""><?php _e('Choose:', 'isrp-event-paygate')?></option>
+			<?php foreach ($rooms as $room):?>
+				<option value="<?php echo $room->id?>"><?php echo $room->room_name?></option>
+			<?php endforeach ?>
+		</select>
+		<?php endif ?>
+
+		<button <?php echo $class?> type="button" name="paygate-button" disabled="disabled" onclick="PayGateCheckout.addTicket(this, '<?php echo addslashes($this->currentTicketType)?>', '<?php echo $ticketRoomSelect ?>')">
 		<?php echo do_shortcode(trim($content)) ?>
 		</button>
 		<?php
@@ -263,6 +288,7 @@ class PayGateShortcodes {
 		$isClub = !is_null($this->currentClubId) && !($this->currentClubIdWasUsed) && $forClub;
 		if ($isClub)
 			error_log("PayGate: Calculating price for club ticket");
+		error_log("Price for $ticketType is ". $this->prices[$ticketType][$isClub ? 1 : 0]);
 		return $this->prices[$ticketType][$isClub ? 1 : 0];
 	}
 	
@@ -344,4 +370,43 @@ class PayGateShortcodes {
 		
 		wp_die( __('Unrecognized e-mail address, please try again', 'isrp-event-paygate') );
 	}
+
+	private function hasRooms() {
+		foreach ($this->rooms as $ticket => $rooms) {
+			if (count($rooms) > 0)
+				return true;
+		}
+		return false;
+	}
+
+
+
+	
+	public function paygateAvailableTickets($atts){
+		$atts = shortcode_atts([
+			'room' => '',
+			'max-show' => 9,
+			'many-message' => '',
+			'few-message' => __('%s tickets left.', "isrp-event-paygate"),
+			'sold-message' => __('Sold out.', "isrp-event-paygate"),
+		], $atts);
+
+		$roomId = $this->pg->database()->getRoomIdByName($atts['room']);
+
+		if(!$roomId){
+			return __("Room Not Found", "isrp-event-paygate");
+		}
+
+		$availableTickets = $this->pg->database()->getRoomAvailableTickets($roomId);
+		
+		if($availableTickets > $atts['max-show']){
+			return $atts['many-message'];
+		} elseif($availableTickets > 0){
+			return sprintf($atts['few-message'] , $availableTickets);
+		} else {
+			return $atts['sold-message'];
+		}
+	}
+
+
 }

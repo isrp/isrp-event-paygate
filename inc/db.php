@@ -537,13 +537,36 @@ class PayGateDatabase {
 	}
 
 	public function listRoomsForTicket($eventId, $ticketType) {
-		$rooms = [];
-		foreach ($this->db->get_results("
-			SELECT r.room_name, r.max_tickets FROM $this->rooms_table_name AS r
+		return $this->db->get_results("
+			SELECT r.id, r.room_name, r.max_tickets FROM $this->rooms_table_name AS r
 			INNER JOIN $this->roomlists_table_name AS rl ON r.room_list_id = rl.id
 			INNER JOIN $this->ticket_roomlist_name AS trl ON trl.room_list_id = rl.id
-				AND trl.ticket_type = '" . esc_sql($ticketType) . "'") as $room)
-			$rooms[$room->room_name] = (int)$room->max_tickets;
-		return $rooms;
+				AND trl.ticket_type = '" . esc_sql($ticketType) . "'");
+	}
+
+
+	public function getRoomAvailableTickets($roomId){
+		$pending_max_time_sec = 3600;
+
+		$soldTickets = $this->db->get_var(
+			"SELECT COUNT(*) FROM $this->reg_table_name WHERE id = $roomId AND (status = 'complete' OR (status = 'pending' AND order_time > UNIX_TIMESTAMP(NOW() - $pending_max_time_sec)))"  );
+
+		$maxTickets = $this->db->get_var("SELECT max_tickets FROM $this->rooms_table_name WHERE id = " . $roomId);
+
+		if ($maxTickets > $soldTickets){
+			return $maxTickets - $soldTickets;
+		} else {
+			return 0;
+		}
+	}
+
+	public function getRoomIdByName($roomName){
+		$roomId = $this->db->get_var("SELECT id FROM $this->rooms_table_name WHERE room_name = '" . esc_sql($roomName) . "'");
+
+		if(!$roomId){
+			return false;
+		}
+
+		return $roomId;
 	}
 }
