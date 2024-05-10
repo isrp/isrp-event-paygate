@@ -139,7 +139,7 @@ class PayGateSettingsPage {
 			case 'edit':
 				return $this->showEvents($this->pg->database()->getEvent(@$_REQUEST['event-id']));
 			case 'delete':
-				if (!$this->pg->database()->deleteEvent(@$_REQUEST['event-id']))
+				if ($this->pg->database()->deleteEvent(@$_REQUEST['event-id']) === false)
 					add_settings_error('paygate', 'events', __('Error deleting event', 'isrp-event-paygate'));
 				break;
 			case 'add-period':
@@ -149,8 +149,8 @@ class PayGateSettingsPage {
 				}
 				$evid = (int)@$_REQUEST['event-id'];
 				$dt = new DateTime(@$_REQUEST['end-period'], $paygate_default_tz);
-				if (!$this->pg->database()->addPeriod($evid, @$_REQUEST['name'],
-					$dt->getTimestamp()+86399)) // getTimestamp gets time for the beginning of the day
+				if ($this->pg->database()->addPeriod($evid, @$_REQUEST['name'],
+					$dt->getTimestamp()+86399) === false) // getTimestamp gets time for the beginning of the day
 					add_settings_error('paygate', 'events', __('Failed to add period!', 'isrp-event-paygate'));
 				break;
 			case 'delete-period':
@@ -342,12 +342,15 @@ class PayGateSettingsPage {
 	
 	public function pricesPage() {
 		$eventId = @$_REQUEST['event-id'];
+		$ticketType = @stripslashes(@$_REQUEST['ticket-type']);
 		switch (@$_REQUEST['prices-action']) {
 			case 'add-ticket-type':
-				$this->pg->database()->addPriceForAllPeriods($eventId, @$_REQUEST['ticket-type']);
+				if ($this->pg->database()->addPriceForAllPeriods($eventId, $ticketType) === false)
+					add_settings_error('paygate', 'prices', sprintf(__('Error creating ticket %s', 'isrp-event-paygate'), $ticketType));
 				break;
 			case 'delete-type':
-				$this->pg->database()->deletePriceForAllPeriods($eventId, @$_REQUEST['ticket-type']);
+				if ($this->pg->database()->deletePriceForAllPeriods($eventId, $ticketType) === false)
+					add_settings_error('paygate', 'prices', sprintf(__('Error deleting ticket %s', 'isrp-event-paygate'), $ticketType));
 				break;
 			case 'update-prices':
 				$priceMatrix = @$_REQUEST['paygate-price-matrix'];
@@ -355,20 +358,21 @@ class PayGateSettingsPage {
 					wp_die( __('No price matrix provided!', 'isrp-event-paygate'));
 				foreach ($priceMatrix as $periodId => $prices) {
 					foreach ($prices as $ticketType => $ticketPrice) {
-						$fullCost = $ticketPrice['full'];
-						$clubCost = $ticketPrice['club'];
-						$this->pg->database()->updatePrice($periodId, $ticketType, $fullCost, $clubCost);
+						$fullCost = $ticketPrice['full'] ?: 0;
+						$clubCost = $ticketPrice['club'] ?: 0;
+						if ($this->pg->database()->updatePrice($periodId, $ticketType, $fullCost, $clubCost) === false)
+							add_settings_error('paygate', 'prices', sprintf(__('Error updating prices for ticket %s (%d)', 'isrp-event-paygate'), $ticketType, $periodId));
 					}
 				}
 				break;
 			case 'cancel-roomlist-update': // do nothing - just render the page again
 				break;
 			case 'update-roomlist':
-				if ($this->pg->database()->setRoomListForTicket($eventId, @$_REQUEST['ticket-type'], @$_REQUEST['room-list-id']) === false)
+				if ($this->pg->database()->setRoomListForTicket($eventId, $ticketType, @$_REQUEST['room-list-id']) === false)
 					add_settings_error('paygate', 'prices', __('Error setting room list for ticket.', 'isrp-event-paygate'));
 				break;
 			case 'clear-roomlist':
-				if ($this->pg->database()->setRoomListForTicket($eventId, @$_REQUEST['ticket-type'], null) === false)
+				if ($this->pg->database()->setRoomListForTicket($eventId, $ticketType, null) === false)
 					add_settings_error('paygate', 'prices', __('Error clearing room list for ticket.', 'isrp-event-paygate'));
 				break;
 		}
@@ -544,7 +548,7 @@ class PayGateSettingsPage {
 				break;
 			case 'add-room':
 				$listId = @$_REQUEST['room-list-id'];
-				$roomName = @$_REQUEST['name'];
+				$roomName = @stripslashes(@$_REQUEST['name']);
 				$max = @$_REQUEST['max-tickets'];
 				if (!$listId) {
 					add_settings_error('paygate', 'rooms', __('Missing room list.', 'isrp-event-paygate'));
@@ -563,7 +567,7 @@ class PayGateSettingsPage {
 				break;
 			case 'update-room':
 				$roomId = @$_REQUEST['room-id'];
-				$roomName = @$_REQUEST['name'];
+				$roomName = @stripslashes(@$_REQUEST['name']);
 				$max = @$_REQUEST['max-tickets'];
 				if (!$roomId) {
 					add_settings_error('paygate', 'rooms', __('Missing room.', 'isrp-event-paygate'));
