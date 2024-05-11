@@ -168,10 +168,13 @@ class PayGate {
 			$club_id = null;
 
 		$has_club_id = is_null($club_id) ? false : true;
+		if ($has_club_id)
+			$clubcard = $this->getClubCard($tickets['club_id']);
 		$ticketdata = [];
 		$period = $this->database()->getActivePeriod();
 		$event = $this->database()->getEvent($period->event_id);
 		$orderid = bin2hex(openssl_random_pseudo_bytes(4));
+		$time = time();
 		$total = 0;
 		$roomReservations = [];
 		foreach ($tickets as $ticketType => $ticketList) {
@@ -180,29 +183,41 @@ class PayGate {
 				$dbprice = $this->database()->getCurrentTicketPrice($ticketType, $has_club_id);
 				if ($data->price != $dbprice)
 					error_log("PayGate: User submitted price $data->price is different from database: $dbprice, ignoring");
-				$ticketdata[] = [ uniqid(), $data->name, $ticketType, $dbprice, $has_club_id, $data->fields, $data->roomId ];
+				$ticketdata[] = [ $data->name, $ticketType, $dbprice, $has_club_id, $data->fields, $data->roomId ];
 				$has_club_id = false;
 				$total += $dbprice;
 				$roomReservations[$data->roomId]++;
+				if ($this->database()->storeRegistration(
+					$data->name, $ticketType, $period->id, $dbprice, $time, $orderid,
+					$has_club_id ? $clubcard->memver_number : null,
+					$data->fields, $data->roomId
+				) === false)
+					wp_die(esc_html__('Error storing ticket registration! Please contact the administrator!', 'isrp-event-paygate'));
 			}
 		}
 
 		if ($event->max_tickets > 0 && $event->sold  + count($ticketdata) > $event->max_tickets) {
-				wp_die(sprintf(esc_html__('Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again.' /*translators: tickets left, tickets ordered */, 'isrp-event-paygate'),
-							   $event->max_tickets - $event->sold, count($ticketdata)));
+			if ($this->database()->cancel_registration($orderid, 'event sold out') === false)
+				error_log("Problem cancelling registration $orderid after event sold out");
+			wp_die(sprintf(esc_html__('Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again.' /*translators: tickets left, tickets ordered */, 'isrp-event-paygate'),
+					   $event->max_tickets - $event->sold, count($ticketdata)));
 		}
 		// verify room reservations
 		foreach ($roomReservations as $roomId => $count) {
 			if (!$roomId) // ignore non-rooms
 				continue;
 			$avail = $this->database()->getRoomAvailableTickets($roomId);
-			if ($avail < $count)
-				wp_die(sprintf(esc_html__('Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again.' /*translators: tickets left, tickets ordered */, 'isrp-event-paygate'),
-					$avail, $count));
+			if ($avail < $count) {
+				$room = $this->database()->getRoom($roomId);
+				if ($this->database()->cancel_registration($orderid, "room $room->room_name ($roomId) sold out") === false)
+					error_log("Problem cancelling registration $orderid after room sold out");
+				wp_die(sprintf(esc_html__('Only %1$s tickets left in %2$s, but you tried to purchase %3$s tickets. Please try again.' /*translators: tickets left, room name, tickets ordered */,
+					 'isrp-event-paygate'), $avail, $room->room_name, $count));
+			}
 		}
 
 		$calldata = json_encode([
-			'time' => time(),
+			'time' => $time,
 			'club_id' => $club_id,
 			'order_id' => $orderid,
 			'period' => $period->id,
@@ -226,10 +241,7 @@ class PayGate {
 		exit();
 	}
 
-	private function paymentSuccess($query, $code) {
-		// http://172.17.0.4/paygate-handler/pay-success/OjoxOjE6MjUwOjE1Mjg0NjQwNjE6NDQ1NmNiNWY?
-		//   Response=000&ConfirmationCode=0656742&index=T478514&amount=250.00&firstname=עודד&lastname=ארבל&
-		//   email=oded@geek.co.il&phone=054-7340014&payfor=כרטיס לליברה 5: יחיד - רישום מוקדם&custom=&orderid=paygate:dae321616c1af325fae085fb4b68ab03
+	private function retrieveOrderDetails($query) {
 		$result = wp_parse_args($query);
 		$resmessage = PayGatePelepayConstants::RESPONSE_CODES[$result['Response']] ?: 'Unknown error';
 
@@ -240,18 +252,25 @@ class PayGate {
 				$resmessage));
 		}
 
+		if (!$this->settings()->allowTestTransaction() and $result['index'][0] == 'T') {
+			wp_die(esc_html__('A payment test account is not valid on this site!', 'isrp-event-paygate'));
+		}
+
 		@list($prefix, $transaction_id) = explode(':',$result['orderid']);
 		$calldata = $_SESSION['paygate_calldata'];
 		if ($transaction_id != md5($calldata . "secret")) {
 			error_log("Transaction id verification failed ($transaction_id != ".md5($calldata . "secret")."): " . print_r($calldata, true));
 			wp_die(esc_html__('Invalid payment confirmation!', 'isrp-event-paygate'));
 		}
+		return json_decode($calldata, true);
+	}
 
-		if (!$this->settings()->allowTestTransaction() and $result['index'][0] == 'T') {
-			wp_die(esc_html__('A payment test account is not valid on this site!', 'isrp-event-paygate'));
-		}
-
-		$tickets = json_decode($calldata, true);
+	private function paymentSuccess($query, $code) {
+		// http://172.17.0.4/paygate-handler/pay-success/OjoxOjE6MjUwOjE1Mjg0NjQwNjE6NDQ1NmNiNWY?
+		//   Response=000&ConfirmationCode=0656742&index=T478514&amount=250.00&firstname=עודד&lastname=ארבל&
+		//   email=oded@geek.co.il&phone=054-7340014&payfor=כרטיס לליברה 5: יחיד - רישום מוקדם&custom=&orderid=paygate:dae321616c1af325fae085fb4b68ab03
+		$result = wp_parse_args($query);
+		$tickets = $this->retrieveOrderDetails($query);
 		$clubcard = $this->getClubCard($tickets['club_id']);
 
 		$payer = $result['email'];
@@ -266,6 +285,7 @@ class PayGate {
 			$details = [ 'data' => $ticket[4] ];
 			$details = array_merge($details, $result);
 			$details = json_encode($details, JSON_UNESCAPED_UNICODE);
+			// TODO: replace with approve the registration that is pending
 			$this->database()->storeRegistration($name, $ticket[1], $tickets['period'],
 												 $ticket[2], $tickets['time'], $orderid, $ticket[3] ? $clubcard->member_number : null, $details);
 		}

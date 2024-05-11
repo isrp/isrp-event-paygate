@@ -1,7 +1,7 @@
 <?php
 
 class PayGateDatabase {
-	var $db_version = '23';
+	var $db_version = '24';
 	var $reg_table_name;
 	var $events_table_name;
 	var $periods_table_name;
@@ -112,7 +112,7 @@ class PayGateDatabase {
 			event_id INT NOT NULL,
 			period_id INT NOT NULL,
 			price_id INT NOT NULL,
-			status enum('pending', 'complete') DEFAULT 'pending',
+			status enum('pending', 'complete', 'cancelled', 'revoked') DEFAULT 'pending',
 			name varchar(255) NOT NULL,
 			price decimal(5,2) NOT NULL DEFAULT 0,
 			order_time int DEFAULT NULL,
@@ -120,6 +120,7 @@ class PayGateDatabase {
 			club_id varchar(10) DEFAULT NULL,
 			details TEXT DEFAULT '',
 			room_id INT DEFAULT NULL,
+			reason varchar(80) DEFAULT NULL,
 			PRIMARY KEY  (id)
 		) $charset_collate;");
 	}
@@ -369,17 +370,28 @@ class PayGateDatabase {
 		return $this->getEvent($this->getPeriod($periodId)->event_id)->success_page;
 	}
 	
-	public function storeRegistration($name, $type, $period, $price, $time, $orderid, $club_id, $details) {
-		$this->db->insert($this->reg_table_name, [
+	public function storeRegistration($name, $type, $period, $price, $time, $orderid, $club_id, $details, $roomId) {
+		return $this->db->insert($this->reg_table_name, [
 			'event_id' => $this->getPeriod($period)->event_id,
 			'period_id' => $period,
 			'price_id' => $this->getPriceByType($period, $type)->id,
+			'status' => 'pending',
 			'name' => $name,
 			'price' => $price,
 			'order_time' => $time,
 			'order_id' => $orderid,
 			'club_id' => $club_id,
 			'details' => $details,
+			'room_id' => $roomId,
+		]);
+	}
+
+	public function cancelRegistration($orderid, $reason = 'cancelled') {
+		return $this->db->update($this->reg_table_name, [
+			'status' => $reason == 'revoked' ? 'revoked' : 'cancelled',
+			'reason' => $reason,
+		], [
+			'order_id' => $orderid,
 		]);
 	}
 	
