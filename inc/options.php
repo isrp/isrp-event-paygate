@@ -318,9 +318,15 @@ class PayGateSettingsPage {
 				if (!$priceMatrix)
 					wp_die( __('No price matrix provided!', 'isrp-event-paygate'));
 				foreach ($priceMatrix as $periodId => $prices) {
+					$tickets = [];
+					foreach ($this->pg->database()->listPrices($periodId) as $ticket) {
+						$tickets[$ticket->ticket_type] = $ticket;
+					}
 					foreach ($prices as $ticketType => $ticketPrice) {
 						$fullCost = $ticketPrice['full'];
 						$clubCost = $ticketPrice['club'];
+						if (!$tickets[$ticketType])
+							$this->pg->database()->addPrice($periodId, $ticketType);
 						$this->pg->database()->updatePrice($periodId, $ticketType, $fullCost, $clubCost);
 					}
 				}
