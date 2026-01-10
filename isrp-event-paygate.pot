@@ -1,36 +1,41 @@
-# Copyright (C) 2022 Oded Arbel
+# Copyright (C) 2026 Oded Arbel
 # This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
-"Project-Id-Version: ISRP Event PayGate 1.4.2\n"
+"Project-Id-Version: ISRP Event PayGate 1.5.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/isrp-event-paygate\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-12-29T16:32:51+00:00\n"
+"POT-Creation-Date: 2026-01-10T23:27:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.7.1\n"
+"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: isrp-event-paygate\n"
 
 #. Plugin Name of the plugin
+#: isrp-event-paygate.php
 msgid "ISRP Event PayGate"
 msgstr ""
 
 #. Plugin URI of the plugin
+#: isrp-event-paygate.php
 msgid "http://github.com/isrp/isrp-event-paygate"
 msgstr ""
 
 #. Description of the plugin
+#: isrp-event-paygate.php
 msgid "Plugin for the Israeli Society of Roleplayers' day-event payments system"
 msgstr ""
 
 #. Author of the plugin
+#: isrp-event-paygate.php
 msgid "Oded Arbel"
 msgstr ""
 
 #. Author URI of the plugin
+#: isrp-event-paygate.php
 msgid "https://github.com/isrp/isrp-event-paygate"
 msgstr ""
 
@@ -39,154 +44,154 @@ msgstr ""
 msgid "Cannot delete period as there are ticket sold!"
 msgstr ""
 
-#: inc/options.php:39
-#: inc/options.php:79
+#: inc/options.php:36
+#: inc/options.php:73
 msgid "Event Paygate Settings"
 msgstr ""
 
-#: inc/options.php:40
-#: inc/options.php:44
+#: inc/options.php:37
+#: inc/options.php:41
 msgid "Event Paygate"
 msgstr ""
 
-#: inc/options.php:43
+#: inc/options.php:40
 msgid "Manage Paygate Events"
 msgstr ""
 
-#: inc/options.php:47
-#: inc/options.php:48
-#: inc/options.php:240
+#: inc/options.php:44
+#: inc/options.php:45
+#: inc/options.php:234
 msgid "Prices"
 msgstr ""
 
-#: inc/options.php:51
-#: inc/options.php:52
+#: inc/options.php:48
+#: inc/options.php:49
 msgid "Reports"
 msgstr ""
 
-#: inc/options.php:60
+#: inc/options.php:57
 msgid "General Settings"
 msgstr ""
 
-#: inc/options.php:61
+#: inc/options.php:58
 msgid "Global Event Paygate configuration options"
 msgstr ""
 
-#: inc/options.php:62
+#: inc/options.php:59
 msgid "Payment Processor Settings"
 msgstr ""
 
-#: inc/options.php:63
-msgid "Configuration of the Pelepay payment processor account"
+#: inc/options.php:60
+msgid "Configuration of the payment processor"
 msgstr ""
 
-#: inc/options.php:139
+#: inc/options.php:133
 msgid "Error deleting event"
 msgstr ""
 
-#: inc/options.php:143
+#: inc/options.php:137
 msgid "Please set period name"
 msgstr ""
 
-#: inc/options.php:150
+#: inc/options.php:144
 msgid "Failed to add period!"
 msgstr ""
 
-#: inc/options.php:167
+#: inc/options.php:161
 msgid "Event List"
 msgstr ""
 
-#: inc/options.php:172
+#: inc/options.php:166
 #: inc/options.php:505
 #: inc/options.php:588
 #: inc/paygate.php:291
-#: inc/shortcodes.php:74
+#: inc/shortcodes.php:83
 msgid "Name"
 msgstr ""
 
-#: inc/options.php:173
-#: inc/options.php:263
+#: inc/options.php:167
+#: inc/options.php:257
 msgid "Purchase completion page"
 msgstr ""
 
-#: inc/options.php:174
+#: inc/options.php:168
 msgid "Ticket sale periods"
 msgstr ""
 
-#: inc/options.php:191
+#: inc/options.php:185
 #: inc/paygate.php:287
 msgid "Tickets"
 msgstr ""
 
-#: inc/options.php:193
+#: inc/options.php:187
 msgid "of"
 msgstr ""
 
-#: inc/options.php:211
+#: inc/options.php:205
 msgid "Remove period"
 msgstr ""
 
-#: inc/options.php:215
+#: inc/options.php:209
 msgid "Today"
 msgstr ""
 
-#: inc/options.php:222
+#: inc/options.php:216
 msgid "No ticket sale periods are defined for this event yet."
 msgstr ""
 
-#: inc/options.php:223
+#: inc/options.php:217
 msgid "Create a new period by setting a period name and period end date."
 msgstr ""
 
-#: inc/options.php:231
+#: inc/options.php:225
 msgid "End date for the new sale period"
 msgstr ""
 
-#: inc/options.php:232
+#: inc/options.php:226
 msgid "Add period"
 msgstr ""
 
-#: inc/options.php:239
+#: inc/options.php:233
 msgid "Edit event"
 msgstr ""
 
-#: inc/options.php:241
+#: inc/options.php:235
 msgid "ּReports"
 msgstr ""
 
-#: inc/options.php:242
+#: inc/options.php:236
 msgid "Delete event"
 msgstr ""
 
-#: inc/options.php:254
+#: inc/options.php:248
 msgid "Edit Event"
 msgstr ""
 
-#: inc/options.php:257
+#: inc/options.php:251
 msgid "Create a new event"
 msgstr ""
 
-#: inc/options.php:260
+#: inc/options.php:254
 msgid "Event name"
 msgstr ""
 
-#: inc/options.php:272
+#: inc/options.php:266
 msgid "Limit amount of tickets available"
 msgstr ""
 
-#: inc/options.php:277
+#: inc/options.php:271
 msgid "No. of tickets"
 msgstr ""
 
-#: inc/options.php:296
+#: inc/options.php:290
 msgid "Update"
 msgstr ""
 
-#: inc/options.php:298
+#: inc/options.php:292
 msgid "Create new event"
 msgstr ""
 
-#: inc/options.php:319
+#: inc/options.php:313
 msgid "No price matrix provided!"
 msgstr ""
 
@@ -206,7 +211,7 @@ msgstr ""
 
 #: inc/options.php:371
 #: inc/paygate.php:292
-#: inc/shortcodes.php:72
+#: inc/shortcodes.php:81
 msgid "Ticket Type"
 msgstr ""
 
@@ -221,7 +226,7 @@ msgstr ""
 #: inc/options.php:413
 #: inc/options.php:420
 #: inc/options.php:547
-#: inc/shortcodes.php:82
+#: inc/shortcodes.php:91
 msgid "¤"
 msgstr ""
 
@@ -301,6 +306,7 @@ msgstr ""
 
 #. translators: name
 #: inc/options.php:538
+#, php-format
 msgid "Remove test registration of %1$s?"
 msgstr ""
 
@@ -344,6 +350,7 @@ msgstr ""
 
 #. translators: result code, result message
 #: inc/paygate.php:61
+#, php-format
 msgid "An error occured while processing the payment - try again and if it reoccures, let the site manager know that you got this error:\\n\\n[%1$s] %2$s"
 msgstr ""
 
@@ -357,6 +364,7 @@ msgstr ""
 
 #. translators: tickets left, tickets ordered
 #: inc/paygate.php:191
+#, php-format
 msgid "Only %1$s tickets left, but you tried to purchase %2$s tickets. Please try again."
 msgstr ""
 
@@ -366,11 +374,13 @@ msgstr ""
 
 #. translators: ticket count, event
 #: inc/paygate.php:206
+#, php-format
 msgid "%1$s tickets for %2$s"
 msgstr ""
 
 #. translators: error text
 #: inc/paygate.php:229
+#, php-format
 msgid "Error processing payment - \"%1$s\". Please contact the site administrator"
 msgstr ""
 
@@ -384,6 +394,7 @@ msgstr ""
 
 #. translators: event
 #: inc/paygate.php:278
+#, php-format
 msgid "Payment confirmation for tickets to %1$s"
 msgstr ""
 
@@ -405,7 +416,7 @@ msgid "Confirmation Code"
 msgstr ""
 
 #: inc/paygate.php:293
-#: inc/shortcodes.php:73
+#: inc/shortcodes.php:82
 msgid "Price"
 msgstr ""
 
@@ -423,6 +434,7 @@ msgstr ""
 
 #. translators: event name
 #: inc/paygate.php:333
+#, php-format
 msgid "‎Ticket order confirmation for %1$s"
 msgstr ""
 
@@ -450,47 +462,55 @@ msgstr ""
 msgid "E-Mail address to BCC on invoices"
 msgstr ""
 
+#: inc/settings/payment_provider.php:6
+msgid "Payment provider"
+msgstr ""
+
 #: inc/settings/pelepay_account.php:6
 msgid "Pelepay account identifier"
 msgstr ""
 
-#: inc/shortcodes.php:49
+#: inc/settings/upay_account.php:6
+msgid "UPay account identifier"
+msgstr ""
+
+#: inc/shortcodes.php:50
 msgid "No More Tickets Available"
 msgstr ""
 
-#: inc/shortcodes.php:51
+#: inc/shortcodes.php:52
 msgid "Unfortunately, the event is now full and no more tickets are available for purchase."
 msgstr ""
 
-#: inc/shortcodes.php:61
-#: inc/shortcodes.php:228
+#: inc/shortcodes.php:66
+#: inc/shortcodes.php:239
 msgid "Sold out"
 msgstr ""
 
-#: inc/shortcodes.php:81
+#: inc/shortcodes.php:90
 msgid "Total:"
 msgstr ""
 
-#: inc/shortcodes.php:83
+#: inc/shortcodes.php:92
 msgid "Pay"
 msgstr ""
 
-#: inc/shortcodes.php:262
+#: inc/shortcodes.php:273
 msgid "Invalid club ID!"
 msgstr ""
 
-#: inc/shortcodes.php:272
+#: inc/shortcodes.php:283
 msgid "Club members are elgible for only 1 discounted ticket"
 msgstr ""
 
-#: inc/shortcodes.php:274
+#: inc/shortcodes.php:285
 msgid "Click here to go back to registration form"
 msgstr ""
 
-#: inc/shortcodes.php:311
+#: inc/shortcodes.php:322
 msgid "Send"
 msgstr ""
 
-#: inc/shortcodes.php:332
+#: inc/shortcodes.php:343
 msgid "Unrecognized e-mail address, please try again"
 msgstr ""

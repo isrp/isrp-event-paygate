@@ -76,8 +76,8 @@ msgid "Payment Processor Settings"
 msgstr "הגדרות ספק סליקה"
 
 #: inc/options.php:63
-msgid "Configuration of the Pelepay payment processor account"
-msgstr "הגדרות חשבון סליקה פלאפיי"
+msgid "Configuration of the payment processor"
+msgstr "הגדרות ספק הסליקה"
 
 #: inc/options.php:139
 msgid "Error deleting event"
@@ -442,9 +442,17 @@ msgstr "כתובת API של מערכת חברי מועדון"
 msgid "E-Mail address to BCC on invoices"
 msgstr "כתובת דואל לקבלת עותק מהזמנות"
 
+#: inc/settings/payment_provider.php:6
+msgid "Payment provider"
+msgstr "ספק סליקה"
+
 #: inc/settings/pelepay_account.php:6
 msgid "Pelepay account identifier"
 msgstr "חשבון פלאפיי"
+
+#: inc/settings/upay_account.php:6
+msgid "UPay account identifier"
+msgstr "חשבון UPay"
 
 #: inc/shortcodes.php:49
 msgid "No More Tickets Available"
