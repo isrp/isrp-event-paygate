@@ -9,3 +9,5 @@ class PayGateAcceptTestSetting extends PayGateSettingsBase {
 	}
 	
 }
+
+return ['PayGateAcceptTestSetting'];
