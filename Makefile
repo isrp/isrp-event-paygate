@@ -1,4 +1,4 @@
-COMPOSE := docker-compose
+COMPOSE := docker compose
 MSGLANGS=$(notdir $(wildcard languages/*.po))
 MSGOBJS=$(addprefix languages/,$(MSGLANGS:.po=.mo))
 
