@@ -16,7 +16,7 @@ class PayGateShortcodes {
 	public function __construct(PayGate $paygate) {
 		$this->pg = $paygate;
 		$this->pelepay_account = get_option('paygate-pelepay-account');
-		$this->processor = new PayGatePelepayProcessor($this->pelepay_account);
+		$this->processor = $this->pg->settings()->getProcessor();
 		$this->currentEvent = $this->pg->database()->getActiveEventId();
 		if ($evData = $this->pg->database()->getEvent($this->currentEvent))
 			$this->availableTickets = $evData->max_tickets > 0 ? max(0, $evData->max_tickets - $evData->sold) : -1;
@@ -225,7 +225,7 @@ class PayGateShortcodes {
 			if (count($this->prices) == 1)
 				$ticketType = key($this->prices);
 			else
-				return 'TYPE ERROR';
+				return 'TYPE ERROR: No ticket type available';
 		}
 		if (!isset($this->prices[$ticketType]))
 			return 'Invalid type: '.$ticketType;

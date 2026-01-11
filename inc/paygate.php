@@ -4,6 +4,7 @@ require_once __DIR__.'/db.php';
 require_once __DIR__.'/options.php';
 require_once __DIR__.'/shortcodes.php';
 require_once __DIR__.'/pelepay.php';
+require_once __DIR__.'/upay.php';
 
 class PayGate {
 	private $database;
@@ -14,7 +15,7 @@ class PayGate {
 		$this->database = new PayGateDatabase($mainfile);
 		$this->settings = new PayGateSettingsPage($this);
 		$this->shortcodes = new PayGateShortcodes($this);
-		$this->processor = new PayGatePelepayProcessor($this->settings()->getPelepayAccount());
+		$this->processor = $this->settings()->getProcessor();
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'custom_wp_admin_style' ]);
 		add_action( 'plugins_loaded', [ $this, 'initTextDomain' ]);
@@ -210,34 +211,28 @@ class PayGate {
 		?>
 		<script>
 		document.forms[0].getElementsByTagName('button')[0].disabled = true;
-		document.forms['pelepayform'].submit();
+		document.forms['paymentform'].submit();
 		</script>
 		<?php
 		exit();
 	}
 
 	private function paymentSuccess($query, $code) {
-		// http://172.17.0.4/paygate-handler/pay-success/OjoxOjE6MjUwOjE1Mjg0NjQwNjE6NDQ1NmNiNWY?
-		//   Response=000&ConfirmationCode=0656742&index=T478514&amount=250.00&firstname=עודד&lastname=ארבל&
-		//   email=oded@geek.co.il&phone=054-7340014&payfor=כרטיס לליברה 5: יחיד - רישום מוקדם&custom=&orderid=paygate:dae321616c1af325fae085fb4b68ab03
-		$result = wp_parse_args($query);
-		$resmessage = PayGatePelepayConstants::RESPONSE_CODES[$result['Response']] ?: 'Unknown error';
-
-		if ($result['Response'] != '000') {
-			error_log("PayGate: PayGate transaction failed: ". print_r($result, true));
-			wp_die(sprintf(
-				esc_html__('Error processing payment - "%1$s". Please contact the site administrator' /*translators: error text*/,'isrp-event-paygate'),
-				$resmessage));
+		$result = $this->processor->parse($query);
+		if ($result === false) {
+			wp_die(
+				esc_html__('Error processing payment. Please contact the site administrator' /*translators: error text*/,'isrp-event-paygate'));
 		}
-
-		@list($prefix, $transaction_id) = explode(':',$result['orderid']);
+		
+		$transaction_id = $result['transaction'];
+		
 		$calldata = $_SESSION['paygate_calldata'];
 		if ($transaction_id != md5($calldata . "secret")) {
 			error_log("Transaction id verification failed ($transaction_id != ".md5($calldata . "secret")."): " . print_r($calldata, true));
 			wp_die(esc_html__('Invalid payment confirmation!', 'isrp-event-paygate'));
 		}
 
-		if (!$this->settings()->allowTestTransaction() and $result['index'][0] == 'T') {
+		if (!$this->settings()->allowTestTransaction() and $result['testmode']) {
 			wp_die(esc_html__('A payment test account is not valid on this site!', 'isrp-event-paygate'));
 		}
 
@@ -245,7 +240,7 @@ class PayGate {
 		$clubcard = $this->getClubCard($tickets['club_id']);
 
 		$payer = $result['email'];
-		$payerName = urldecode($result['firstname'] . ' ' . $result['lastname']);
+		$payerName = $result['name'];
 		$event = $this->database()->getEvent($this->database()->getActiveEventId());
 		$orderid = $tickets['order_id'] . ':' . bin2hex(openssl_random_pseudo_bytes(2));
 		
@@ -281,7 +276,7 @@ class PayGate {
 		<tr><th><?php _e('Payee', 'isrp-event-paygate')?>:</td><td><?php echo $payerName?></td></tr>
 		<tr><th><?php _e('E-Mail', 'isrp-event-paygate')?>:<td><td><?php echo $result['email']?></td></tr>
 		<tr><th><?php _e('Confirmation Phone', 'isrp-event-paygate')?>:<td><td><?php echo $result['phone']?></td></tr>
-		<tr><th><?php _e('Confirmation Code', 'isrp-event-paygate')?>:</td><td><?php echo $result['ConfirmationCode']?></td></tr>
+		<tr><th><?php _e('Confirmation Code', 'isrp-event-paygate')?>:</td><td><?php echo $result['confirmation']?></td></tr>
 		</table>
 		
 		<h2><?php _e('Tickets', 'isrp-event-paygate')?>:</h2>
