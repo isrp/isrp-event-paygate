@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-01-10T23:27:11+00:00\n"
+"POT-Creation-Date: 2026-01-10T23:43:17+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: isrp-event-paygate\n"
@@ -443,7 +443,7 @@ msgid "For testing: accept all purchase attempts"
 msgstr ""
 
 #: inc/settings/accept_test.php:7
-msgid "To perform acceptance testing, check this box to treat payment processor failures as success. Don't forget to disable this before start production service."
+msgid "To perform acceptance testing, check this box to treat payment processor failures as success. Don't forget to disable this before start production service.<br/>Do not use this option if they payment processor supports 'testing mode' - use that instead."
 msgstr ""
 
 #: inc/settings/allow_multiple.php:6
@@ -472,6 +472,14 @@ msgstr ""
 
 #: inc/settings/upay_account.php:6
 msgid "UPay account identifier"
+msgstr ""
+
+#: inc/settings/upay_test_mode.php:6
+msgid "Use UPay's test system"
+msgstr ""
+
+#: inc/settings/upay_test_mode.php:7
+msgid "To perform acceptance testing, check this box to send all payments to UPay test system, That does not require real credit cards."
 msgstr ""
 
 #: inc/shortcodes.php:50
