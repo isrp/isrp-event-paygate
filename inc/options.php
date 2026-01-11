@@ -22,7 +22,7 @@ class PayGateSettingsPage {
 				$setup =  require_once($path);
 				if ($setup === 1) // a non-setting
 					continue;
-				list($clz_name, $section) = $setup;
+				@list($clz_name, $section) = $setup;
 				$this->settings[$name] = new $clz_name($section ?: 'paygate_section_global');
 			}
 		}
@@ -83,8 +83,14 @@ class PayGateSettingsPage {
 		<?php
 	}
 	
-	public function getPelepayAccount() {
-		return $this->settings['pelepay_account']->getValue();
+	public function getProcessor() {
+		switch($this->settings['payment_provider']->getValue()) {
+			case 'upay': return new PayGateUPayProcessor(
+				$this->settings['upay_account']->getValue(),
+				$this->settings['upay_test_mode']->getValue());
+			case 'pelepay': return new PayGatePelepayProcessor($this->settings['pelepay_account']->getValue());
+			default: return null;
+		}
 	}
 	
 	public function allowTestTransaction() {
