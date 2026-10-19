@@ -19,7 +19,7 @@ class PayGate {
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'custom_wp_admin_style' ]);
 		add_action( 'plugins_loaded', [ $this, 'initTextDomain' ]);
-		add_action( 'init', [ $this, 'startSession' ]);
+		add_action( 'send_headers', [ $this, 'startSession' ]);
 		add_action( 'init', [ $this, 'handleCallbacks' ]);
 	}
 
