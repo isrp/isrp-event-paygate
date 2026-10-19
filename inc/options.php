@@ -87,6 +87,7 @@ class PayGateSettingsPage {
 		switch($this->settings['payment_provider']->getValue()) {
 			case 'upay': return new PayGateUPayProcessor(
 				$this->settings['upay_account']->getValue(),
+				$this->settings['upay_api_key']->getValue(),
 				$this->settings['upay_test_mode']->getValue());
 			case 'pelepay': return new PayGatePelepayProcessor($this->settings['pelepay_account']->getValue());
 			default: return null;
@@ -306,7 +307,7 @@ class PayGateSettingsPage {
 	
 	public function pricesPage() {
 		$eventId = @$_REQUEST['event-id'];
-		switch ($_REQUEST['prices-action']) {
+		switch (@$_REQUEST['prices-action']) {
 			case 'add-ticket-type':
 				$this->pg->database()->addPriceForAllPeriods($eventId, @$_REQUEST['ticket-type']);
 				break;
@@ -462,7 +463,7 @@ class PayGateSettingsPage {
 			wp_die( __('You do not have sufficient permissions to access this page.', 'isrp-event-paygate') );
 		
 		$eventId = @$_REQUEST['event-id'];
-		switch ($_POST['paygate-action']) {
+		switch (@$_POST['paygate-action']) {
 			case 'delete':
 				$this->pg->database()->deleteRegistration($_POST['id']);
 				break;
@@ -533,10 +534,10 @@ class PayGateSettingsPage {
 			<td>₪<?php echo $row->price?></td>
 			<td style="direction: ltr; text-align: right;"><?php echo $dt->format('d.m.Y, H:i')?></td>
 			<td><?php echo $row->club_id?></td>
-			<td><?php echo $details->ConfirmationCode?></td>
+			<td><?php echo $details->confirmation??@$details->ConfirmationCode?></td>
 			<td><?php echo $row->order_id?></td>
 			<td>
-				<?php if ($details->index[0] == 'T'):?>
+				<?php if ($details->testmode):?>
 				<form method="post" action="">
 				<input type="hidden" name="id" value="<?php echo $row->id?>">
 				<?php _e('Test!', 'isrp-event-paygate')?>
