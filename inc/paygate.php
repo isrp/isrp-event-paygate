@@ -33,6 +33,7 @@ class PayGate {
 	}
 
 	public function handleCallbacks($wpquery) {
+		session_start();
 		if (strpos($_SERVER['REQUEST_URI'], 'paygate-handler') === false)
 			return;
 
@@ -223,8 +224,14 @@ class PayGate {
 			wp_die(
 				esc_html__('Error processing payment. Please contact the site administrator' /*translators: error text*/,'isrp-event-paygate'));
 		}
+		if (!array_key_exists('paygate_calldata', $_SESSION)) {
+			wp_die(
+				esc_html__('Error processing payment - missing saved transaction data. Please contact the site administrator' /*translators: error text*/,'isrp-event-paygate'));
+		}
 		
 		$transaction_id = $result['transaction'];
+		if ($transaction_id == false)
+			$transaction_id = base64_decode($code); // let processor implementation give up on having the original transaction id
 		
 		$calldata = $_SESSION['paygate_calldata'];
 		if ($transaction_id != md5($calldata . "secret")) {
