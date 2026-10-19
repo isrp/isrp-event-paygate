@@ -56,6 +56,7 @@ class PayGatePelepayProcessor {
 		if ($result['Response'] == '000' && $orderCode == 'paygate') {
 			error_log("PayGate: transaction successful: ". print_r($result, true));
 			return [
+				'processor' => 'pelepay',
 				'amount' => $result['amount'],
 				'transaction' => $transaction_id,
 				'testmode' => $result['index'][0] == 'T',
