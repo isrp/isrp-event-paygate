@@ -229,13 +229,15 @@ class PayGateDatabase {
 	public function updatePrice($periodId, $type, $fullCost, $clubCost) {
 		if (empty($type) or !is_numeric($periodId) or $periodId <= 0)
 			return null;
-		$this->db->update($this->prices_table_name, [
+		error_log("Updating prices for $periodId => $type to $fullCost, $clubCost");
+		$res = $this->db->update($this->prices_table_name, [
 			'full_price' => $fullCost,
 			'club_price' => $clubCost,
 		], [
 			'period_id' => $periodId,
 			'ticket_type' => $type,
 		]);
+		error_log("Result: $res");
 	}
 	
 	private function verifyCanDeletePrice($periodId, $type) {
