@@ -4,6 +4,7 @@ class PayGateSettingsBase {
 	
 	const SETTING_TYPE_STRING = 1;
 	const SETTING_TYPE_BOOLEAN = 2;
+	const SETTING_TYPE_SELECT = 3;
 	
 	protected $value = null;
 	protected $name;
@@ -13,6 +14,7 @@ class PayGateSettingsBase {
 	protected $type;
 	protected $description;
 	protected $width = 20;
+	protected $values = [];
 	
 	protected function __construct($name, $title, $section, $type = null,
 			$description = null) {
@@ -36,6 +38,7 @@ class PayGateSettingsBase {
 		switch ($this->type) {
 			case static::SETTING_TYPE_STRING: return $this->display_string();
 			case static::SETTING_TYPE_BOOLEAN: return $this->display_boolean();
+			case static::SETTING_TYPE_SELECT: return $this->display_select();
 			default: return;
 		}
 	}
@@ -69,7 +72,25 @@ class PayGateSettingsBase {
 			echo " <label for='{$this->name}'>".__($this->description, 'isrp-event-paygate')."</label>";
 	}
 	
-	protected function print_tag($name, $attr) {
+	protected function display_select() {
+		$this->print_tag('select', [
+			'id' => $this->name,
+			'name' => $this->setting_name,
+			'title' => $this->description,
+		], function() {
+			print '<option>' . __('Select option') . '</option>';
+			foreach ($this->values as $value => $description) {
+				if (is_numeric($value))
+					$value = $description;
+				$is_selected = ($value == $this->value);
+				print '<option value="' . $value . '" ' . ($is_selected ? 'selected' : '') . '>' . $description . '</option>';
+			}
+		});
+		if ($this->description)
+			echo " <label for='{$this->name}'>".__($this->description, 'isrp-event-paygate')."</label>";
+	}
+	
+	protected function print_tag($name, $attr, $contentClosure = null) {
 		echo '<';
 		echo $name;
 		echo ' ';
@@ -79,6 +100,12 @@ class PayGateSettingsBase {
 			if (is_bool($content)) continue;
 			echo "=\"" . esc_attr($content) . '"';
 		}
-		echo '/>';
+		if ($contentClosure == null) {
+			echo '/>';
+		} else {
+			echo '>';
+			$contentClosure();
+			echo '</'.$name.'>';
+		}
 	}
 }

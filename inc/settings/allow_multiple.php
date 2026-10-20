@@ -8,3 +8,5 @@ class PayGateAllowMultipleSetting extends PayGateSettingsBase {
 	}
 	
 }
+
+return ['PayGateAllowMultipleSetting'];

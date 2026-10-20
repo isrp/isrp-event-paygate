@@ -7,3 +7,5 @@ class PayGatePelePayAccountSetting extends PayGateSettingsBase {
 	}
 	
 }
+
+return ['PayGatePelePayAccountSetting','paygate_section_processor'];

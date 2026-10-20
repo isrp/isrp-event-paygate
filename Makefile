@@ -1,4 +1,4 @@
-COMPOSE := docker-compose
+COMPOSE := docker compose
 MSGLANGS=$(notdir $(wildcard languages/*.po))
 MSGOBJS=$(addprefix languages/,$(MSGLANGS:.po=.mo))
 
@@ -11,7 +11,8 @@ zip:
 dev-makepot:
 	$(COMPOSE) -f dev-compose.yaml run wpcli --allow-root i18n make-pot wp-content/plugins/isrp-event-paygate/ wp-content/plugins/isrp-event-paygate/isrp-event-paygate.pot
 
-languages/%.mo:
+languages/%.mo: languages/%.po isrp-event-paygate.pot
+	msgmerge --update languages/$*.po isrp-event-paygate.pot
 	msgfmt -c -o $@ languages/$*.po
 
 gettext: $(MSGOBJS)

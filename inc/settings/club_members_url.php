@@ -8,3 +8,5 @@ class PayGateClubMembersURLSetting extends PayGateSettingsBase {
 	}
 	
 }
+
+return ['PayGateClubMembersURLSetting'];

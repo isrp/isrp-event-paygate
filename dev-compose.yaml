@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   wordpress:
-    image: wordpress:php8.1
+    image: wordpress:php8.5
     ports:
       - 12080:80
     environment:
@@ -30,11 +30,11 @@ services:
     container_name: cli
     depends_on:
       - wordpress
-    image: wordpress:cli-php8.1
+    image: wordpress:cli-php8.5
     user: 0:0
     volumes:
-      - wordpress:/var/www/html
-      - .:/var/www/html/wp-content/plugins/isrp-event-paygate
+      - wordpress:/var/www/html:Z
+      - .:/var/www/html/wp-content/plugins/isrp-event-paygate:Z
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: user

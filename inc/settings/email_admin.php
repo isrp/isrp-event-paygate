@@ -7,3 +7,5 @@ class PayGateEmailAdminSetting extends PayGateSettingsBase {
 	}
 	
 }
+
+return ['PayGateEmailAdminSetting'];

@@ -3,8 +3,8 @@ Contributors: guss77
 Tags: events, payment, pelepay
 Requires at least: 5.0
 Tested up to: 6.1
-Stable tag: 1.5.5
-Requires PHP: 7.0
+Stable tag: 2.0.0
+Requires PHP: 8.3
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Domain Path: /languages
@@ -162,6 +162,11 @@ Login form for club members. Use this in a standalone page to allow club members
 * `style` (optional) CSS style rule to apply to the login field. Default: none.
 
 == Changelog ==
+
+= 2.0.0 =
+
+* Add support for UPay payment processor.
+* Fix a lot of stuff.
 
 = 1.5.0 =
 
